@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PACKBANG.COM | Factory-Direct Packaging & eCommerce Supplies</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        :root {
+            --temu-orange: #FB7701;
+            --temu-orange-hover: #E06400;
+            --temu-orange-light: #FFF4EB;
+            --temu-dark: #111111;
+            --temu-text: #222222;
+            --temu-muted: #666666;
+            --temu-border: #EEEEEE;
+            --temu-bg: #F7F8FA;
+            --temu-red: #E02020;
+            --temu-green: #00A854;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            background: var(--temu-bg);
+            color: var(--temu-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================================================
+           TEMU-STYLE TOP BENEFIT STRIP
+           ========================================================= */
+        .temu-top-strip {
+            background: #0F172A;
+            color: #E2E8F0;
+            font-size: 0.78rem;
+            padding: 7px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-weight: 500;
+        }
+
+        .top-strip-items {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .top-strip-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .top-strip-item i {
+            color: var(--temu-orange);
+            font-size: 0.85rem;
+        }
+
+        .top-strip-item strong {
+            color: #FFFFFF;
+        }
+
+        /* =========================================================
+           TEMU-STYLE MAIN NAVBAR
+           ========================================================= */
+        .main-navbar {
+            background: #FFFFFF;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            border-bottom: 1px solid #ECECEC;
+        }
+
+        .navbar-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 12px 24px;
+        }
+
+        .navbar-row-top {
+            padding-bottom: 10px;
+        }
+
+        .navbar-row-bottom {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            border-top: 1px solid #F1F1F1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: #FAFAFA;
+        }
+
+        /* Brand Logo */
+        .nav-brand-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .header-logo {
+            height: 38px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .nav-brand {
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: var(--temu-orange);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-brand-badge {
+            background: #111111;
+            color: #FFFFFF;
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Search Box (Temu Style) */
+        .header-search-box {
+            flex: 1;
+            max-width: 650px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input-wrap {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            background: #F4F5F7;
+            border: 2px solid var(--temu-orange);
+            border-radius: 30px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .search-input-wrap:focus-within {
+            box-shadow: 0 0 0 3px rgba(251, 119, 1, 0.2);
+            background: #FFFFFF;
+        }
+
+        .search-icon-placeholder {
+            padding-left: 16px;
+            color: #888888;
+            font-size: 0.95rem;
+        }
+
+        #globalProductSearch {
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.92rem;
+            font-family: inherit;
+            color: var(--temu-text);
+        }
+
+        .search-submit-btn {
+            background: var(--temu-orange);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 22px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .search-submit-btn:hover {
+            background: var(--temu-orange-hover);
+        }
+
+        /* Right Actions */
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-seller-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--temu-orange-light);
+            color: var(--temu-orange);
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            border: 1px solid rgba(251, 119, 1, 0.3);
+            transition: all 0.2s;
+        }
+
+        .nav-seller-pill:hover {
+            background: var(--temu-orange);
+            color: #FFFFFF;
+            transform: translateY(-1px);
+        }
+
+        /* Cart Link */
+        .nav-cart-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--temu-dark);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-cart-link:hover {
+            background: #F4F5F7;
+            border-color: #E2E8F0;
+        }
+
+        .nav-cart-icon-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            color: var(--temu-dark);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: var(--temu-orange);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            box-shadow: 0 2px 6px rgba(251, 119, 1, 0.4);
+        }
+
+        .cart-badge.zero {
+            display: none;
+        }
+
+        /* User Menu & Login */
+        .btn-login {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #111111;
+            color: #FFFFFF;
+            padding: 8px 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: all 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #333333;
+            transform: translateY(-1px);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu-toggle {
+            background: #F4F5F7;
+            border: 1px solid #E2E8F0;
+            color: var(--temu-text);
+            padding: 7px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .user-menu-toggle:hover {
+            background: #FFFFFF;
+            border-color: var(--temu-orange);
+        }
+
+        .super-admin-badge {
+            background: #DC2626;
+            color: white;
+            font-size: 0.62rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+
+        .user-menu-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            border-radius: 12px;
+            width: 240px;
+            display: none;
+            flex-direction: column;
+            padding: 8px 0;
+            z-index: 10000;
+        }
+
+        .user-menu-dropdown.open {
+            display: flex;
+        }
+
+        .user-menu-dropdown a {
+            padding: 8px 16px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+        }
+
+        .user-menu-dropdown a:hover {
+            background: #F9FAFB;
+            color: var(--temu-orange);
+        }
+
+        .menu-section-label {
+            padding: 6px 16px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #9CA3AF;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: #F3F4F6;
+            margin: 4px 0;
+        }
+
+        .btn-logout-menu {
+            color: #EF4444 !important;
+        }
+
+        /* Row 2: Category Pills & Navigation */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-links li a {
+            color: #333333;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 16px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-links li a:hover {
+            background: #FFFFFF;
+            color: var(--temu-orange);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-category-select {
+            background: #FFFFFF;
+            border: 1px solid #D1D5DB;
+            color: #111111;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .nav-category-select:focus {
+            border-color: var(--temu-orange);
+        }
+
+        /* Guest Cart Banner */
+        .guest-cart-banner {
+            background: linear-gradient(90deg, #FFF4EB 0%, #FFE9D5 100%);
+            color: #9A3412;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid rgba(251, 119, 1, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .guest-cart-banner a {
+            background: var(--temu-orange);
+            color: #FFFFFF;
+            padding: 3px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Notifications */
+        #notificationContainer {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+        }
+
+        .notification {
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+        .notification-success { background: #10B981; }
+        .notification-info { background: #3B82F6; }
+        .notification-warning { background: #F59E0B; }
+        .notification-error { background: #EF4444; }
+
+        @media (max-width: 768px) {
+            .temu-top-strip { display: none; }
+            .navbar-row { padding: 10px 14px; gap: 10px; }
+            .nav-brand { font-size: 1.25rem; }
+            .header-logo { height: 30px; }
+            .nav-brand-badge { display: none; }
+            .search-submit-btn span { display: none; }
+            .cart-text { display: none; }
+            .nav-seller-pill { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TEMU-STYLE TOP BENEFIT STRIP -->
+    <div class="temu-top-strip">
+        <div class="top-strip-items">
+            <div class="top-strip-item">
+                <i class="fas fa-truck-fast"></i>
+                <span><strong>Free Delivery</strong> on orders over ৳1,000</span>
+            </div>
+            <div class="top-strip-item">
+                <i class="fas fa-industry"></i>
+                <span><strong>Factory Direct</strong> Old Dhaka wholesale pricing</span>
+            </div>
+            <div class="top-strip-item">
+                <i class="fas fa-shield-halved"></i>
+                <span><strong>Packbang Protection</strong> 100% Quality guarantee</span>
+            </div>
+            <div class="top-strip-item">
+                <i class="fas fa-bolt"></i>
+                <span><strong>Lightning Deals</strong> Up to 70% OFF</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <nav class="main-navbar">
+        <!-- Row 1: Brand, Search, Cart, Account -->
+        <div class="navbar-row navbar-row-top">
+            <a href="/" class="nav-brand-container">
+                <img src="https://res.cloudinary.com/o4zunnbp/image/upload/v1791517536/packbanglogo_molbe0.png" alt="PACKBANG Logo" class="header-logo" />
+                <span class="nav-brand">
+                    PACKBANG
+                    <span class="nav-brand-badge">DIRECT</span>
+                </span>
+            </a>
+
+            <!-- Search (Temu Style) -->
+            <div class="header-search-box">
+                <div class="search-input-wrap">
+                    <span class="search-icon-placeholder">🔍</span>
+                    <input type="text" id="globalProductSearch" placeholder="Search courier poly, bubble wrap, carton boxes, stickers..." autocomplete="off" />
+                    <button type="button" class="search-submit-btn" onclick="$('#globalProductSearch').trigger('keyup')">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="navbar-actions">
+                <a href="https://seller.packbang.com/" class="nav-seller-pill">
+                    <i class="fas fa-store"></i> Seller Hub
+                </a>
+
+                <a href="/cart" class="nav-cart-link" id="cartLink">
+                    <div class="nav-cart-icon-wrap">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge zero" id="cartCount">0</span>
+                    </div>
+                    <span class="cart-text">Cart</span>
+                </a>
+
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div class="user-menu">
+                        <button type="button" class="user-menu-toggle" id="userMenuToggle">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="user-name-text"><%= user.username %></span>
+                            <% if (user.isSuperAdmin === true || user.username === 'superadmin') { %>
+                                <span class="super-admin-badge">Super</span>
+                            <% } %>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+
+                        <div class="user-menu-dropdown" id="userMenuDropdown">
+                            <div class="menu-section-label">Your account</div>
+                            <a href="/profile"><i class="fas fa-user-circle"></i> Profile</a>
+                            <a href="/my-orders"><i class="fas fa-box"></i> My Orders</a>
+                            <a href="/my-custom-orders"><i class="fas fa-list-ul"></i> My Custom Orders</a>
+
+                            <% if (user.role === 'seller' || user.role === 'authorized_cashier' || user.isSuperAdmin === true) { %>
+                                <div class="menu-divider"></div>
+                                <div class="menu-section-label">Seller tools</div>
+                                <a href="/seller/custom-orders"><i class="fas fa-gavel"></i> Bid on Orders</a>
+                            <% } %>
+
+                            <% if (user.role === 'admin' || user.role === 'authorized_cashier' || user.username.toLowerCase() === 'admin' || user.isSuperAdmin === true) { %>
+                                <div class="menu-divider"></div>
+                                <div class="menu-section-label">Point of sale</div>
+                                <a href="/terminal"><i class="fas fa-cash-register"></i> Terminal</a>
+                            <% } %>
+
+                            <% if (user.role === 'admin' || user.username.toLowerCase() === 'admin' || user.isSuperAdmin === true) { %>
+                                <div class="menu-divider"></div>
+                                <div class="menu-section-label">Store management</div>
+                                <a href="/admin/custom-orders"><i class="fas fa-clipboard-list"></i> Review Custom Orders</a>
+                                <a href="/admin/orders"><i class="fas fa-clipboard-list"></i> Order Management</a>
+                                <a href="/admin/inventory"><i class="fas fa-warehouse"></i> Inventory</a>
+                                <a href="/sales"><i class="fas fa-chart-bar"></i> Sales</a>
+                                <a href="/admin/categories"><i class="fas fa-tags"></i> Categories</a>
+                                <a href="/admin/stock-report"><i class="fas fa-boxes"></i> Stock Report</a>
+                                <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
+                                <a href="/admin/banners"><i class="fas fa-images"></i> Banners</a>
+                            <% } %>
+
+                            <% if (user.username === 'superadmin' || user.isSuperAdmin === true) { %>
+                                <div class="menu-divider"></div>
+                                <div class="menu-section-label">Super admin</div>
+                                <a href="/superadmin/dashboard"><i class="fas fa-crown"></i> Super Dashboard</a>
+                                <a href="/superadmin/admins"><i class="fas fa-user-shield"></i> Manage Admins</a>
+                            <% } %>
+
+                            <div class="menu-divider"></div>
+                            <a href="/logout" class="btn-logout-menu"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="btn-login">
+                        <i class="fas fa-user"></i> Login
+                    </a>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Row 2: Navigation & Categories -->
+        <div class="navbar-row navbar-row-bottom">
+            <ul class="nav-links">
+                <li><a href="/"><i class="fas fa-house"></i> Home</a></li>
+                <li><a href="/#lightning-deals"><i class="fas fa-bolt" style="color:var(--temu-orange);"></i> Lightning Deals</a></li>
+                <li><a href="/custom-orders"><i class="fas fa-pencil-ruler"></i> Custom Orders</a></li>
+                <li><a href="/#categories"><i class="fas fa-border-all"></i> Categories</a></li>
+                <li><a href="/#factory-direct"><i class="fas fa-industry"></i> Factory Direct</a></li>
+            </ul>
+
+            <label for="Categories" class="visually-hidden" style="position:absolute; left:-9999px;">Select a Category</label>
+            <select name="Categories" id="Categories" class="nav-category-select" onchange="if(this.value) window.location.href='/?category='+this.value">
+                <option value="">All Packaging Categories</option>
+                <% if (typeof categories !== 'undefined' && categories && categories.length > 0) { %>
+                    <% categories.forEach(parent => { %>
+                        <% if (!parent.children || parent.children.length === 0) { %>
+                            <option value="<%= parent._id %>" <%= (typeof currentCategory !== 'undefined' && currentCategory === parent._id.toString()) ? 'selected' : '' %>>
+                                <%= parent.name %>
+                            </option>
+                        <% } else { %>
+                            <optgroup label="<%= parent.name %>">
+                                <% parent.children.forEach(child => { %>
+                                    <option value="<%= child._id %>" <%= (typeof currentCategory !== 'undefined' && currentCategory === child._id.toString()) ? 'selected' : '' %>>
+                                        <%= child.name %>
+                                    </option>
+                                <% }) %>
+                            </optgroup>
+                        <% } %>
+                    <% }) %>
+                <% } %>
+            </select>
+        </div>
+    </nav>
+
+    <% if (typeof user === 'undefined' || !user) { %>
+        <div class="guest-cart-banner">
+            <i class="fas fa-bolt" style="color:var(--temu-orange);"></i>
+            <span>Factory Direct Bulk Pricing Unlocked! You have <strong id="guestCartCount">0</strong> items in cart.</span>
+            <a href="/login">Checkout Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+    <% } %>
+
+    <div id="notificationContainer"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#userMenuToggle').on('click', function(e) {
+                e.stopPropagation();
+                $('#userMenuDropdown').toggleClass('open');
+            });
+
+            $('#userMenuDropdown').on('click', function(e) {
+                e.stopPropagation();
+            });
+
+            $(document).on('click', function() {
+                $('#userMenuDropdown').removeClass('open');
+            });
+
+            $(document).on('keyup', function(e) {
+                if (e.key === 'Escape') {
+                    $('#userMenuDropdown').removeClass('open');
+                }
+            });
+
+            $('#globalProductSearch').on('keyup', function() {
+                var searchString = $(this).val().toLowerCase().trim();
+
+                $('.home-catalog-grid .home-card').filter(function() {
+                    var productNameText = $(this).find('.product-name, strong').text().toLowerCase();
+                    $(this).toggle(productNameText.indexOf(searchString) > -1);
+                });
+
+                $('.product-grid .card, .admin-inventory-grid .card').filter(function() {
+                    var nameText = $(this).find('strong, .product-name').text().toLowerCase();
+                    $(this).toggle(nameText.indexOf(searchString) > -1);
+                });
+            });
+
+            window.updateCartCount = function() {
+                $.ajax({
+                    url: '/api/cart/view',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            var count = response.count || 0;
+                            var $badge = $('#cartCount');
+                            $badge.text(count);
+                            $('#guestCartCount').text(count);
+
+                            if (count === 0) {
+                                $badge.addClass('zero');
+                            } else {
+                                $badge.removeClass('zero');
+                            }
+                        }
+                    },
+                    error: function() {
+                        console.log('Cart count update failed');
+                    }
+                });
+            };
+
+            window.showNotification = function(message, type, icon) {
+                var container = $('#notificationContainer');
+                var icons = {
+                    success: 'fa-check-circle',
+                    info: 'fa-info-circle',
+                    warning: 'fa-exclamation-triangle',
+                    error: 'fa-times-circle'
+                };
+                var notification = $(
+                    '<div class="notification notification-' + type + '">' +
+                        '<i class="fas ' + (icons[type] || 'fa-info-circle') + '"></i>' +
+                        '<span>' + message + '</span>' +
+                    '</div>'
+                );
+                container.append(notification);
+                setTimeout(function() {
+                    notification.fadeOut(300, function() { $(this).remove(); });
+                }, 3000);
+            };
+
+            if (typeof updateCartCount === 'function') {
+                updateCartCount();
+            }
+
+            console.log('✅ Temu-style Header Loaded with Live Cart Sync!');
+        });
+    </script>

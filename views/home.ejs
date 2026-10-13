@@ -1,0 +1,932 @@
+<%- include('partials/header') %>
+
+<style>
+    /* ==========================================
+       TEMU-STYLE DESIGN SYSTEM & HOMEPAGE STYLES
+       ========================================== */
+    .temu-home-wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 16px 20px 60px 20px;
+    }
+
+    /* User Notice Bar */
+    .user-welcome-bar {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .user-welcome-bar.guest {
+        background: linear-gradient(90deg, #FFF7ED 0%, #FFEDD5 100%);
+        border-color: #FED7AA;
+    }
+    .user-welcome-bar.logged-in {
+        background: #F0FDF4;
+        border-color: #BBF7D0;
+    }
+
+    /* ==========================================
+       HERO BANNER SLIDER
+       ========================================== */
+    .packbang-hero {
+        margin-bottom: 24px;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .packbang-slider {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1400 / 420;
+        background: #ECEFF1;
+        overflow: hidden;
+    }
+    .packbang-track {
+        display: flex;
+        height: 100%;
+        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        will-change: transform;
+    }
+    .packbang-slide {
+        min-width: 100%;
+        height: 100%;
+        display: block;
+        text-decoration: none;
+    }
+    .packbang-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .packbang-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.92);
+        border: none;
+        font-size: 1.1rem;
+        color: #222222;
+        cursor: pointer;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        transition: all 0.2s;
+    }
+    .packbang-arrow:hover {
+        background: var(--temu-orange);
+        color: #FFFFFF;
+    }
+    .packbang-prev { left: 16px; }
+    .packbang-next { right: 16px; }
+    .packbang-dots {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+    }
+    .packbang-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .packbang-dot.active {
+        background: var(--temu-orange);
+        width: 26px;
+        border-radius: 6px;
+    }
+
+    /* ==========================================
+       TEMU LIGHTNING DEALS SECTION
+       ========================================== */
+    .lightning-deals-banner {
+        background: linear-gradient(135deg, #FF4500 0%, #FB7701 50%, #FF8A00 100%);
+        color: white;
+        border-radius: 14px;
+        padding: 16px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        box-shadow: 0 8px 24px rgba(251, 119, 1, 0.25);
+    }
+    .lightning-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .lightning-icon-box {
+        width: 46px;
+        height: 46px;
+        background: #FFFFFF;
+        color: #FF4500;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        animation: pulseIcon 1.8s infinite;
+    }
+    @keyframes pulseIcon {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+    .lightning-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+    .lightning-subtitle {
+        font-size: 0.85rem;
+        opacity: 0.92;
+        font-weight: 500;
+    }
+
+    /* Digital Countdown Timer */
+    .countdown-timer-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 0, 0, 0.25);
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+    .timer-block {
+        background: #111111;
+        color: #FFFFFF;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        min-width: 32px;
+        text-align: center;
+    }
+    .timer-separator {
+        color: #FFFFFF;
+        font-weight: 800;
+    }
+
+    /* ==========================================
+       FACTORY DIRECT TRUST STRIP (TEMU 4-PILLARS)
+       ========================================== */
+    .temu-trust-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+    .trust-pill-card {
+        background: #FFFFFF;
+        border: 1px solid #ECECEC;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .trust-pill-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        border-color: #FED7AA;
+    }
+    .trust-icon-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: var(--temu-orange-light);
+        color: var(--temu-orange);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    .trust-pill-card h4 {
+        margin: 0 0 2px 0;
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #111111;
+    }
+    .trust-pill-card p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #666666;
+        line-height: 1.3;
+    }
+
+    /* ==========================================
+       CATEGORY CAROUSEL (TEMU PILLS)
+       ========================================== */
+    .section-headline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    .section-headline h2 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #111111;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .category-carousel {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding: 4px 2px 14px 2px;
+        scrollbar-width: none;
+    }
+    .category-carousel::-webkit-scrollbar {
+        display: none;
+    }
+    .category-pill-card {
+        text-align: center;
+        text-decoration: none;
+        color: #222222;
+        min-width: 100px;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+    }
+    .category-pill-card:hover {
+        transform: translateY(-4px);
+    }
+    .cat-avatar {
+        width: 82px;
+        height: 82px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid #FFFFFF;
+        margin: 0 auto 8px auto;
+        background: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        transition: border-color 0.2s;
+    }
+    .category-pill-card:hover .cat-avatar {
+        border-color: var(--temu-orange);
+    }
+    .cat-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .category-pill-card span {
+        font-weight: 700;
+        font-size: 0.82rem;
+        display: block;
+    }
+
+    /* ==========================================
+       TEMU-STYLE PRODUCT CATALOG GRID
+       ========================================== */
+    .home-catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 18px;
+        margin-bottom: 40px;
+    }
+    .home-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #ECECEC;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        text-decoration: none;
+    }
+    .home-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        border-color: #E2E8F0;
+    }
+    .product-img-wrap {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        background: #F8F9FA;
+        overflow: hidden;
+    }
+    .product-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .home-card:hover .product-img-wrap img {
+        transform: scale(1.05);
+    }
+
+    /* Badges */
+    .temu-badge-top-left {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: #FF4500;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        z-index: 2;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 6px rgba(255, 69, 0, 0.3);
+    }
+    .temu-discount-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: var(--temu-dark);
+        color: #FFFFFF;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 12px;
+        z-index: 2;
+    }
+    .factory-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #00884A;
+        background: #E8F8F0;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-bottom: 6px;
+        width: fit-content;
+    }
+
+    /* Card Body */
+    .home-card-body {
+        padding: 12px 14px 14px 14px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    .home-card-body .product-name {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #222222;
+        display: block;
+        margin-bottom: 6px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.3;
+        min-height: 2.4rem;
+    }
+    .price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+    }
+    .product-price {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--temu-orange);
+    }
+    .original-price {
+        font-size: 0.82rem;
+        color: #999999;
+        text-decoration: line-through;
+    }
+
+    /* Social Proof / Sales & Rating */
+    .sales-rating-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: #666666;
+        margin-bottom: 10px;
+    }
+    .star-rating {
+        color: #F59E0B;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    /* Urgency Progress Bar */
+    .urgency-bar-wrap {
+        margin-bottom: 12px;
+    }
+    .urgency-bar-text {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #D97706;
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .urgency-bar-track {
+        width: 100%;
+        height: 5px;
+        background: #F1F5F9;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .urgency-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #F59E0B, #EF4444);
+        border-radius: 10px;
+    }
+
+    /* Cart Quantity Stepper */
+    .cart-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 10px;
+        border-top: 1px solid #F1F1F1;
+        margin-top: auto;
+    }
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 50%;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    .qty-plus {
+        background: var(--temu-orange);
+        box-shadow: 0 2px 8px rgba(251, 119, 1, 0.35);
+    }
+    .qty-plus:hover:not(:disabled) {
+        background: var(--temu-orange-hover);
+        transform: scale(1.08);
+    }
+    .qty-minus {
+        background: #94A3B8;
+    }
+    .qty-minus:hover:not(:disabled) {
+        background: #64748B;
+        transform: scale(1.08);
+    }
+    .qty-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    .qty-display {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #111111;
+        min-width: 28px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .temu-home-wrap { padding: 10px 12px 60px 12px; }
+        .home-catalog-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .lightning-deals-banner { padding: 14px 16px; }
+        .lightning-title { font-size: 1.1rem; }
+        .product-price { font-size: 1.1rem; }
+    }
+</style>
+
+<div class="temu-home-wrap">
+
+    <!-- USER STATUS BAR -->
+    <% if (typeof user !== 'undefined' && user) { %>
+        <div class="user-welcome-bar logged-in">
+            <div>
+                <i class="fas fa-check-circle" style="color:#10B981;margin-right:6px;"></i>
+                <strong>Welcome back, <%= user.username %>!</strong>
+                <span style="color:#4B5563;font-size:0.85rem;margin-left:8px;">
+                    Role: <strong><%= user.role %></strong>
+                </span>
+            </div>
+            <div>
+                <a href="/profile" style="color:#111827;font-weight:700;font-size:0.85rem;margin-right:14px;text-decoration:none;"><i class="fas fa-user"></i> Profile</a>
+                <a href="/logout" style="color:#DC2626;font-weight:700;font-size:0.85rem;text-decoration:none;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="user-welcome-bar guest">
+            <div>
+                <i class="fas fa-bolt" style="color:var(--temu-orange);margin-right:6px;"></i>
+                <strong>Wholesale Factory Guest Access</strong>
+                <span style="color:#4B5563;font-size:0.85rem;margin-left:8px;">Sign in to save bulk carts and track orders</span>
+            </div>
+            <div>
+                <a href="/login" style="background:#111111;color:#FFFFFF;padding:5px 14px;border-radius:14px;font-size:0.8rem;font-weight:700;text-decoration:none;margin-right:8px;">Login</a>
+                <a href="/register" style="color:var(--temu-orange);font-weight:700;font-size:0.85rem;text-decoration:none;">Register</a>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- HERO BANNER SLIDER -->
+    <header class="packbang-hero">
+        <% if (typeof banners !== 'undefined' && banners.length > 0) { %>
+            <div class="packbang-slider" id="packbangSlider">
+                <div class="packbang-track" id="packbangTrack">
+                    <% banners.forEach((banner) => { %>
+                        <a href="<%= banner.link || '#' %>" class="packbang-slide">
+                            <img src="<%= banner.imageUrl %>" alt="<%= banner.title || 'PackBang Banner' %>">
+                        </a>
+                    <% }) %>
+                </div>
+                
+                <% if (banners.length > 1) { %>
+                    <button class="packbang-arrow packbang-prev" onclick="packbangSlide(-1)">❮</button>
+                    <button class="packbang-arrow packbang-next" onclick="packbangSlide(1)">❯</button>
+                    
+                    <div class="packbang-dots">
+                        <% banners.forEach((_, i) => { %>
+                            <span class="packbang-dot <%= i === 0 ? 'active' : '' %>" onclick="packbangGoTo(<%= i %>)"></span>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        <% } else { %>
+            <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: white; border-radius: 16px; padding: 40px 24px; text-align: center;">
+                <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 8px;">Factory-Direct Packaging Supplies in Bangladesh</h2>
+                <p style="color: #94A3B8; max-width: 600px; margin: 0 auto 16px auto; font-size: 0.95rem;">Buy courier poly mailers, bubble wrap rolls, carton boxes, and stickers directly from Dhaka manufacturers at 0% middleman markup.</p>
+                <a href="/#lightning-deals" style="background: var(--temu-orange); color: white; font-weight: 700; padding: 10px 24px; border-radius: 20px; text-decoration: none; display: inline-block;">Browse Lightning Deals</a>
+            </div>
+        <% } %>
+    </header>
+
+    <!-- TEMU LIGHTNING DEALS SECTION -->
+    <section id="lightning-deals" class="lightning-deals-banner">
+        <div class="lightning-header-left">
+            <div class="lightning-icon-box">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div>
+                <div class="lightning-title">⚡ LIGHTNING DEALS</div>
+                <div class="lightning-subtitle">Limited factory-direct surplus deals • Up to 70% OFF</div>
+            </div>
+        </div>
+
+        <div class="countdown-timer-wrap">
+            <span><i class="far fa-clock"></i> Ends in:</span>
+            <div class="timer-block" id="countHours">02</div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block" id="countMins">45</div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block" id="countSecs">18</div>
+        </div>
+    </section>
+
+    <!-- TEMU 4-PILLAR FACTORY TRUST STRIP -->
+    <section class="temu-trust-grid" id="factory-direct">
+        <div class="trust-pill-card">
+            <div class="trust-icon-wrap"><i class="fas fa-industry"></i></div>
+            <div>
+                <h4>Factory Direct</h4>
+                <p>Direct from Dhaka presses. Zero middleman commission.</p>
+            </div>
+        </div>
+        <div class="trust-pill-card">
+            <div class="trust-icon-wrap"><i class="fas fa-truck-fast"></i></div>
+            <div>
+                <h4>Fast Bulk Logistics</h4>
+                <p>Steadfast courier tracked delivery across 64 districts.</p>
+            </div>
+        </div>
+        <div class="trust-pill-card">
+            <div class="trust-icon-wrap"><i class="fas fa-shield-check"></i></div>
+            <div>
+                <h4>Packbang Guarantee</h4>
+                <p>100% money back or replacement for damaged items.</p>
+            </div>
+        </div>
+        <div class="trust-pill-card">
+            <div class="trust-icon-wrap"><i class="fas fa-tags"></i></div>
+            <div>
+                <h4>Price Match Promise</h4>
+                <p>Guaranteed lowest wholesale price per unit or pack.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section id="categories" style="margin-bottom: 30px;">
+        <div class="section-headline">
+            <h2><i class="fas fa-cubes" style="color:var(--temu-orange);"></i> Packaging Categories</h2>
+        </div>
+        <div class="category-carousel" id="catCarousel">
+            <% if (typeof categories !== 'undefined' && categories && categories.length > 0) { %>
+                <% categories.forEach(cat => { 
+                    if (!cat.parentId) { %>
+                    <a href="/?category=<%= cat._id %>" class="category-pill-card">
+                        <div class="cat-avatar">
+                            <img src="<%= cat.image || 'https://via.placeholder.com/150' %>" alt="<%= cat.name %>">
+                        </div>
+                        <span><%= cat.name %></span>
+                    </a>
+                <% } }) %>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- PRODUCT CATALOG GRID -->
+    <section>
+        <div class="section-headline">
+            <h2><i class="fas fa-fire" style="color:#FF4500;"></i> Factory Deals & Best Sellers</h2>
+            <span style="font-size:0.85rem;color:#666666;font-weight:600;"><%= products.length %> Items Available</span>
+        </div>
+
+        <div class="home-catalog-grid">
+            <% products.forEach((product, idx) => { %>
+                <div class="home-card" data-product-id="<%= product.id %>">
+                    <div class="product-img-wrap">
+                        <a href="/product/<%= product.id %>">
+                            <img src="<%= product.imagePath %>" alt="<%= product.name %>" loading="lazy">
+                        </a>
+                        <% if (idx % 3 === 0) { %>
+                            <span class="temu-badge-top-left"><i class="fas fa-bolt"></i> LIGHTNING</span>
+                        <% } else if (idx % 3 === 1) { %>
+                            <span class="temu-badge-top-left" style="background:#0F172A;"><i class="fas fa-fire"></i> TOP SELLER</span>
+                        <% } %>
+
+                        <% if (product.originalPrice && product.originalPrice > product.price) { 
+                            var discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+                        %>
+                            <span class="temu-discount-badge">-<%= discount %>%</span>
+                        <% } %>
+                    </div>
+
+                    <div class="home-card-body">
+                        <div class="factory-tag">
+                            <i class="fas fa-check-circle"></i> Direct Factory
+                        </div>
+
+                        <a href="/product/<%= product.id %>" style="text-decoration:none;color:inherit;">
+                            <span class="product-name"><%= product.name %></span>
+                        </a>
+
+                        <div class="price-row">
+                            <span class="product-price">BDT. <%= product.price.toFixed(2) %></span>
+                            <% if (product.originalPrice && product.originalPrice > product.price) { %>
+                                <span class="original-price">BDT. <%= product.originalPrice.toFixed(2) %></span>
+                            <% } %>
+                        </div>
+
+                        <div class="sales-rating-row">
+                            <span class="star-rating">
+                                <i class="fas fa-star"></i> 4.9
+                            </span>
+                            <span><%= (idx + 1) * 120 + 85 %>+ sold</span>
+                        </div>
+
+                        <!-- Urgency Stock Indicator -->
+                        <div class="urgency-bar-wrap">
+                            <div class="urgency-bar-text">
+                                <span><i class="fas fa-boxes"></i> <%= product.stock <= 5 ? 'Almost Sold Out!' : 'Factory Stock' %></span>
+                                <span><%= product.stock || 0 %> left</span>
+                            </div>
+                            <div class="urgency-bar-track">
+                                <div class="urgency-bar-fill" style="width: <%= Math.min(100, Math.max(15, (product.stock || 5) * 10)) %>%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Cart Controls -->
+                        <div class="cart-controls">
+                            <button class="qty-btn qty-minus" data-product-id="<%= product.id %>" disabled>
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="qty-display" id="qty-<%= product.id %>">0</span>
+                            <button class="qty-btn qty-plus" data-product-id="<%= product.id %>" <%= product.stock <= 0 ? 'disabled' : '' %>>
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // ==========================================
+    // Temu Lightning Deals Live Countdown Clock
+    // ==========================================
+    function startCountdown() {
+        let totalSeconds = 2 * 3600 + 45 * 60 + 18;
+        setInterval(() => {
+            if (totalSeconds <= 0) totalSeconds = 24 * 3600;
+            totalSeconds--;
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            document.getElementById('countHours').innerText = String(h).padStart(2, '0');
+            document.getElementById('countMins').innerText = String(m).padStart(2, '0');
+            document.getElementById('countSecs').innerText = String(s).padStart(2, '0');
+        }, 1000);
+    }
+    startCountdown();
+
+    // ==========================================
+    // Hero Slider
+    // ==========================================
+    let packbangIndex = 0;
+    let packbangTimer = null;
+
+    function packbangUpdate() {
+        const track = document.getElementById('packbangTrack');
+        const dots = document.querySelectorAll('.packbang-dot');
+        if (!track) return;
+        track.style.transform = `translateX(-${packbangIndex * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === packbangIndex));
+    }
+
+    function packbangSlide(dir) {
+        const slides = document.querySelectorAll('.packbang-slide');
+        if (!slides.length) return;
+        packbangIndex += dir;
+        if (packbangIndex >= slides.length) packbangIndex = 0;
+        if (packbangIndex < 0) packbangIndex = slides.length - 1;
+        packbangUpdate();
+        packbangRestart();
+    }
+
+    function packbangGoTo(index) {
+        packbangIndex = index;
+        packbangUpdate();
+        packbangRestart();
+    }
+
+    function packbangRestart() {
+        clearInterval(packbangTimer);
+        const slides = document.querySelectorAll('.packbang-slide');
+        if (slides.length > 1) {
+            packbangTimer = setInterval(() => {
+                packbangIndex++;
+                if (packbangIndex >= slides.length) packbangIndex = 0;
+                packbangUpdate();
+            }, 4000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.querySelectorAll('.packbang-slide').length > 0) {
+            packbangUpdate();
+            packbangRestart();
+        }
+    });
+
+    // ==========================================
+    // Cart Controls
+    // ==========================================
+    $(document).ready(function() {
+        updateAllQuantities();
+
+        $(document).on('click', '.qty-plus', function() {
+            var productId = $(this).data('product-id');
+            var $btn = $(this);
+            $btn.prop('disabled', true);
+            $btn.html('<i class="fas fa-spinner fa-spin"></i>');
+            $.ajax({
+                url: '/api/cart/add',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ productId: productId, quantity: 1 }),
+                success: function(response) {
+                    if (response.success) {
+                        updateQuantityDisplay(productId);
+                        updateAllQuantities();
+                        if (typeof updateCartCount === 'function') updateCartCount();
+                        showNotification('✅ Added to cart!', 'success');
+                    }
+                    $btn.html('<i class="fas fa-plus"></i>');
+                    $btn.prop('disabled', false);
+                },
+                error: function() {
+                    showNotification('❌ Failed to add', 'error');
+                    $btn.html('<i class="fas fa-plus"></i>');
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        $(document).on('click', '.qty-minus', function() {
+            var productId = $(this).data('product-id');
+            var $btn = $(this);
+            var currentQty = parseInt($('#qty-' + productId).text()) || 0;
+            if (currentQty <= 0) {
+                showNotification('⚠️ Item not in cart', 'warning');
+                return;
+            }
+            $btn.prop('disabled', true);
+            $btn.html('<i class="fas fa-spinner fa-spin"></i>');
+            $.ajax({
+                url: '/api/cart/remove',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ productId: productId }),
+                success: function(response) {
+                    if (response.success) {
+                        updateQuantityDisplay(productId);
+                        updateAllQuantities();
+                        if (typeof updateCartCount === 'function') updateCartCount();
+                        showNotification('🗑️ Removed from cart', 'warning');
+                    }
+                    $btn.html('<i class="fas fa-minus"></i>');
+                    $btn.prop('disabled', false);
+                },
+                error: function() {
+                    showNotification('❌ Failed to remove', 'error');
+                    $btn.html('<i class="fas fa-minus"></i>');
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        function updateQuantityDisplay(productId) {
+            $.ajax({
+                url: '/api/cart/view',
+                type: 'GET',
+                cache: false,
+                success: function(response) {
+                    if (response.success) {
+                        var items = response.items || [];
+                        var found = items.find(function(item) { return item.id === productId; });
+                        var qty = found ? found.quantity : 0;
+                        $('#qty-' + productId).text(qty);
+                        var $minusBtn = $('.qty-minus[data-product-id="' + productId + '"]');
+                        $minusBtn.prop('disabled', qty <= 0);
+                    }
+                }
+            });
+        }
+
+        function updateAllQuantities() {
+            $.ajax({
+                url: '/api/cart/view',
+                type: 'GET',
+                cache: false,
+                success: function(response) {
+                    if (response.success) {
+                        var items = response.items || [];
+                        $('.home-card').each(function() {
+                            var productId = $(this).data('product-id');
+                            var found = items.find(function(item) { return item.id === productId; });
+                            var qty = found ? found.quantity : 0;
+                            $('#qty-' + productId).text(qty);
+                            var $minusBtn = $('.qty-minus[data-product-id="' + productId + '"]');
+                            $minusBtn.prop('disabled', qty <= 0);
+                        });
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>
