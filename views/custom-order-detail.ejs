@@ -465,7 +465,7 @@
                         <span class="escrow-badge badge-delivered"><i class="fas fa-truck"></i> Ready for Confirmation</span>
                     </div>
                     <div class="escrow-body">
-                        Supplier <strong><%= order.assignedSellerName %></strong> has marked manufacturing and delivery as complete. Please inspect your packaging quality. When satisfied, click below to confirm receipt so PackBang Admin can deduct platform commission and release the payout to the supplier.
+                        Supplier <strong><%= order.assignedSellerName %></strong> has marked manufacturing and delivery as complete. Please inspect your packaging quality. When satisfied, click below to confirm receipt so PackBang Admin can deduct Total Admin Fee and release the payout to the supplier.
                     </div>
                     <div class="escrow-breakdown">
                         <span><strong>Escrow Deposited:</strong> BDT <%= (order.escrowAmount || order.agreedPrice || 0).toFixed(2) %></span>
@@ -485,7 +485,7 @@
                         <span class="escrow-badge badge-paid"><i class="fas fa-clock"></i> Queued for Payout</span>
                     </div>
                     <div class="escrow-body">
-                        You have confirmed successful delivery of your packaging. The order is now queued for PackBang Admin to deduct the platform commission and release net payment to supplier <strong><%= order.assignedSellerName %></strong>.
+                        You have confirmed successful delivery of your packaging. The order is now queued for PackBang Admin to deduct the Total Admin Fee and release net payment to supplier <strong><%= order.assignedSellerName %></strong>.
                     </div>
                 </div>
             <% } else if (order.status === 'completed') { %>
@@ -495,7 +495,7 @@
                         <span class="escrow-badge badge-completed"><i class="fas fa-check-double"></i> Completed</span>
                     </div>
                     <div class="escrow-body">
-                        This order has been completed successfully. PackBang Admin deducted platform commission (<%= order.adminCommissionPercent || 10 %>%) and released payout of BDT <%= (order.sellerPayoutAmount || 0).toFixed(2) %> to supplier <%= order.assignedSellerName %>.
+                        This order has been completed successfully. PackBang Admin deducted Total Admin Fee (<%= order.adminCommissionPercent || 5 %>%) and released payout of BDT <%= (order.sellerPayoutAmount || 0).toFixed(2) %> to supplier <%= order.assignedSellerName %>.
                     </div>
                 </div>
             <% } else { %>

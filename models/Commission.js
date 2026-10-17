@@ -1,11 +1,26 @@
 const mongoose = require('mongoose');
 
 const commissionSchema = new mongoose.Schema({
-    percent: { 
+    itMaintenancePercent: { 
         type: Number, 
-        default: 10,
-        min: 0,
-        max: 100
+        default: 2.5,
+        min: 2.5,
+        required: true 
+    },
+    adminCommissionPercent: { 
+        type: Number, 
+        default: 2.5,
+        min: 2.5,
+        max: 97.5,
+        required: true 
+    },
+    percent: { 
+        // Total Admin Fee (itMaintenancePercent + adminCommissionPercent)
+        type: Number, 
+        default: 5.0,
+        min: 5.0,
+        max: 100,
+        required: true
     },
     updatedBy: { 
         type: String, 

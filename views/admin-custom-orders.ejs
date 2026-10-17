@@ -305,20 +305,60 @@
     <h2><i class="fas fa-clipboard-list"></i> Custom Orders & Escrow Management</h2>
     
     <!-- ===== ADMIN COMMISSION SETTINGS BAR ===== -->
-    <div class="commission-settings-card">
-        <div class="commission-info">
-            <h4><i class="fas fa-percentage"></i> Platform Commission Rate</h4>
-            <p>Admin commission is automatically deducted from custom order escrow when releasing payout to suppliers.</p>
-        </div>
-        <form class="commission-form" onsubmit="saveCommission(event)">
-            <div class="commission-input-wrapper">
-                <input type="number" id="commissionPercentInput" min="0" max="100" step="0.5" value="10" required>
-                <span>%</span>
+    <div class="commission-settings-card" style="background: #FFFFFF; border-radius: 12px; padding: 22px 24px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div class="commission-info" style="max-width: 520px;">
+                <h4 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-percentage" style="color: #FF5A1F;"></i> Total Admin Fee Configuration
+                </h4>
+                <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.5;">
+                    Platform operational fees: <strong>2.5%</strong> is dedicated for IT Support and Maintenance. Admin can set their commission (minimum <strong>2.5%</strong>). Sellers and customers will see the combined <strong>Total Admin Fee (2.5% + Admin %)</strong>.
+                </p>
             </div>
-            <button type="submit" id="saveCommissionBtn" class="btn-save-commission">
-                <i class="fas fa-save"></i> Save Rate
-            </button>
-        </form>
+
+            <form class="commission-form" onsubmit="saveCommission(event)" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <!-- Fixed IT Fee Display -->
+                <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 6px 12px; text-align: center;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748B; text-transform: uppercase;">IT Support</div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #0F172A;">2.5% <span style="font-size: 0.72rem; color: #10B981; font-weight: 700;">(Fixed)</span></div>
+                </div>
+
+                <span style="font-size: 1.2rem; font-weight: 800; color: #94A3B8;">+</span>
+
+                <!-- Admin Commission Input -->
+                <div>
+                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748B; text-transform: uppercase; margin-bottom: 3px;">
+                        Admin Commission <span style="color: #EA580C;">(Min 2.5%)</span>
+                    </label>
+                    <div style="display: flex; align-items: center; background: #FFF; border: 1.5px solid #CBD5E1; border-radius: 8px; overflow: hidden; height: 38px;">
+                        <input
+                            type="number"
+                            id="adminCommissionInput"
+                            min="2.5"
+                            max="97.5"
+                            step="0.1"
+                            value="2.5"
+                            required
+                            oninput="updateTotalFeeLivePreview()"
+                            style="width: 75px; padding: 6px 10px; border: none; font-size: 0.95rem; font-weight: 800; color: #0F172A; text-align: center; outline: none;"
+                        />
+                        <span style="padding: 0 10px; font-weight: 700; color: #64748B; background: #F8FAFC; border-left: 1px solid #E2E8F0; line-height: 38px;">%</span>
+                    </div>
+                </div>
+
+                <span style="font-size: 1.2rem; font-weight: 800; color: #94A3B8;">=</span>
+
+                <!-- Total Combined Fee Badge -->
+                <div style="background: #FFF7ED; border: 1.5px solid #FDBA74; border-radius: 8px; padding: 6px 14px; text-align: center;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #C2410C; text-transform: uppercase;">Total Admin Fee</div>
+                    <div id="totalFeePreview" style="font-size: 1.05rem; font-weight: 900; color: #EA580C;">5.0%</div>
+                </div>
+
+                <button type="submit" id="saveCommissionBtn" class="btn-save-commission" style="background: #0F172A; color: #FFF; border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; height: 38px;">
+                    <i class="fas fa-save"></i> Save Rate
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- ===== ORDERS LIST ===== -->
@@ -348,8 +388,16 @@
                     <span>Customer Paid into Escrow:</span>
                     <strong id="calcGrossAmount">BDT 0.00</strong>
                 </div>
-                <div class="calc-row">
-                    <span id="calcCommissionLabel">Admin Commission (10%):</span>
+                <div class="calc-row" style="color: #64748B; font-size: 0.82rem;">
+                    <span>├─ IT Support & Maintenance (2.5%):</span>
+                    <span id="calcItAmount">- BDT 0.00</span>
+                </div>
+                <div class="calc-row" style="color: #64748B; font-size: 0.82rem;">
+                    <span id="calcAdminShareLabel">├─ Admin Commission (2.5%):</span>
+                    <span id="calcAdminShareAmount">- BDT 0.00</span>
+                </div>
+                <div class="calc-row" style="font-weight: 700;">
+                    <span id="calcCommissionLabel">Total Admin Fee (5.0%):</span>
                     <strong id="calcCommissionAmount" style="color: #ea580c;">- BDT 0.00</strong>
                 </div>
                 <div class="calc-row total-payout">
@@ -357,7 +405,6 @@
                     <span id="calcNetAmount">BDT 0.00</span>
                 </div>
             </div>
-
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Disbursement Gateway</label>
                 <select id="payoutMethodSelect" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; font-family: inherit;">
@@ -385,15 +432,27 @@
 </div>
 
 <script>
-    let currentAdminCommission = 10;
+    let itMaintenancePercent = 2.5;
+    let currentAdminCommission = 2.5;
+    let totalAdminFeePercent = 5.0;
+
+    function updateTotalFeeLivePreview() {
+        const adminVal = parseFloat(document.getElementById('adminCommissionInput').value) || 2.5;
+        const total = Math.round((itMaintenancePercent + adminVal) * 100) / 100;
+        document.getElementById('totalFeePreview').textContent = total.toFixed(1) + '%';
+    }
 
     async function loadCommissionSettings() {
         try {
             const res = await fetch('/api/admin/commission');
             const data = await res.json();
-            if (data.success && data.percent !== undefined) {
-                currentAdminCommission = data.percent;
-                document.getElementById('commissionPercentInput').value = data.percent;
+            if (data.success) {
+                itMaintenancePercent = data.itMaintenancePercent || 2.5;
+                currentAdminCommission = data.adminCommissionPercent !== undefined ? data.adminCommissionPercent : 2.5;
+                totalAdminFeePercent = data.totalPercent || (itMaintenancePercent + currentAdminCommission);
+
+                document.getElementById('adminCommissionInput').value = currentAdminCommission;
+                updateTotalFeeLivePreview();
             }
         } catch (err) {
             console.error('Failed to load commission rate', err);
@@ -402,9 +461,9 @@
 
     async function saveCommission(e) {
         e.preventDefault();
-        const percent = parseFloat(document.getElementById('commissionPercentInput').value);
-        if (isNaN(percent) || percent < 0 || percent > 100) {
-            alert('Please enter a valid percentage between 0 and 100.');
+        const adminPercent = parseFloat(document.getElementById('adminCommissionInput').value);
+        if (isNaN(adminPercent) || adminPercent < 2.5) {
+            alert('Admin commission must be a minimum of 2.5%.');
             return;
         }
 
@@ -417,17 +476,21 @@
             const res = await fetch('/api/admin/commission', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ percent })
+                body: JSON.stringify({ adminCommissionPercent: adminPercent })
             });
             const data = await res.json();
             if (data.success) {
-                alert(`✅ ${data.message || 'Commission updated successfully!'}`);
-                currentAdminCommission = data.percent;
+                alert('✓ ' + (data.message || 'Commission rate updated successfully!'));
+                itMaintenancePercent = data.itMaintenancePercent || 2.5;
+                currentAdminCommission = data.adminCommissionPercent || adminPercent;
+                totalAdminFeePercent = data.totalPercent || (itMaintenancePercent + currentAdminCommission);
+                updateTotalFeeLivePreview();
+                loadOrders(); // refresh cards with new rates
             } else {
-                alert(`❌ ${data.message}`);
+                alert('✕ ' + data.message);
             }
         } catch (err) {
-            alert('❌ Failed to update commission');
+            alert('✕ Failed to update commission');
         } finally {
             btn.disabled = false;
             btn.innerHTML = orig;
@@ -523,7 +586,7 @@
                         </div>
                         ${order.paymentStatus === 'paid_to_admin' ? `
                             <div class="summary-item">
-                                <span>Platform Commission (${commissionPct}%):</span>
+                                <span>Total Admin Fee (${commissionPct}%):</span>
                                 <strong style="color:#ea580c;">BDT ${commissionAmt.toFixed(2)}</strong>
                             </div>
                             <div class="summary-item">
@@ -603,14 +666,30 @@
 
     // ===== ADMIN PAYOUT MODAL FUNCTIONS =====
     function openPayoutModal(orderId, agreedAmount, commissionPct, sellerName) {
-        const commAmt = Math.round((agreedAmount * commissionPct) / 100 * 100) / 100;
+        const totalFeePct = commissionPct || totalAdminFeePercent || 5.0;
+        const itFeePct = 2.5;
+        const adminFeePct = Math.max(0, Math.round((totalFeePct - itFeePct) * 100) / 100);
+
+        const itAmt = Math.round((agreedAmount * itFeePct) / 100 * 100) / 100;
+        const adminAmt = Math.round((agreedAmount * adminFeePct) / 100 * 100) / 100;
+        const commAmt = Math.round((agreedAmount * totalFeePct) / 100 * 100) / 100;
         const netAmt = Math.round((agreedAmount - commAmt) * 100) / 100;
 
         document.getElementById('payoutOrderId').value = orderId;
         document.getElementById('payoutSellerTitle').textContent = `Seller: ${sellerName}`;
         document.getElementById('payoutOrderRef').textContent = `Order #${orderId}`;
         document.getElementById('calcGrossAmount').textContent = `BDT ${agreedAmount.toFixed(2)}`;
-        document.getElementById('calcCommissionLabel').textContent = `Admin Commission (${commissionPct}%):`;
+
+        const calcIt = document.getElementById('calcItAmount');
+        if (calcIt) calcIt.textContent = `- BDT ${itAmt.toFixed(2)}`;
+
+        const calcAdminShareLabel = document.getElementById('calcAdminShareLabel');
+        if (calcAdminShareLabel) calcAdminShareLabel.textContent = `├─ Admin Commission (${adminFeePct}%):`;
+
+        const calcAdminShareAmount = document.getElementById('calcAdminShareAmount');
+        if (calcAdminShareAmount) calcAdminShareAmount.textContent = `- BDT ${adminAmt.toFixed(2)}`;
+
+        document.getElementById('calcCommissionLabel').textContent = `Total Admin Fee (${totalFeePct}%):`;
         document.getElementById('calcCommissionAmount').textContent = `- BDT ${commAmt.toFixed(2)}`;
         document.getElementById('calcNetAmount').textContent = `BDT ${netAmt.toFixed(2)}`;
 

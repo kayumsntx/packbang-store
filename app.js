@@ -2122,23 +2122,62 @@ app.get("/my-custom-orders", requireAuth, async (req, res) => {
 // ==========================================
 // ADMIN COMMISSION SETTINGS & APIS
 // ==========================================
-async function getAdminCommissionPercent() {
+async function getAdminCommissionConfig() {
     try {
         let config = await Commission.findOne();
         if (!config) {
-            config = new Commission({ percent: 10 });
+            config = new Commission({
+                itMaintenancePercent: 2.5,
+                adminCommissionPercent: 2.5,
+                percent: 5.0
+            });
             await config.save();
+        } else {
+            // Ensure fields are properly populated and synchronized
+            let modified = false;
+            if (config.itMaintenancePercent === undefined || config.itMaintenancePercent !== 2.5) {
+                config.itMaintenancePercent = 2.5;
+                modified = true;
+            }
+            if (config.adminCommissionPercent === undefined) {
+                config.adminCommissionPercent = Math.max(2.5, (config.percent || 5.0) - 2.5);
+                modified = true;
+            }
+            const expectedTotal = Math.round((config.itMaintenancePercent + config.adminCommissionPercent) * 100) / 100;
+            if (config.percent !== expectedTotal) {
+                config.percent = expectedTotal;
+                modified = true;
+            }
+            if (modified) {
+                await config.save();
+            }
         }
-        return config.percent;
+        return config;
     } catch (e) {
-        return 10;
+        console.error("Commission config read error:", e);
+        return {
+            itMaintenancePercent: 2.5,
+            adminCommissionPercent: 2.5,
+            percent: 5.0
+        };
     }
+}
+
+async function getAdminCommissionPercent() {
+    const config = await getAdminCommissionConfig();
+    return config.percent;
 }
 
 app.get("/api/admin/commission", requireAdmin, async (req, res) => {
     try {
-        const percent = await getAdminCommissionPercent();
-        res.json({ success: true, percent });
+        const config = await getAdminCommissionConfig();
+        res.json({
+            success: true,
+            itMaintenancePercent: config.itMaintenancePercent,
+            adminCommissionPercent: config.adminCommissionPercent,
+            totalPercent: config.percent,
+            percent: config.percent // for backward compatibility
+        });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -2146,19 +2185,56 @@ app.get("/api/admin/commission", requireAdmin, async (req, res) => {
 
 app.post("/api/admin/commission", requireAdmin, async (req, res) => {
     try {
-        const percent = parseFloat(req.body.percent);
-        if (isNaN(percent) || percent < 0 || percent > 100) {
-            return res.status(400).json({ success: false, message: "Commission percent must be a number between 0 and 100." });
+        const itMaintenance = 2.5; // Fixed 2.5% for IT Support and Maintenance
+        let adminPercent = parseFloat(req.body.adminCommissionPercent ?? req.body.adminPercent);
+
+        // If legacy total 'percent' provided, subtract the 2.5% IT fee
+        if (isNaN(adminPercent) && req.body.percent !== undefined) {
+            const rawTotal = parseFloat(req.body.percent);
+            adminPercent = Math.max(2.5, Math.round((rawTotal - itMaintenance) * 100) / 100);
         }
+
+        if (isNaN(adminPercent) || adminPercent < 2.5) {
+            return res.status(400).json({
+                success: false,
+                message: "Admin commission must be at least 2.5%."
+            });
+        }
+
+        const totalPercent = Math.round((itMaintenance + adminPercent) * 100) / 100;
+
         let config = await Commission.findOne();
-        if (!config) config = new Commission({ percent });
-        else config.percent = percent;
+        if (!config) {
+            config = new Commission({
+                itMaintenancePercent: itMaintenance,
+                adminCommissionPercent: adminPercent,
+                percent: totalPercent,
+                updatedBy: req.session && req.session.user ? (req.session.user.name || 'Admin') : 'Admin',
+                updatedAt: new Date()
+            });
+        } else {
+            config.itMaintenancePercent = itMaintenance;
+            config.adminCommissionPercent = adminPercent;
+            config.percent = totalPercent;
+            config.updatedBy = req.session && req.session.user ? (req.session.user.name || 'Admin') : 'Admin';
+            config.updatedAt = new Date();
+        }
         await config.save();
-        res.json({ success: true, message: `Admin commission updated to ${percent}%`, percent: config.percent });
+
+        res.json({
+            success: true,
+            message: `Admin fee updated: IT Maintenance 2.5% + Admin Commission ${adminPercent}% = Total Admin Fee ${totalPercent}%`,
+            itMaintenancePercent: config.itMaintenancePercent,
+            adminCommissionPercent: config.adminCommissionPercent,
+            totalPercent: config.percent,
+            percent: config.percent
+        });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
 });
+
+
 
 // ==========================================
 // CUSTOM ORDER ESCROW & PAYMENT WORKFLOW
