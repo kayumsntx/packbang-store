@@ -121,18 +121,33 @@ const productSchema = new mongoose.Schema({
     },
     colors: [{ type: String, default: [] }],
     sizes: [{ type: String, default: [] }],
-    // NEW: per size+color stock. If a product has no variants, the flat
-    // `stock` field above is used as before (fully backward compatible).
+    // Per size+color stock and pricing
     variants: [{
         color: { type: String, default: '' },
         size: { type: String, default: '' },
         stock: { type: Number, default: 0, min: 0 },
-        // Optional per-variant price override. 0/blank = use the product's base price.
         price: { type: Number, default: 0, min: 0 },
         originalPrice: { type: Number, default: 0, min: 0 }
     }],
     reviews: { type: Number, default: 0 },
-    rating: { type: Number, default: 0 },
+    rating: { type: Number, default: 4.8 },
+    description: { type: String, default: '' },
+    moq: { type: Number, default: 1, min: 1 },
+    unit: { type: String, default: 'pcs' },
+    sellerId: { type: String, default: null },
+    sellerName: { type: String, default: 'PackBang Direct' },
+    sellerPhone: { type: String, default: '' },
+    sellerBadge: { type: String, default: 'Verified Supplier' },
+    sellerRating: { type: Number, default: 4.9 },
+    specifications: [{
+        key: { type: String },
+        value: { type: String }
+    }],
+    approvalStatus: {
+        type: String,
+        enum: ['approved', 'pending', 'rejected'],
+        default: 'approved'
+    },
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -1673,6 +1688,315 @@ app.post("/api/custom-order/:id/message", requireAuth, async (req, res) => {
     }
 });
 
+// ==========================================
+// SELLER MARKETPLACE PRODUCT REST ENDPOINTS
+// ==========================================
+
+// 1. GET /api/seller/categories - Returns category hierarchy for seller product listings
+app.get('/api/seller/categories', async (req, res) => {
+    try {
+        const categories = await Category.find().sort({ order: 1 });
+        res.json({
+            success: true,
+            categories: categories.map(c => ({
+                id: c._id,
+                name: c.name,
+                parentId: c.parentId || null,
+                image: c.image || ''
+            }))
+        });
+    } catch (err) {
+        console.error("Seller categories error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch categories" });
+    }
+});
+
+// 2. GET /api/seller/products - Fetch products listed by a seller
+app.get('/api/seller/products', async (req, res) => {
+    try {
+        const { sellerId, sellerPhone, category, status } = req.query;
+        const query = { isActive: true };
+
+        if (sellerId && sellerPhone) {
+            query.$or = [{ sellerId: sellerId }, { sellerPhone: sellerPhone }];
+        } else if (sellerId) {
+            query.sellerId = sellerId;
+        } else if (sellerPhone) {
+            query.sellerPhone = sellerPhone;
+        }
+
+        if (category && category !== 'All') {
+            query.category = category;
+        }
+
+        if (status === 'in_stock') {
+            query.stock = { $gt: 5 };
+        } else if (status === 'low_stock') {
+            query.stock = { $gt: 0, $lte: 5 };
+        } else if (status === 'out_of_stock') {
+            query.stock = { $lte: 0 };
+        }
+
+        const products = await Product.find(query).sort({ createdAt: -1 });
+        
+        // Calculate summary stats
+        const totalStockValue = products.reduce((sum, p) => sum + ((p.price || 0) * (p.stock || 0)), 0);
+        const lowStockCount = products.filter(p => (p.stock || 0) <= 5).length;
+
+        res.json({
+            success: true,
+            count: products.length,
+            stats: {
+                totalProducts: products.length,
+                totalStockValue,
+                lowStockCount
+            },
+            products
+        });
+    } catch (err) {
+        console.error("Seller products fetch error:", err);
+        res.status(500).json({ success: false, message: "Error fetching seller products" });
+    }
+});
+
+// 3. POST /api/seller/products/upload-image - Upload product images to Cloudinary
+app.post('/api/seller/products/upload-image', (req, res) => {
+    uploadMultiple(req, res, (err) => {
+        if (err) {
+            console.error("Seller image upload error:", err);
+            return res.status(400).json({ success: false, message: err.message || "Upload error" });
+        }
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ success: false, message: "No files uploaded" });
+        }
+        const fileUrls = req.files.map(f => f.path);
+        res.json({
+            success: true,
+            urls: fileUrls,
+            url: fileUrls[0]
+        });
+    });
+});
+
+// 4. POST /api/seller/products/create - Create product directly from seller dashboard
+app.post('/api/seller/products/create', (req, res, next) => {
+    const contentType = req.headers['content-type'] || '';
+    if (contentType.includes('multipart/form-data')) {
+        uploadMultiple(req, res, (err) => {
+            if (err) {
+                console.error("Upload error:", err);
+                return res.status(400).json({ success: false, message: err.message });
+            }
+            next();
+        });
+    } else {
+        next();
+    }
+}, async (req, res) => {
+    try {
+        const {
+            name,
+            title,
+            price,
+            originalPrice,
+            category,
+            stock,
+            moq,
+            unit,
+            description,
+            colors,
+            sizes,
+            variants,
+            sellerId,
+            sellerName,
+            sellerPhone,
+            sellerBadge,
+            images: providedImages,
+            imagePath: providedImagePath
+        } = req.body;
+
+        const productName = (name || title || '').trim();
+        if (!productName) {
+            return res.status(400).json({ success: false, message: "Product name is required." });
+        }
+        if (!price || isNaN(parseFloat(price))) {
+            return res.status(400).json({ success: false, message: "Valid product price is required." });
+        }
+
+        let allImages = [];
+        let mainImage = '/uploads/default.jpg';
+
+        if (req.files && req.files.length > 0) {
+            allImages = req.files.map(f => f.path);
+            mainImage = req.files[0].path;
+        } else if (Array.isArray(providedImages) && providedImages.length > 0) {
+            allImages = providedImages.filter(img => img && typeof img === 'string');
+            mainImage = allImages[0] || providedImagePath || '/uploads/default.jpg';
+        } else if (typeof providedImages === 'string' && providedImages.trim()) {
+            allImages = providedImages.split(',').map(s => s.trim()).filter(Boolean);
+            mainImage = allImages[0] || '/uploads/default.jpg';
+        } else if (providedImagePath) {
+            mainImage = providedImagePath;
+            allImages = [providedImagePath];
+        }
+
+        // Process variants
+        let variantArray = [];
+        if (typeof variants === 'string') {
+            try { variantArray = JSON.parse(variants); } catch (e) { variantArray = []; }
+        } else if (Array.isArray(variants)) {
+            variantArray = variants;
+        }
+
+        // Colors & Sizes
+        const colorArray = Array.isArray(colors)
+            ? colors
+            : (colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []);
+        const sizeArray = Array.isArray(sizes)
+            ? sizes
+            : (sizes ? String(sizes).split(',').map(s => s.trim()).filter(Boolean) : []);
+
+        const numericStock = parseInt(stock) || 0;
+        const numericPrice = parseFloat(price);
+        const numericOrigPrice = (originalPrice && !isNaN(parseFloat(originalPrice))) ? parseFloat(originalPrice) : null;
+        const numericMoq = Math.max(1, parseInt(moq) || 1);
+
+        const newProduct = new Product({
+            id: "PROD-S-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+            name: productName,
+            price: numericPrice,
+            originalPrice: numericOrigPrice,
+            stock: numericStock,
+            stockStatus: computeStockStatus(numericStock),
+            imagePath: mainImage,
+            images: allImages.length > 0 ? allImages : [mainImage],
+            category: category || 'Packaging',
+            moq: numericMoq,
+            unit: unit || 'pcs',
+            description: description || '',
+            colors: colorArray,
+            sizes: sizeArray,
+            variants: variantArray,
+            sellerId: sellerId || 'SELLER-DIRECT',
+            sellerName: sellerName || 'Verified Packaging Supplier',
+            sellerPhone: sellerPhone || '',
+            sellerBadge: sellerBadge || 'Factory Direct',
+            sellerRating: 4.9,
+            isActive: true,
+            approvalStatus: 'approved'
+        });
+
+        await newProduct.save();
+
+        // Broadcast to live storefront clients
+        try {
+            broadcastRefresh({ action: "product_created", product: newProduct });
+        } catch (e) {}
+
+        res.status(201).json({
+            success: true,
+            message: "Product listed successfully on PackBang marketplace!",
+            product: newProduct
+        });
+    } catch (err) {
+        console.error("Seller create product error:", err);
+        res.status(500).json({ success: false, message: "Error saving product to catalog: " + err.message });
+    }
+});
+
+// 5. PUT /api/seller/products/:id - Update product details
+app.put('/api/seller/products/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            name,
+            price,
+            originalPrice,
+            stock,
+            moq,
+            unit,
+            category,
+            description,
+            isActive,
+            images,
+            imagePath
+        } = req.body;
+
+        const updateData = { updatedAt: new Date() };
+
+        if (name) updateData.name = name.trim();
+        if (price !== undefined) updateData.price = parseFloat(price);
+        if (originalPrice !== undefined) updateData.originalPrice = originalPrice ? parseFloat(originalPrice) : null;
+        if (stock !== undefined) {
+            updateData.stock = parseInt(stock) || 0;
+            updateData.stockStatus = computeStockStatus(updateData.stock);
+        }
+        if (moq !== undefined) updateData.moq = Math.max(1, parseInt(moq) || 1);
+        if (unit) updateData.unit = unit.trim();
+        if (category) updateData.category = category.trim();
+        if (description !== undefined) updateData.description = description;
+        if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+        if (images && Array.isArray(images) && images.length > 0) {
+            updateData.images = images;
+            updateData.imagePath = images[0];
+        } else if (imagePath) {
+            updateData.imagePath = imagePath;
+        }
+
+        const updated = await Product.findOneAndUpdate(
+            { id: id },
+            { $set: updateData },
+            { new: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        try {
+            broadcastRefresh({ action: "product_updated", product: updated });
+        } catch (e) {}
+
+        res.json({
+            success: true,
+            message: "Product updated successfully",
+            product: updated
+        });
+    } catch (err) {
+        console.error("Seller update product error:", err);
+        res.status(500).json({ success: false, message: "Failed to update product" });
+    }
+});
+
+// 6. DELETE /api/seller/products/:id - Deactivate/Delete product
+app.delete('/api/seller/products/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Product.findOneAndUpdate(
+            { id: id },
+            { $set: { isActive: false, updatedAt: new Date() } },
+            { new: true }
+        );
+
+        if (!result) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        try {
+            broadcastRefresh({ action: "product_deleted", productId: id });
+        } catch (e) {}
+
+        res.json({
+            success: true,
+            message: "Product removed from marketplace listing"
+        });
+    } catch (err) {
+        console.error("Seller delete product error:", err);
+        res.status(500).json({ success: false, message: "Failed to delete product" });
+    }
+});
+
+
 // ---------- PUBLIC MESSAGING ENDPOINTS (FOR seller.packbang.com) ----------
 app.get("/api/public/custom-order/:id/messages", async (req, res) => {
     try {
@@ -2212,11 +2536,11 @@ app.get("/product/:productId", async (req, res) => {
 app.get('/api/categories', async (req, res) => {
     const categories = await Category.find().sort({ order: 1 });
     
-    // মূল ক্যাটাগরি (Parent) এবং সাব-ক্যাটাগরি (Child) আলাদা করা
+    // Parent categories and child categories tree structure
     const parentCategories = categories.filter(c => !c.parentId);
     const childCategories = categories.filter(c => c.parentId);
     
-    // প্রতিটি Parent-এর ভেতরে তার Children গুলো যুক্ত করা (Tree Structure)
+    // Map parent categories to their respective children
     const tree = parentCategories.map(parent => ({
         ...parent.toObject(),
         children: childCategories.filter(child => child.parentId.toString() === parent._id.toString())
@@ -3126,7 +3450,7 @@ app.post("/product/create", requireAdmin, uploadMultiple, async (req, res) => {
     sizes,
     originalPrice,
     variantsData,
-    category // 🔥 নতুন অংশ: ড্রপডাউন থেকে category ID নেওয়া
+    category // Category reference
   } = req.body;
 
   try {

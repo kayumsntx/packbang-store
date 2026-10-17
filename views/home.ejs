@@ -702,9 +702,14 @@
                     </div>
 
                     <div class="home-card-body">
-                        <div class="factory-tag">
-                            <i class="fas fa-check-circle"></i> Direct Factory
+                        <div class="factory-tag" title="Seller: <%= product.sellerName || 'Direct Factory' %>">
+                            <i class="fas fa-store"></i> <%= product.sellerName || 'Direct Factory' %>
                         </div>
+                        <% if (product.moq && product.moq > 1) { %>
+                            <div style="font-size: 0.72rem; font-weight: 700; color: #475569; background: #F1F5F9; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px;">
+                                MOQ: <%= product.moq %> <%= product.unit || 'pcs' %>
+                            </div>
+                        <% } %>
 
                         <a href="/product/<%= product.id %>" style="text-decoration:none;color:inherit;">
                             <span class="product-name"><%= product.name %></span>
