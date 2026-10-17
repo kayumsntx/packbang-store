@@ -464,7 +464,7 @@
                 <i class="fas fa-box"></i> Product Summary
             </h4>
             <div class="product-item">
-                <img src="<%= order.imagePath || '/uploads/default.jpg' %>" alt="<%= order.productName %>" />
+                <img src="<%= order.imagePath || '/uploads/default.jpg' %>" alt="<%= order.productName %>" onerror="this.onerror=null; this.src='/uploads/default.jpg';" />
                 <div class="details">
                     <div class="name"><%= order.productName %></div>
                     <div class="meta">

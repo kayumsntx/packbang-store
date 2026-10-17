@@ -470,7 +470,7 @@
                                         src="<%= sale.imagePath || '/uploads/default.jpg' %>"
                                         class="img-thumb"
                                         alt="<%= sale.productName %>"
-                                        onerror="this.src='/uploads/default.jpg'"
+                                        onerror="this.onerror=null; this.src='/uploads/default.jpg';"
                                     />
                                 </td>
                                 <td>

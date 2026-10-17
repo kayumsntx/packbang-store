@@ -306,6 +306,27 @@ app.set("views", path.join(__dirname, "views"));
 app.use("/testimg", express.static(path.join(__dirname, "testimg")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Fallback for default product image (guarantees 200 OK on production and local)
+app.get(["/uploads/default.jpg", "/default.jpg"], (req, res) => {
+    const candidates = [
+        path.join(__dirname, "uploads", "default.jpg"),
+        path.join(__dirname, "public", "uploads", "default.jpg"),
+        path.join(__dirname, "public", "images", "default.jpg")
+    ];
+    for (const filePath of candidates) {
+        if (fs.existsSync(filePath)) {
+            return res.sendFile(filePath);
+        }
+    }
+    res.setHeader("Content-Type", "image/svg+xml");
+    res.send(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+        <rect width="300" height="300" fill="#F8FAFC" rx="16" stroke="#E2E8F0" stroke-width="2"/>
+        <text x="50%" y="46%" dominant-baseline="middle" text-anchor="middle" font-size="80">📦</text>
+        <text x="50%" y="78%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#64748B">PackBang Packaging</text>
+    </svg>`);
+});
+
+
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);

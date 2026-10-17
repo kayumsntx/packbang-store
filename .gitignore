@@ -18,6 +18,7 @@ pnpm-debug.log*
 # Runtime data & temporary uploads
 uploads/*
 !uploads/.gitkeep
+!uploads/default.jpg
 testimg/*
 pids/
 *.pid

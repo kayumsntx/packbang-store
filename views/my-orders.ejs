@@ -503,7 +503,7 @@
                     <div class="order-items">
                         <% order.items.forEach(item => { %>
                             <div class="order-item">
-                                <img src="<%= item.imagePath || '/uploads/default.jpg' %>" alt="<%= item.productName %>" />
+                                <img src="<%= item.imagePath || '/uploads/default.jpg' %>" alt="<%= item.productName %>" onerror="this.onerror=null; this.src='/uploads/default.jpg';" />
                                 <div class="item-details">
                                     <div class="item-name"><%= item.productName %></div>
                                     <div class="item-meta">

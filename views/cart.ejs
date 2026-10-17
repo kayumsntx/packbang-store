@@ -504,7 +504,7 @@
     <% if (cart && cart.length > 0) { %>
         <% cart.forEach(item => { %>
             <div class="cart-item" data-product-id="<%= item.id %>">
-                <img src="<%= item.imagePath || '/uploads/default.jpg' %>" alt="<%= item.name %>" />
+                <img src="<%= item.imagePath || '/uploads/default.jpg' %>" alt="<%= item.name %>" onerror="this.onerror=null; this.src='/uploads/default.jpg';" />
                 <div class="item-details">
                     <div class="item-name"><%= item.name %></div>
                     <div class="item-price">BDT. <%= item.price.toFixed(2) %></div>
