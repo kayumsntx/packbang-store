@@ -476,56 +476,34 @@
         border-radius: 10px;
     }
 
-    /* Cart Quantity Stepper */
-    .cart-controls {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
+        /* Product Card Action Button */
+    .card-action-wrap {
         padding-top: 10px;
-        border-top: 1px solid #F1F1F1;
+        border-top: 1px solid #F1F5F9;
         margin-top: auto;
     }
-    .qty-btn {
-        width: 32px;
-        height: 32px;
-        border: none;
-        border-radius: 50%;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
+    .btn-card-details {
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-weight: bold;
+        gap: 6px;
+        width: 100%;
+        padding: 9px 12px;
+        background: #FFF7ED;
+        color: #EA580C;
+        border: 1px solid #FFEDD5;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
     }
-    .qty-plus {
-        background: var(--temu-orange);
-        box-shadow: 0 2px 8px rgba(251, 119, 1, 0.35);
-    }
-    .qty-plus:hover:not(:disabled) {
-        background: var(--temu-orange-hover);
-        transform: scale(1.08);
-    }
-    .qty-minus {
-        background: #94A3B8;
-    }
-    .qty-minus:hover:not(:disabled) {
-        background: #64748B;
-        transform: scale(1.08);
-    }
-    .qty-btn:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-        transform: none !important;
-    }
-    .qty-display {
-        font-size: 0.95rem;
-        font-weight: 800;
-        color: #111111;
-        min-width: 28px;
-        text-align: center;
+    .btn-card-details:hover {
+        background: #EA580C;
+        color: #FFFFFF;
+        border-color: #EA580C;
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+        transform: translateY(-1px);
     }
 
     @media (max-width: 768px) {
@@ -740,15 +718,11 @@
                             </div>
                         </div>
 
-                        <!-- Cart Controls -->
-                        <div class="cart-controls">
-                            <button class="qty-btn qty-minus" data-product-id="<%= product.id %>" disabled>
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span class="qty-display" id="qty-<%= product.id %>">0</span>
-                            <button class="qty-btn qty-plus" data-product-id="<%= product.id %>" <%= product.stock <= 0 ? 'disabled' : '' %>>
-                                <i class="fas fa-plus"></i>
-                            </button>
+                        <!-- Action Button: View Details -->
+                        <div class="card-action-wrap">
+                            <a href="/product/<%= product.id %>" class="btn-card-details">
+                                <span>View Details</span> <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -826,112 +800,6 @@
         }
     });
 
-    // ==========================================
-    // Cart Controls
-    // ==========================================
-    $(document).ready(function() {
-        updateAllQuantities();
-
-        $(document).on('click', '.qty-plus', function() {
-            var productId = $(this).data('product-id');
-            var $btn = $(this);
-            $btn.prop('disabled', true);
-            $btn.html('<i class="fas fa-spinner fa-spin"></i>');
-            $.ajax({
-                url: '/api/cart/add',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ productId: productId, quantity: 1 }),
-                success: function(response) {
-                    if (response.success) {
-                        updateQuantityDisplay(productId);
-                        updateAllQuantities();
-                        if (typeof updateCartCount === 'function') updateCartCount();
-                        showNotification('✅ Added to cart!', 'success');
-                    }
-                    $btn.html('<i class="fas fa-plus"></i>');
-                    $btn.prop('disabled', false);
-                },
-                error: function() {
-                    showNotification('❌ Failed to add', 'error');
-                    $btn.html('<i class="fas fa-plus"></i>');
-                    $btn.prop('disabled', false);
-                }
-            });
-        });
-
-        $(document).on('click', '.qty-minus', function() {
-            var productId = $(this).data('product-id');
-            var $btn = $(this);
-            var currentQty = parseInt($('#qty-' + productId).text()) || 0;
-            if (currentQty <= 0) {
-                showNotification('⚠️ Item not in cart', 'warning');
-                return;
-            }
-            $btn.prop('disabled', true);
-            $btn.html('<i class="fas fa-spinner fa-spin"></i>');
-            $.ajax({
-                url: '/api/cart/remove',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ productId: productId }),
-                success: function(response) {
-                    if (response.success) {
-                        updateQuantityDisplay(productId);
-                        updateAllQuantities();
-                        if (typeof updateCartCount === 'function') updateCartCount();
-                        showNotification('🗑️ Removed from cart', 'warning');
-                    }
-                    $btn.html('<i class="fas fa-minus"></i>');
-                    $btn.prop('disabled', false);
-                },
-                error: function() {
-                    showNotification('❌ Failed to remove', 'error');
-                    $btn.html('<i class="fas fa-minus"></i>');
-                    $btn.prop('disabled', false);
-                }
-            });
-        });
-
-        function updateQuantityDisplay(productId) {
-            $.ajax({
-                url: '/api/cart/view',
-                type: 'GET',
-                cache: false,
-                success: function(response) {
-                    if (response.success) {
-                        var items = response.items || [];
-                        var found = items.find(function(item) { return item.id === productId; });
-                        var qty = found ? found.quantity : 0;
-                        $('#qty-' + productId).text(qty);
-                        var $minusBtn = $('.qty-minus[data-product-id="' + productId + '"]');
-                        $minusBtn.prop('disabled', qty <= 0);
-                    }
-                }
-            });
-        }
-
-        function updateAllQuantities() {
-            $.ajax({
-                url: '/api/cart/view',
-                type: 'GET',
-                cache: false,
-                success: function(response) {
-                    if (response.success) {
-                        var items = response.items || [];
-                        $('.home-card').each(function() {
-                            var productId = $(this).data('product-id');
-                            var found = items.find(function(item) { return item.id === productId; });
-                            var qty = found ? found.quantity : 0;
-                            $('#qty-' + productId).text(qty);
-                            var $minusBtn = $('.qty-minus[data-product-id="' + productId + '"]');
-                            $minusBtn.prop('disabled', qty <= 0);
-                        });
-                    }
-                }
-            });
-        }
-    });
-</script>
+    </script>
 
 <%- include('partials/footer') %>
