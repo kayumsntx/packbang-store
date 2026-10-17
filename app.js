@@ -2017,6 +2017,141 @@ app.delete('/api/seller/products/:id', async (req, res) => {
     }
 });
 
+// 7. GET /api/seller/orders - Fetch orders belonging strictly to the individual seller
+app.get('/api/seller/orders', async (req, res) => {
+    try {
+        const { sellerId, sellerPhone } = req.query;
+        if (!sellerId && !sellerPhone) {
+            return res.json({ success: true, count: 0, orders: [], stats: { totalRevenue: 0, totalOrders: 0, pendingShipments: 0 } });
+        }
+
+        // Find all product IDs belonging to this seller
+        const sellerProducts = await Product.find({
+            $or: [{ sellerId: sellerId }, { sellerPhone: sellerPhone }]
+        }).select('id name price');
+        const sellerProductIds = new Set(sellerProducts.map(p => p.id));
+
+        // Query standard sales
+        const sales = await Sale.find({
+            $or: [
+                { 'products.productId': { $in: Array.from(sellerProductIds) } },
+                { sellerId: sellerId }
+            ]
+        }).sort({ saleDate: -1 }).limit(50);
+
+        // Query custom orders
+        const customOrders = await CustomOrder.find({
+            $or: [
+                { assignedSellerId: sellerId },
+                { 'bids.sellerId': sellerId }
+            ]
+        }).sort({ createdAt: -1 }).limit(50);
+
+        const mappedOrders = [];
+
+        sales.forEach(s => {
+            mappedOrders.push({
+                orderId: s.saleId,
+                type: 'direct_sale',
+                buyerShop: s.customerName || 'Retail Customer',
+                items: (s.products && s.products.length > 0)
+                    ? s.products.map(p => `${p.quantity || 1}x ${p.name || 'Packaging'}`).join(', ')
+                    : (s.productName || 'Packaging Item'),
+                amount: s.totalAmount || (s.price * s.quantity) || 0,
+                date: s.saleDate ? new Date(s.saleDate).toLocaleDateString() : 'Recent',
+                status: s.status === 'Completed' || s.status === 'Delivered' ? 'Delivered' : (s.status === 'Shipped' ? 'Shipped' : 'Processing'),
+                courier: s.courier && s.courier.provider ? s.courier.provider : 'Packaging Courier'
+            });
+        });
+
+        customOrders.forEach(co => {
+            if (co.assignedSellerId === sellerId) {
+                mappedOrders.push({
+                    orderId: co.id,
+                    type: 'custom_order',
+                    buyerShop: co.customerName || 'Verified Merchant',
+                    items: `${co.quantity ? co.quantity.toLocaleString() : '1'}x ${co.title || 'Custom Packaging'}`,
+                    amount: co.agreedPrice || co.budget || 0,
+                    date: co.createdAt ? new Date(co.createdAt).toLocaleDateString() : 'Recent',
+                    status: co.status === 'completed' ? 'Delivered' : (co.status === 'manufacturing' ? 'Processing' : (co.status === 'in_progress' ? 'Processing' : 'Pending')),
+                    courier: 'Factory Dispatch'
+                });
+            }
+        });
+
+        const totalRevenue = mappedOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+        const pendingShipments = mappedOrders.filter(o => o.status === 'Processing' || o.status === 'Pending').length;
+        const deliveredOrders = mappedOrders.filter(o => o.status === 'Delivered').length;
+
+        res.json({
+            success: true,
+            count: mappedOrders.length,
+            stats: {
+                totalRevenue,
+                totalOrders: mappedOrders.length,
+                pendingShipments,
+                deliveredOrders
+            },
+            orders: mappedOrders
+        });
+    } catch (err) {
+        console.error("Seller orders fetch error:", err);
+        res.status(500).json({ success: false, message: "Error fetching seller orders" });
+    }
+});
+
+// 8. GET /api/seller/metrics - Aggregate individual seller live metrics
+app.get('/api/seller/metrics', async (req, res) => {
+    try {
+        const { sellerId, sellerPhone } = req.query;
+        if (!sellerId && !sellerPhone) {
+            return res.json({
+                success: true,
+                totalStock: 0,
+                totalListings: 0,
+                totalRevenue: 0,
+                activeShipments: 0,
+                bidsPlaced: 0
+            });
+        }
+
+        const sellerProducts = await Product.find({
+            isActive: true,
+            $or: [{ sellerId: sellerId }, { sellerPhone: sellerPhone }]
+        });
+
+        const totalStock = sellerProducts.reduce((sum, p) => sum + (p.stock || 0), 0);
+        const totalListings = sellerProducts.length;
+
+        const bidsPlacedCount = await CustomOrder.countDocuments({
+            'bids.sellerId': sellerId
+        });
+
+        const activeCustomOrders = await CustomOrder.countDocuments({
+            assignedSellerId: sellerId,
+            status: { $in: ['in_progress', 'manufacturing', 'in_delivery'] }
+        });
+
+        const completedCustomOrders = await CustomOrder.find({
+            assignedSellerId: sellerId,
+            status: 'completed'
+        });
+        const customRevenue = completedCustomOrders.reduce((sum, co) => sum + (co.sellerPayoutAmount || co.agreedPrice || 0), 0);
+
+        res.json({
+            success: true,
+            totalStock,
+            totalListings,
+            totalRevenue: customRevenue,
+            activeShipments: activeCustomOrders,
+            bidsPlaced: bidsPlacedCount
+        });
+    } catch (err) {
+        console.error("Seller metrics fetch error:", err);
+        res.status(500).json({ success: false, message: "Error calculating seller metrics" });
+    }
+});
+
 
 // ---------- PUBLIC MESSAGING ENDPOINTS (FOR seller.packbang.com) ----------
 app.get("/api/public/custom-order/:id/messages", async (req, res) => {
