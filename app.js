@@ -21,8 +21,10 @@ const mongoose = require("mongoose");
 const steadfast = require("./steadfast");
 
 const Category = require("./models/Category");
-
 const Banner = require("./models/Banner");
+const Commission = require("./models/Commission");
+const PaymentTransaction = require("./models/PaymentTransaction");
+const paymentService = require("./services/paymentService");
 
 
 const app = express();
@@ -276,7 +278,7 @@ const categoryStorage = new CloudinaryStorage({
   params: {
     folder: 'bagnest_categories',
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif'],
-    transformation: [{ width: 300, height: 300, crop: 'fill' }]
+    transformation: [{ width: 300, height: 300, crop: 'fill' }] // গোল ছবির জন্য স্কয়ার
   },
 });
 const uploadCategoryImage = multer({ storage: categoryStorage }).single('categoryImage');
@@ -1011,7 +1013,7 @@ app.get("/logout", async (req, res) => {
 // ---------- HOME ----------
 app.get("/", async (req, res) => {
   try {
-
+    // 🔥 ক্যাটাগরি ফিল্টার লজিক
     const { category } = req.query;
 
     let products;
@@ -1021,7 +1023,7 @@ app.get("/", async (req, res) => {
         products = await getAllProducts();
     }
 
-
+    // 🔥 হেডার ড্রপডাউনে সাব-ক্যাটাগরি সহ (Tree) ক্যাটাগরি লোড
     const allCats = await Category.find().sort({ order: 1 });
     const parentCategories = allCats.filter(c => !c.parentId);
     const childCategories = allCats.filter(c => c.parentId);
@@ -1079,7 +1081,7 @@ const banners = await Banner.find({ isActive: true }).sort({ order: 1 });
 app.get("/cart", async (req, res) => {
   try {
     const products = await getAllProducts();
-    const categories = await Category.find().sort({ order: 1 });
+    const categories = await Category.find().sort({ order: 1 }); // 🔥 যোগ করা হয়েছে
 
     let userCart = [];
     let cartTotal = 0;
@@ -1111,7 +1113,7 @@ app.get("/cart", async (req, res) => {
       cartTotal: cartTotal.toFixed(2),
       user: req.session.user,
       isGuest: !req.session.user,
-      categories: categories,
+      categories: categories, // 🔥 যোগ করা হয়েছে
       currentCategory: null
     });
   } catch (err) {
@@ -1124,7 +1126,7 @@ app.get("/cart", async (req, res) => {
 app.get("/my-orders", requireAuth, async (req, res) => {
   try {
     const userEmail = req.session.user.profile?.email || req.session.user.username;
-    const categories = await Category.find().sort({ order: 1 });
+    const categories = await Category.find().sort({ order: 1 }); // 🔥 যোগ করা হয়েছে
     
     const userOrders = await Sale.find({
       $or: [
@@ -1147,7 +1149,7 @@ app.get("/my-orders", requireAuth, async (req, res) => {
       totalAmount: totalAmount.toFixed(2),
       averageAmount: averageAmount,
       pendingCount: pendingCount,
-      categories: categories,
+      categories: categories, // 🔥 যোগ করা হয়েছে
       currentCategory: null
     });
   } catch (err) {
@@ -1160,7 +1162,7 @@ app.get("/my-orders", requireAuth, async (req, res) => {
 app.get("/terminal", requireCashierOrAdmin, async (req, res) => {
   try {
     const products = await getAllProducts();
-    const categories = await Category.find().sort({ order: 1 });
+    const categories = await Category.find().sort({ order: 1 }); // 🔥 যোগ করা হয়েছে
 
     let userCart = req.session.cart || [];
     
@@ -1182,7 +1184,7 @@ app.get("/terminal", requireCashierOrAdmin, async (req, res) => {
       cart: userCart,
       cartTotal: cartTotal.toFixed(2),
       user: req.session.user,
-      categories: categories,
+      categories: categories, // 🔥 যোগ করা হয়েছে
       currentCategory: null
     });
   } catch (err) {
@@ -1208,10 +1210,35 @@ const customOrderSchema = new mongoose.Schema({
     deadline: { type: Date, default: null },
     status: { 
         type: String, 
-        enum: ['pending', 'approved', 'rejected', 'assigned', 'completed'],
+        enum: ['pending', 'approved', 'rejected', 'assigned', 'in_progress', 'seller_completed', 'received', 'completed', 'cancelled'],
         default: 'pending' 
     },
     adminNotes: { type: String, default: '' },
+    assignedSellerId: { type: String, default: null },
+    assignedSellerName: { type: String, default: null },
+    agreedPrice: { type: Number, default: 0 },
+    paymentStatus: { 
+        type: String, 
+        enum: ['unpaid', 'pending', 'paid_to_admin', 'refunded'], 
+        default: 'unpaid' 
+    },
+    escrowAmount: { type: Number, default: 0 },
+    paymentMethod: { type: String, default: '' },
+    paymentTransactionId: { type: String, default: '' },
+    paidAt: { type: Date, default: null },
+    sellerCompletedAt: { type: Date, default: null },
+    customerConfirmedReceived: { type: Boolean, default: false },
+    customerConfirmedAt: { type: Date, default: null },
+    adminCommissionPercent: { type: Number, default: 10 },
+    adminCommissionAmount: { type: Number, default: 0 },
+    sellerPayoutAmount: { type: Number, default: 0 },
+    payoutStatus: { 
+        type: String, 
+        enum: ['pending', 'eligible', 'paid', 'withheld'], 
+        default: 'pending' 
+    },
+    payoutTransactionId: { type: String, default: '' },
+    payoutAt: { type: Date, default: null },
     bids: [{
         sellerId: { type: String, required: true },
         sellerName: { type: String, required: true },
@@ -1220,7 +1247,7 @@ const customOrderSchema = new mongoose.Schema({
         note: { type: String, default: '' },
         status: { 
             type: String, 
-            enum: ['pending', 'accepted', 'rejected'],
+            enum: ['pending', 'accepted', 'rejected'], 
             default: 'pending' 
         },
         createdAt: { type: Date, default: Date.now }
@@ -1330,7 +1357,7 @@ const requireSellerOrAdmin = (req, res, next) => {
 // CUSTOM ORDER - CREATE (with Image Upload)
 // ==========================================
 const uploadOrderImages = multer({
-    storage: productStorage,
+    storage: productStorage, // Cloudinary storage (আপনার আগের productStorage ব্যবহার করুন)
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB per file
 }).array('orderImages', 5); // Max 5 images
 
@@ -1338,7 +1365,7 @@ app.post("/api/custom-order/create", requireAuth, uploadOrderImages, async (req,
     const { title, description, budget, quantity, deadline } = req.body;
     
     try {
-
+        // ছবির URL সংগ্রহ করুন
         let imageUrls = [];
         if (req.files && req.files.length > 0) {
             imageUrls = req.files.map(file => file.path); // Cloudinary URL
@@ -1355,7 +1382,7 @@ app.post("/api/custom-order/create", requireAuth, uploadOrderImages, async (req,
             budget: parseFloat(budget) || 0,
             quantity: parseInt(quantity) || 1,
             deadline: deadline ? new Date(deadline) : null,
-            images: imageUrls,
+            images: imageUrls, // ✅ ছবি সেভ
             status: 'pending'
         });
         
@@ -1407,12 +1434,12 @@ app.get(["/api/custom-orders", "/api/my-custom-orders"], requireAuth, async (req
         const user = req.session.user;
         let filter = {};
         
-
+        // যদি সেলার হয়, শুধু approved অর্ডার দেখাবে
         if (user.role === 'seller' || user.role === 'authorized_cashier') {
             filter.status = 'approved';
         }
-
-
+        // অ্যাডমিন সব দেখতে পাবে
+        // কাস্টমার শুধু নিজের অর্ডার দেখতে পাবে (আমরা আলাদা রাউট দেব)
         
         const orders = await CustomOrder.find(filter).sort({ createdAt: -1 });
         res.json({ success: true, orders });
@@ -1534,17 +1561,25 @@ app.put(["/api/custom-order/:orderId/bid/:bidId", "/api/admin/custom-order/:orde
             order.bids.forEach((b, idx) => {
                 if (idx !== bidIndex) b.status = 'rejected';
             });
-            order.bids[bidIndex].status = 'accepted';
+            const selectedBid = order.bids[bidIndex];
+            selectedBid.status = 'accepted';
             order.status = 'assigned';
-            order.selectedBidId = order.bids[bidIndex]._id;
+            order.selectedBidId = selectedBid._id;
+            order.assignedSellerId = selectedBid.sellerId;
+            order.assignedSellerName = selectedBid.sellerName;
+            const unitPrice = selectedBid.amount;
+            const qty = order.quantity || 1;
+            order.agreedPrice = Math.round(unitPrice * qty * 100) / 100;
+            order.paymentStatus = 'unpaid';
+            order.payoutStatus = 'pending';
 
             if (!order.messages) order.messages = [];
             order.messages.push({
                 senderId: 'SYSTEM',
-                senderName: 'PackBang Safe System',
+                senderName: 'PackBang Escrow System',
                 senderRole: 'admin',
-                sellerId: order.bids[bidIndex].sellerId,
-                text: "Quotation accepted for BDT. " + order.bids[bidIndex].amount + " by customer. Supplier assigned for production.",
+                sellerId: selectedBid.sellerId,
+                text: `Supplier ${selectedBid.sellerName} assigned for quotation of BDT ${unitPrice}/pc (Total: BDT ${order.agreedPrice}). Customer must deposit payment to Admin Escrow before production begins.`,
                 createdAt: new Date()
             });
         } else if (action === 'reject') {
@@ -1739,12 +1774,362 @@ app.get("/my-custom-orders", requireAuth, async (req, res) => {
     }
 });
 
-// ---------- ADMIN CUSTOM ORDER MANAGEMENT ----------
-app.get("/admin/my-custom-orders", requireAdmin, (req, res) => {
-    res.render("admin-custom-orders", {
-        user: req.session.user,
-        isGuest: false
-    });
+// ==========================================
+// ADMIN COMMISSION SETTINGS & APIS
+// ==========================================
+async function getAdminCommissionPercent() {
+    try {
+        let config = await Commission.findOne();
+        if (!config) {
+            config = new Commission({ percent: 10 });
+            await config.save();
+        }
+        return config.percent;
+    } catch (e) {
+        return 10;
+    }
+}
+
+app.get("/api/admin/commission", requireAdmin, async (req, res) => {
+    try {
+        const percent = await getAdminCommissionPercent();
+        res.json({ success: true, percent });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/admin/commission", requireAdmin, async (req, res) => {
+    try {
+        const percent = parseFloat(req.body.percent);
+        if (isNaN(percent) || percent < 0 || percent > 100) {
+            return res.status(400).json({ success: false, message: "Commission percent must be a number between 0 and 100." });
+        }
+        let config = await Commission.findOne();
+        if (!config) config = new Commission({ percent });
+        else config.percent = percent;
+        await config.save();
+        res.json({ success: true, message: `Admin commission updated to ${percent}%`, percent: config.percent });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// CUSTOM ORDER ESCROW & PAYMENT WORKFLOW
+// 1. Customer Pays Admin Escrow
+// ==========================================
+app.post("/api/custom-order/:orderId/pay", requireAuth, async (req, res) => {
+    const { orderId } = req.params;
+    const { paymentMethod = 'bkash', accountNumber = '' } = req.body;
+    const user = req.session.user;
+
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        // Only the customer who created the order or admin can pay
+        const isOwner = order.customerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Only the customer can make payment for this order." });
+        }
+
+        if (order.paymentStatus === 'paid_to_admin') {
+            return res.status(400).json({ success: false, message: "Payment has already been deposited to Admin Escrow for this order." });
+        }
+
+        // Smart seller assignment: if not explicitly assigned, check accepted bid or first available quote
+        const acceptedBid = order.bids.find(b => b.status === 'accepted' || b._id.toString() === order.selectedBidId) || (order.bids.length > 0 ? order.bids[0] : null);
+        if (!order.assignedSellerId && acceptedBid) {
+            order.assignedSellerId = acceptedBid.sellerId;
+            order.assignedSellerName = acceptedBid.sellerName;
+            acceptedBid.status = 'accepted';
+            order.selectedBidId = acceptedBid._id;
+        }
+
+        // Calculate amount from request, agreedPrice, accepted bid, or budget
+        let amount = req.body.amount ? parseFloat(req.body.amount) : order.agreedPrice;
+        if (!amount || amount <= 0) {
+            if (acceptedBid) {
+                amount = Math.round(acceptedBid.amount * (order.quantity || 1) * 100) / 100;
+            } else if (order.budget && order.budget > 0) {
+                amount = order.budget;
+            } else {
+                amount = 1000; // Default nominal deposit
+            }
+        }
+
+        // Process deposit into Admin Escrow via payment service
+        const paymentResult = await paymentService.processCustomerEscrow({
+            orderId: order.id,
+            orderTitle: order.title,
+            customerId: order.customerId,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            amount: amount,
+            paymentMethod: paymentMethod,
+            accountNumber: accountNumber
+        });
+
+        const currentCommission = await getAdminCommissionPercent();
+
+        order.agreedPrice = amount;
+        order.escrowAmount = amount;
+        order.paymentStatus = 'paid_to_admin';
+        order.paymentMethod = paymentMethod;
+        order.paymentTransactionId = paymentResult.transactionId;
+        order.paidAt = new Date();
+        order.status = 'in_progress';
+        order.adminCommissionPercent = currentCommission;
+        order.payoutStatus = 'pending';
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: 'SYSTEM',
+            senderName: 'PackBang Escrow System',
+            senderRole: 'admin',
+            sellerId: order.assignedSellerId,
+            text: `Payment of BDT. ${amount.toFixed(2)} received & securely held in Admin Escrow via ${paymentMethod.toUpperCase()} (TX: ${paymentResult.transactionId}). Assigned supplier ${order.assignedSellerName || ''} is now authorized to begin production.`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
+        await order.save();
+
+        broadcastRefresh({ action: 'custom_order_paid', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: paymentResult.message,
+            transactionId: paymentResult.transactionId,
+            order
+        });
+    } catch (err) {
+        console.error("Custom order payment error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// 2. Seller Marks Order Completed & Dispatched
+// ==========================================
+app.post(["/api/custom-order/:orderId/seller-complete", "/api/custom-order/:orderId/complete"], requireSellerOrAdmin, async (req, res) => {
+    const { orderId } = req.params;
+    const user = req.session.user;
+
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        // Must be the assigned seller or admin
+        const isAssignedSeller = order.assignedSellerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        if (!isAssignedSeller && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Only the assigned seller can mark this custom order as completed." });
+        }
+
+        // Must be paid to admin first
+        if (order.paymentStatus !== 'paid_to_admin') {
+            return res.status(400).json({ success: false, message: "Order cannot be marked completed because customer has not deposited payment to Admin Escrow yet." });
+        }
+
+        order.status = 'seller_completed';
+        order.sellerCompletedAt = new Date();
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: user.id,
+            senderName: user.profile?.name || user.username,
+            senderRole: 'seller',
+            sellerId: order.assignedSellerId,
+            text: `Production complete! The custom order has been packaged and delivered/shipped. Customer, please inspect packages and confirm receipt.`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
+        await order.save();
+
+        broadcastRefresh({ action: 'custom_order_seller_completed', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: "Order successfully marked as completed by seller. Customer has been asked to confirm receipt.",
+            order
+        });
+    } catch (err) {
+        console.error("Seller complete error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// 3. Customer Confirms Order Received
+// ==========================================
+app.post("/api/custom-order/:orderId/confirm-received", requireAuth, async (req, res) => {
+    const { orderId } = req.params;
+    const user = req.session.user;
+
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        // Only the customer or admin can confirm receipt
+        const isOwner = order.customerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Only the customer who placed this order can confirm receipt." });
+        }
+
+        if (order.status !== 'seller_completed' && order.status !== 'in_progress' && order.status !== 'assigned') {
+            return res.status(400).json({ success: false, message: "Order is not in a state ready for delivery confirmation." });
+        }
+
+        order.customerConfirmedReceived = true;
+        order.customerConfirmedAt = new Date();
+        order.status = 'received';
+        order.payoutStatus = 'eligible'; // Eligible for admin payout
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: user.id,
+            senderName: user.profile?.name || user.username,
+            senderRole: 'customer',
+            sellerId: order.assignedSellerId,
+            text: `Customer has successfully received and verified the custom order. Order marked as received. Escrow payout is now queued for Admin release.`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
+        await order.save();
+
+        broadcastRefresh({ action: 'custom_order_received', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: "Thank you! Receipt confirmed. Admin has been notified to release payout to the supplier.",
+            order
+        });
+    } catch (err) {
+        console.error("Customer confirm error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// 4. Admin Takes Commission & Releases Payout to Seller
+// ==========================================
+app.post(["/api/admin/custom-order/:orderId/release-payout", "/api/admin/payout/:orderId"], requireAdmin, async (req, res) => {
+    const { orderId } = req.params;
+    const { payoutMethod = 'bkash', payoutAccountNumber = '', overrideConfirm = false } = req.body;
+
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        if (order.paymentStatus !== 'paid_to_admin') {
+            return res.status(400).json({ success: false, message: "Cannot release payout: Customer has not paid money to Admin Escrow." });
+        }
+
+        if (order.payoutStatus === 'paid') {
+            return res.status(400).json({ success: false, message: "Payout for this order has already been released to the seller." });
+        }
+
+        if (!order.customerConfirmedReceived && !overrideConfirm) {
+            return res.status(400).json({ success: false, message: "Customer has not yet confirmed receipt of this order. (Check 'Override Confirmation' if resolving a dispute)." });
+        }
+
+        const commissionPct = order.adminCommissionPercent || (await getAdminCommissionPercent());
+        const grossAmount = order.agreedPrice || order.escrowAmount || order.budget || 0;
+
+        if (grossAmount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid order amount for payout." });
+        }
+
+        // Process seller payout via payment service
+        const payoutResult = await paymentService.processSellerPayout({
+            orderId: order.id,
+            orderTitle: order.title,
+            sellerId: order.assignedSellerId || 'UNKNOWN_SELLER',
+            sellerName: order.assignedSellerName || 'Assigned Packaging Supplier',
+            grossAmount: grossAmount,
+            commissionPercent: commissionPct,
+            payoutMethod: payoutMethod,
+            payoutAccountNumber: payoutAccountNumber,
+            adminId: req.session.user.id
+        });
+
+        order.adminCommissionPercent = payoutResult.commissionPercent;
+        order.adminCommissionAmount = payoutResult.commissionAmount;
+        order.sellerPayoutAmount = payoutResult.sellerPayoutAmount;
+        order.payoutStatus = 'paid';
+        order.payoutTransactionId = payoutResult.transactionId;
+        order.payoutAt = new Date();
+        order.status = 'completed';
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: 'SYSTEM',
+            senderName: 'PackBang Escrow System',
+            senderRole: 'admin',
+            sellerId: order.assignedSellerId,
+            text: `Admin released payout of BDT. ${payoutResult.sellerPayoutAmount.toFixed(2)} to supplier ${order.assignedSellerName} via ${payoutMethod.toUpperCase()} (TX: ${payoutResult.transactionId}) after retaining ${payoutResult.commissionPercent}% platform commission (BDT. ${payoutResult.commissionAmount.toFixed(2)}). Order successfully completed!`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
+        await order.save();
+
+        broadcastRefresh({ action: 'custom_order_completed', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: payoutResult.message,
+            payoutResult,
+            order
+        });
+    } catch (err) {
+        console.error("Admin payout error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// 5. Get Payment & Escrow Breakdown for an Order
+// ==========================================
+app.get("/api/custom-order/:orderId/payment-details", requireAuth, async (req, res) => {
+    try {
+        const order = await CustomOrder.findOne({ id: req.params.orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        const commissionPct = order.adminCommissionPercent || (await getAdminCommissionPercent());
+        const total = order.agreedPrice || order.budget || 0;
+        const commissionAmount = Math.round((total * commissionPct) / 100 * 100) / 100;
+        const sellerPayout = Math.round((total - commissionAmount) * 100) / 100;
+
+        const transactions = await paymentService.getOrderTransactions(order.id);
+
+        res.json({
+            success: true,
+            orderId: order.id,
+            totalAmount: total,
+            paymentStatus: order.paymentStatus,
+            paymentMethod: order.paymentMethod,
+            paymentTransactionId: order.paymentTransactionId,
+            paidAt: order.paidAt,
+            customerConfirmedReceived: order.customerConfirmedReceived,
+            customerConfirmedAt: order.customerConfirmedAt,
+            commissionPercent: commissionPct,
+            commissionAmount: order.adminCommissionAmount || commissionAmount,
+            sellerPayoutAmount: order.sellerPayoutAmount || sellerPayout,
+            payoutStatus: order.payoutStatus,
+            payoutTransactionId: order.payoutTransactionId,
+            payoutAt: order.payoutAt,
+            transactions
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
 // Alias: navbar links to /admin/custom-orders
@@ -1827,11 +2212,11 @@ app.get("/product/:productId", async (req, res) => {
 app.get('/api/categories', async (req, res) => {
     const categories = await Category.find().sort({ order: 1 });
     
-
+    // মূল ক্যাটাগরি (Parent) এবং সাব-ক্যাটাগরি (Child) আলাদা করা
     const parentCategories = categories.filter(c => !c.parentId);
     const childCategories = categories.filter(c => c.parentId);
     
-
+    // প্রতিটি Parent-এর ভেতরে তার Children গুলো যুক্ত করা (Tree Structure)
     const tree = parentCategories.map(parent => ({
         ...parent.toObject(),
         children: childCategories.filter(child => child.parentId.toString() === parent._id.toString())
@@ -1844,7 +2229,7 @@ app.get('/api/categories', async (req, res) => {
 app.post('/api/admin/categories', requireAdmin, uploadCategoryImage, async (req, res) => {
     try {
         const { name, parentId } = req.body;
-        const image = req.file ? req.file.path : '';
+        const image = req.file ? req.file.path : ''; // ফাইল থাকলে পাথ, না থাকলে খালি
 
         const lastCat = await Category.findOne().sort({ order: -1 });
         const newCat = new Category({
@@ -1860,13 +2245,13 @@ app.post('/api/admin/categories', requireAdmin, uploadCategoryImage, async (req,
     }
 });
 
-
+// Category Update (Edit with Image Upload) -> ID অপরিবর্তিত থাকবে
 app.put('/api/admin/categories/:id', requireAdmin, uploadCategoryImage, async (req, res) => {
     try {
         const { name, parentId } = req.body;
         const updateData = { name, parentId: parentId || null };
 
-
+        // নতুন ছবি আপলোড হলে আপডেট হবে, না দিলে পুরনো ছবি থাকবে
         if (req.file) {
             updateData.image = req.file.path;
         }
@@ -1894,7 +2279,7 @@ app.post('/api/admin/categories/reorder', requireAdmin, async (req, res) => {
 
 app.delete('/api/admin/categories/:id', requireAdmin, async (req, res) => {
     try {
-
+        // সাব-ক্যাটাগরি থাকলে সেগুলোও ডিলিট করা হবে
         await Category.deleteMany({ parentId: req.params.id });
         await Category.findByIdAndDelete(req.params.id);
         res.json({ success: true });
@@ -2660,7 +3045,7 @@ app.post("/api/user/role", requireAdmin, async (req, res) => {
       });
     }
     
-
+    // ✅ এখানে 'seller' যোগ করুন
     const validRoles = ['user', 'authorized_cashier', 'seller', 'admin'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ success: false, message: "Invalid role" });
@@ -2741,7 +3126,7 @@ app.post("/product/create", requireAdmin, uploadMultiple, async (req, res) => {
     sizes,
     originalPrice,
     variantsData,
-    category
+    category // 🔥 নতুন অংশ: ড্রপডাউন থেকে category ID নেওয়া
   } = req.body;
 
   try {
@@ -2792,7 +3177,7 @@ app.post("/product/create", requireAdmin, uploadMultiple, async (req, res) => {
       colors: colorArray,
       sizes: sizeArray,
       variants: variantArray,
-      category: category || 'General'
+      category: category || 'General' // 🔥 নতুন অংশ: category যুক্ত করা হয়েছে
     });
 
     await newProduct.save();
@@ -2815,7 +3200,7 @@ app.post("/product/update", requireAdmin, uploadMultiple, async (req, res) => {
     updateSizes,
     updateOriginalPrice,
     variantsData,
-    updateCategory
+    updateCategory // 🔥 নতুন অংশ: এডিট ফর্ম থেকে category আপডেট নেওয়া
   } = req.body;
 
   try {
@@ -2849,7 +3234,7 @@ app.post("/product/update", requireAdmin, uploadMultiple, async (req, res) => {
       colors: updateColors ? updateColors.split(',').map(c => c.trim()).filter(c => c) : [],
       sizes: updateSizes ? updateSizes.split(',').map(s => s.trim()).filter(s => s) : [],
       variants: variantArray,
-      category: updateCategory || 'General'
+      category: updateCategory || 'General' // 🔥 নতুন অংশ: category আপডেট যুক্ত করা হয়েছে
     };
 
     if (req.files && req.files.length > 0) {
@@ -2906,14 +3291,14 @@ app.get("/api/product/:productId", requireAdmin, async (req, res) => {
             images: product.images || [],
             colors: product.colors || [],
             sizes: product.sizes || [],
-            category: product.category || ''
+            category: product.category || '' // 🔥 নতুন অংশ: ক্যাটাগরি ID রিসপন্সে পাঠানো হচ্ছে
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-
+// ---------- PRODUCT DELETE (অপরিবর্তিত) ----------
 app.post("/product/delete", requireAdmin, async (req, res) => {
   const { productId } = req.body;
 
@@ -3070,7 +3455,7 @@ app.post("/api/order/status", requireAdmin, async (req, res) => {
 });
 
 app.post("/api/order/send-courier", requireAdmin, async (req, res) => {
-
+  // ১. এখানে 'phone' এবং 'address' যুক্ত করা হয়েছে, যা পপ-আপ ফর্ম থেকে আসবে
   const { saleId, codAmount, phone, address } = req.body;
 
   try {
@@ -3097,7 +3482,7 @@ app.post("/api/order/send-courier", requireAdmin, async (req, res) => {
     const response = await steadfast.createOrder({
       invoice: sale.saleId,
       recipient_name: sale.customerName,
-
+      // ২. এখানে পপ-আপ থেকে আসা এডিট করা phone এবং address বসানো হয়েছে
       recipient_phone: phone || sale.customerPhone || '01000000000',
       recipient_address: address || sale.customerAddress || 'Address not provided',
       cod_amount: cod,
