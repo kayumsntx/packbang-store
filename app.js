@@ -21,6 +21,8 @@ const mongoose = require("mongoose");
 const steadfast = require("./steadfast");
 
 const Category = require("./models/Category");
+const Seller = require("./models/Seller");
+const SELLER_BACKEND_URL = process.env.SELLER_BACKEND_URL || (process.env.NODE_ENV === "production" ? "https://packbang-seller-backend.onrender.com" : "http://localhost:5000");
 const Banner = require("./models/Banner");
 const Commission = require("./models/Commission");
 const PaymentTransaction = require("./models/PaymentTransaction");
@@ -1444,6 +1446,11 @@ app.get("/api/public/approved-custom-orders", async (req, res) => {
 app.post("/api/public/custom-order/:id/bid", async (req, res) => {
     const { sellerId, sellerName, amount, deliveryTime, note } = req.body;
     try {
+        // Check admin approval status for bidding
+        const approvalCheck = await verifySellerApproved(sellerId);
+        if (!approvalCheck.allowed) {
+            return res.status(403).json({ success: false, message: approvalCheck.reason });
+        }
         const order = await CustomOrder.findOne({ id: req.params.id });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
         if (order.status !== 'approved') return res.status(400).json({ success: false, message: "Order is not open for bidding" });
@@ -1470,12 +1477,12 @@ app.get(["/api/custom-orders", "/api/my-custom-orders"], requireAuth, async (req
         const user = req.session.user;
         let filter = {};
         
-        // যদি সেলার হয়, শুধু approved অর্ডার দেখাবে
+        // If user is a seller, only display approved orders
         if (user.role === 'seller' || user.role === 'authorized_cashier') {
             filter.status = 'approved';
         }
-        // অ্যাডমিন সব দেখতে পাবে
-        // কাস্টমার শুধু নিজের অর্ডার দেখতে পাবে (আমরা আলাদা রাউট দেব)
+        // Admin can view all custom orders
+        // Customer only views their own orders
         
         const orders = await CustomOrder.find(filter).sort({ createdAt: -1 });
         res.json({ success: true, orders });
@@ -1541,6 +1548,11 @@ app.post("/api/custom-order/:id/bid", requireSellerOrAdmin, async (req, res) => 
     const user = req.session.user;
     
     try {
+        // Check admin approval status for bidding
+        const approvalCheck = await verifySellerApproved(user.id, user.phone);
+        if (!approvalCheck.allowed) {
+            return res.status(403).json({ success: false, message: approvalCheck.reason });
+        }
         const order = await CustomOrder.findOne({ id: req.params.id });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
         
@@ -1835,6 +1847,12 @@ app.post('/api/seller/products/create', (req, res, next) => {
             images: providedImages,
             imagePath: providedImagePath
         } = req.body;
+
+        // Check admin approval status for the seller
+        const approvalCheck = await verifySellerApproved(sellerId, sellerPhone);
+        if (!approvalCheck.allowed) {
+            return res.status(403).json({ success: false, message: approvalCheck.reason });
+        }
 
         const productName = (name || title || '').trim();
         if (!productName) {
@@ -2683,6 +2701,290 @@ app.get("/api/custom-order/:orderId/payment-details", requireAuth, async (req, r
             payoutAt: order.payoutAt,
             transactions
         });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+
+// ==========================================
+// ADMIN: SELLER MANAGEMENT (Approve, Reject, Suspend, Ban)
+// ==========================================
+app.get("/admin/sellers", requireAdmin, async (req, res) => {
+    try {
+        const { status, search } = req.query;
+        let query = {};
+
+        if (status && status !== 'all') {
+            if (status === 'pending') {
+                query.status = { $in: ['pending_approval', 'pending'] };
+            } else if (status === 'approved') {
+                query.status = { $in: ['approved', 'active'] };
+            } else {
+                query.status = status;
+            }
+        }
+
+        if (search && search.trim()) {
+            const regex = new RegExp(search.trim(), 'i');
+            query.$or = [
+                { shopName: regex },
+                { ownerName: regex },
+                { phone: regex },
+                { email: regex },
+                { tradeLicenseNumber: regex },
+                { nidNumber: regex }
+            ];
+        }
+
+        let sellers = [];
+        let counts = { total: 0, pending: 0, approved: 0, suspended: 0, banned: 0, rejected: 0 };
+
+        try {
+            const [dbSellers, totalCount, pendingCount, approvedCount, suspendedCount, bannedCount, rejectedCount] = await Promise.all([
+                Seller.find(query).sort({ createdAt: -1 }),
+                Seller.countDocuments(),
+                Seller.countDocuments({ status: { $in: ['pending_approval', 'pending'] } }),
+                Seller.countDocuments({ status: { $in: ['approved', 'active'] } }),
+                Seller.countDocuments({ status: 'suspended' }),
+                Seller.countDocuments({ status: 'banned' }),
+                Seller.countDocuments({ status: 'rejected' })
+            ]);
+
+            sellers = dbSellers;
+            counts = {
+                total: totalCount,
+                pending: pendingCount,
+                approved: approvedCount,
+                suspended: suspendedCount,
+                banned: bannedCount,
+                rejected: rejectedCount
+            };
+        } catch (dbErr) {
+            console.warn("Direct Seller DB query note:", dbErr.message);
+        }
+
+        // Fallback to seller backend API if local collection is empty
+        if ((!sellers || sellers.length === 0) && counts.total === 0) {
+            try {
+                const apiRes = await fetch(`${SELLER_BACKEND_URL}/api/admin/sellers${status ? '?status=' + status : ''}`);
+                if (apiRes.ok) {
+                    const data = await apiRes.json();
+                    if (data.success) {
+                        sellers = data.sellers || [];
+                        counts = data.counts || counts;
+                    }
+                }
+            } catch (apiErr) {
+                console.warn("Seller backend API fallback note:", apiErr.message);
+            }
+        }
+
+        res.render("admin-sellers", {
+            user: req.session.user,
+            sellers,
+            counts,
+            currentFilter: status || 'all',
+            currentSearch: search || '',
+            isGuest: false
+        });
+    } catch (err) {
+        console.error("Admin sellers page error:", err);
+        res.status(500).send("Error loading seller management");
+    }
+});
+
+// JSON API: GET /api/admin/sellers
+app.get("/api/admin/sellers", requireAdmin, async (req, res) => {
+    try {
+        const { status, search } = req.query;
+        let query = {};
+        if (status && status !== 'all') {
+            if (status === 'pending') query.status = { $in: ['pending_approval', 'pending'] };
+            else if (status === 'approved') query.status = { $in: ['approved', 'active'] };
+            else query.status = status;
+        }
+        if (search && search.trim()) {
+            const regex = new RegExp(search.trim(), 'i');
+            query.$or = [{ shopName: regex }, { ownerName: regex }, { phone: regex }, { email: regex }];
+        }
+
+        const sellers = await Seller.find(query).sort({ createdAt: -1 });
+        res.json({ success: true, count: sellers.length, sellers });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// POST /admin/sellers/:id/approve
+app.post("/admin/sellers/:id/approve", requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const reviewedBy = req.session.user ? (req.session.user.username || 'Admin') : 'Admin';
+
+        // Update in DB if exists
+        try {
+            const seller = await Seller.findById(id);
+            if (seller) {
+                seller.status = 'approved';
+                seller.kycStatus = 'verified';
+                seller.isVerified = true;
+                seller.rejectionReason = '';
+                seller.suspendedUntil = null;
+                seller.suspensionReason = '';
+                seller.banReason = '';
+                seller.reviewedAt = new Date();
+                seller.reviewedBy = reviewedBy;
+                await seller.save();
+            }
+        } catch (e) {}
+
+        // Forward to seller backend API
+        try {
+            await fetch(`${SELLER_BACKEND_URL}/api/admin/sellers/${id}/approve`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reviewedBy })
+            });
+        } catch (e) {}
+
+        res.json({ success: true, message: "Seller approved successfully. Full catalog and bidding privileges activated." });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// POST /admin/sellers/:id/reject
+app.post("/admin/sellers/:id/reject", requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const reviewedBy = req.session.user ? (req.session.user.username || 'Admin') : 'Admin';
+
+        try {
+            const seller = await Seller.findById(id);
+            if (seller) {
+                seller.status = 'rejected';
+                seller.kycStatus = 'rejected';
+                seller.isVerified = false;
+                seller.rejectionReason = (reason && reason.trim()) || 'Documents did not meet verification criteria.';
+                seller.reviewedAt = new Date();
+                seller.reviewedBy = reviewedBy;
+                await seller.save();
+            }
+        } catch (e) {}
+
+        try {
+            await fetch(`${SELLER_BACKEND_URL}/api/admin/sellers/${id}/reject`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason, reviewedBy })
+            });
+        } catch (e) {}
+
+        res.json({ success: true, message: "Seller application rejected." });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// POST /admin/sellers/:id/suspend
+app.post("/admin/sellers/:id/suspend", requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { durationDays, suspendedUntil, reason } = req.body;
+        const reviewedBy = req.session.user ? (req.session.user.username || 'Admin') : 'Admin';
+
+        let untilDate = suspendedUntil ? new Date(suspendedUntil) : new Date(Date.now() + (parseInt(durationDays) || 7) * 24 * 60 * 60 * 1000);
+
+        try {
+            const seller = await Seller.findById(id);
+            if (seller) {
+                seller.status = 'suspended';
+                seller.suspendedUntil = untilDate;
+                seller.suspensionReason = (reason && reason.trim()) || 'Administrative suspension.';
+                seller.reviewedAt = new Date();
+                seller.reviewedBy = reviewedBy;
+                await seller.save();
+            }
+        } catch (e) {}
+
+        try {
+            await fetch(`${SELLER_BACKEND_URL}/api/admin/sellers/${id}/suspend`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ durationDays, suspendedUntil: untilDate, reason, reviewedBy })
+            });
+        } catch (e) {}
+
+        res.json({ success: true, message: `Seller suspended until ${untilDate.toLocaleDateString()}.` });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// POST /admin/sellers/:id/ban
+app.post("/admin/sellers/:id/ban", requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const reviewedBy = req.session.user ? (req.session.user.username || 'Admin') : 'Admin';
+
+        try {
+            const seller = await Seller.findById(id);
+            if (seller) {
+                seller.status = 'banned';
+                seller.isVerified = false;
+                seller.banReason = (reason && reason.trim()) || 'Permanent policy violation.';
+                seller.reviewedAt = new Date();
+                seller.reviewedBy = reviewedBy;
+                await seller.save();
+            }
+        } catch (e) {}
+
+        try {
+            await fetch(`${SELLER_BACKEND_URL}/api/admin/sellers/${id}/ban`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason, reviewedBy })
+            });
+        } catch (e) {}
+
+        res.json({ success: true, message: "Seller has been permanently banned." });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// POST /admin/sellers/:id/unsuspend
+app.post("/admin/sellers/:id/unsuspend", requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const reviewedBy = req.session.user ? (req.session.user.username || 'Admin') : 'Admin';
+
+        try {
+            const seller = await Seller.findById(id);
+            if (seller) {
+                seller.status = 'approved';
+                seller.isVerified = true;
+                seller.suspendedUntil = null;
+                seller.suspensionReason = '';
+                seller.banReason = '';
+                seller.reviewedAt = new Date();
+                seller.reviewedBy = reviewedBy;
+                await seller.save();
+            }
+        } catch (e) {}
+
+        try {
+            await fetch(`${SELLER_BACKEND_URL}/api/admin/sellers/${id}/unsuspend`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reviewedBy })
+            });
+        } catch (e) {}
+
+        res.json({ success: true, message: "Seller reactivated and approved successfully." });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

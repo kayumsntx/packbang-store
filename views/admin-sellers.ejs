@@ -1,0 +1,1031 @@
+<%- include('partials/header') %>
+
+<style>
+    .seller-admin-wrapper {
+        max-width: 1360px;
+        margin: 28px auto 60px auto;
+        padding: 0 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .page-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #E2E8F0;
+    }
+
+    .page-header-row h1 {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-badge {
+        font-size: 0.75rem;
+        background: #FF5A1F;
+        color: #FFFFFF;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 800;
+    }
+
+    /* KPI STATS ROW */
+    .kpi-stats-grid {
+        display: grid;
+        grid-templateColumns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .kpi-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+
+    .kpi-info .kpi-num {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1.1;
+    }
+
+    .kpi-info .kpi-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #64748B;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+
+    /* CONTROLS BAR: FILTER TABS & SEARCH */
+    .controls-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        background: #F1F5F9;
+        color: #475569;
+        border: 1px solid #E2E8F0;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tab-btn:hover {
+        background: #E2E8F0;
+        color: #0F172A;
+    }
+
+    .tab-btn.active {
+        background: #0F172A;
+        color: #FFFFFF;
+        border-color: #0F172A;
+    }
+
+    .search-input-box {
+        position: relative;
+        min-width: 280px;
+    }
+
+    .search-input-box input {
+        width: 100%;
+        padding: 9px 14px 9px 36px;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .search-input-box input:focus {
+        border-color: #FF5A1F;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94A3B8;
+        font-size: 0.9rem;
+    }
+
+    /* TABLE STYLES */
+    .table-container {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        overflow-x: auto;
+    }
+
+    .seller-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.875rem;
+    }
+
+    .seller-table th {
+        background: #F8FAFC;
+        color: #475569;
+        font-weight: 800;
+        padding: 14px 18px;
+        border-bottom: 2px solid #E2E8F0;
+        white-space: nowrap;
+    }
+
+    .seller-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #F1F5F9;
+        vertical-align: middle;
+    }
+
+    .seller-table tr:hover {
+        background: #FBFCFE;
+    }
+
+    /* BADGES */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-transform: uppercase;
+    }
+
+    .badge-pending {
+        background: #FEF3C7;
+        color: #92400E;
+        border: 1px solid #FDE68A;
+    }
+
+    .badge-approved {
+        background: #DEF7EC;
+        color: #03543F;
+        border: 1px solid #BCF0DA;
+    }
+
+    .badge-suspended {
+        background: #F3E8FF;
+        color: #6B21A8;
+        border: 1px solid #E9D5FF;
+    }
+
+    .badge-banned {
+        background: #FDE8E8;
+        color: #9B1C1C;
+        border: 1px solid #F8B4B4;
+    }
+
+    .badge-rejected {
+        background: #FEE2E2;
+        color: #991B1B;
+        border: 1px solid #FECACA;
+    }
+
+    .doc-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid #BFDBFE;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .doc-pill:hover {
+        background: #DBEAFE;
+    }
+
+    .doc-pill-missing {
+        background: #F1F5F9;
+        color: #94A3B8;
+        border: 1px dashed #CBD5E1;
+        cursor: not-allowed;
+    }
+
+    /* ACTION BUTTONS */
+    .action-group {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .btn-act {
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.15s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-act:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+
+    .btn-act-approve {
+        background: #059669;
+        color: #FFFFFF;
+    }
+
+    .btn-act-reject {
+        background: #EF4444;
+        color: #FFFFFF;
+    }
+
+    .btn-act-suspend {
+        background: #D97706;
+        color: #FFFFFF;
+    }
+
+    .btn-act-ban {
+        background: #475569;
+        color: #FFFFFF;
+    }
+
+    .btn-act-unsuspend {
+        background: #2563EB;
+        color: #FFFFFF;
+    }
+
+    /* MODAL OVERLAY */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .modal-box {
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 26px;
+        width: 100%;
+        max-width: 540px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        box-sizing: border-box;
+    }
+
+    .modal-doc-viewer {
+        max-width: 780px;
+        text-align: center;
+    }
+
+    .modal-doc-viewer img {
+        max-width: 100%;
+        max-height: 72vh;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        object-fit: contain;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+        text-align: left;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+</style>
+
+<div class="seller-admin-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header-row">
+        <div>
+            <h1>
+                <span>🏬</span>
+                <span>Supplier & Seller Management</span>
+                <span class="header-badge"><%= counts.total %> Registered</span>
+            </h1>
+            <p style="margin: 4px 0 0 0; color: #64748B; font-size: 0.9rem;">
+                Review submitted trade licenses, verify national ID documents, and manage supplier operational permissions.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="/admin/custom-orders" class="tab-btn" style="background: #FFFFFF;">
+                ⚡ Custom Orders Review
+            </a>
+            <a href="/admin/orders" class="tab-btn" style="background: #FFFFFF;">
+                📦 Store Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 KPI SUMMARY CARDS -->
+    <div class="kpi-stats-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #EFF6FF; color: #2563EB;">👥</div>
+            <div class="kpi-info">
+                <div class="kpi-num"><%= counts.total %></div>
+                <div class="kpi-label">Total Suppliers</div>
+            </div>
+        </div>
+
+        <div class="kpi-card" style="border-color: <%= counts.pending > 0 ? '#F59E0B' : '#E2E8F0' %>;">
+            <div class="kpi-icon" style="background: #FEF3C7; color: #D97706;">⏳</div>
+            <div class="kpi-info">
+                <div class="kpi-num" style="color: #D97706;"><%= counts.pending %></div>
+                <div class="kpi-label">Pending Approval</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #ECFDF5; color: #059669;">✓</div>
+            <div class="kpi-info">
+                <div class="kpi-num" style="color: #059669;"><%= counts.approved %></div>
+                <div class="kpi-label">Approved & Active</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #FEF2F2; color: #DC2626;">⏸</div>
+            <div class="kpi-info">
+                <div class="kpi-num" style="color: #DC2626;"><%= (counts.suspended || 0) + (counts.banned || 0) %></div>
+                <div class="kpi-label">Suspended / Banned</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLS ROW -->
+    <div class="controls-card">
+        <div class="filter-tabs">
+            <a href="/admin/sellers" class="tab-btn <%= !currentFilter || currentFilter === 'all' ? 'active' : '' %>">
+                All (<%= counts.total %>)
+            </a>
+            <a href="/admin/sellers?status=pending" class="tab-btn <%= currentFilter === 'pending' ? 'active' : '' %>">
+                ⏳ Pending Approval (<%= counts.pending %>)
+            </a>
+            <a href="/admin/sellers?status=approved" class="tab-btn <%= currentFilter === 'approved' ? 'active' : '' %>">
+                ✓ Approved (<%= counts.approved %>)
+            </a>
+            <a href="/admin/sellers?status=suspended" class="tab-btn <%= currentFilter === 'suspended' ? 'active' : '' %>">
+                ⏸ Suspended (<%= counts.suspended || 0 %>)
+            </a>
+            <a href="/admin/sellers?status=banned" class="tab-btn <%= currentFilter === 'banned' ? 'active' : '' %>">
+                🚫 Banned (<%= counts.banned || 0 %>)
+            </a>
+        </div>
+
+        <div class="search-input-box">
+            <span class="search-icon">🔍</span>
+            <input
+                type="text"
+                id="sellerSearchInput"
+                placeholder="Search shop, name, phone, trade license..."
+                value="<%= currentSearch || '' %>"
+                onkeyup="handleSearch(event)"
+            />
+        </div>
+    </div>
+
+    <!-- SELLERS TABLE -->
+    <div class="table-container">
+        <% if (!sellers || sellers.length === 0) { %>
+            <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+                <div style="font-size: 3rem; margin-bottom: 12px;">🏬</div>
+                <h3 style="margin: 0 0 6px 0; color: #0F172A; font-size: 1.15rem; font-weight: 800;">
+                    No Suppliers Found
+                </h3>
+                <p style="margin: 0; font-size: 0.88rem;">
+                    <%= currentFilter === 'pending' ? 'All supplier accounts have been reviewed!' : 'No suppliers match the selected filter.' %>
+                </p>
+            </div>
+        <% } else { %>
+            <table class="seller-table">
+                <thead>
+                    <tr>
+                        <th>Supplier / Shop</th>
+                        <th>Owner Legal Name</th>
+                        <th>Trade License</th>
+                        <th>National ID (NID)</th>
+                        <th>Settlement Payout</th>
+                        <th>Current Status</th>
+                        <th style="text-align: right;">Admin Decisions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% sellers.forEach(function(s) { 
+                        var isPending = (s.status === 'pending_approval' || s.status === 'pending' || !s.status);
+                        var isApproved = (s.status === 'approved' || s.status === 'active');
+                        var isSuspended = (s.status === 'suspended');
+                        var isBanned = (s.status === 'banned');
+                        var isRejected = (s.status === 'rejected');
+                    %>
+                        <tr id="seller-row-<%= s._id || s.id %>">
+                            <!-- SHOP & PHONE -->
+                            <td>
+                                <div style="font-weight: 800; color: #0F172A; font-size: 0.95rem;">
+                                    <%= s.shopName || 'Packaging Store' %>
+                                </div>
+                                <div style="color: #64748B; font-size: 0.8rem; margin-top: 2px;">
+                                    📞 <%= s.phone %>
+                                </div>
+                                <% if (s.email) { %>
+                                    <div style="color: #94A3B8; font-size: 0.75rem;">
+                                        ✉ <%= s.email %>
+                                    </div>
+                                <% } %>
+                                <div style="color: #94A3B8; font-size: 0.72rem; margin-top: 4px;">
+                                    Reg: <%= s.createdAt ? new Date(s.createdAt).toLocaleDateString() : 'Recent' %>
+                                </div>
+                            </td>
+
+                            <!-- OWNER NAME & ADDRESS -->
+                            <td>
+                                <div style="font-weight: 700; color: #1E293B;">
+                                    <%= s.ownerName || '—' %>
+                                </div>
+                                <div style="color: #64748B; font-size: 0.75rem; max-width: 220px; line-height: 1.3; margin-top: 2px;">
+                                    <%= (s.warehouseAddress && s.warehouseAddress.fullAddress) ? s.warehouseAddress.fullAddress : (s.warehouseAddress ? s.warehouseAddress.division : 'Dhaka, Bangladesh') %>
+                                </div>
+                            </td>
+
+                            <!-- TRADE LICENSE -->
+                            <td>
+                                <div style="font-weight: 700; color: #334155; font-size: 0.82rem; margin-bottom: 4px;">
+                                    <%= s.tradeLicenseNumber || 'Not entered' %>
+                                </div>
+                                <% if (s.tradeLicenseImage) { %>
+                                    <span class="doc-pill" onclick="openDocModal('<%= s.tradeLicenseImage %>', 'Trade License: <%= s.shopName %>')">
+                                        📄 View Certificate ↗
+                                    </span>
+                                <% } else { %>
+                                    <span class="doc-pill doc-pill-missing">
+                                        ✕ No Document
+                                    </span>
+                                <% } %>
+                            </td>
+
+                            <!-- NATIONAL ID (NID) -->
+                            <td>
+                                <div style="font-weight: 700; color: #334155; font-size: 0.82rem; margin-bottom: 4px;">
+                                    <%= s.nidNumber || 'Not entered' %>
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap;">
+                                    <% if (s.nidFrontImage) { %>
+                                        <span class="doc-pill" onclick="openDocModal('<%= s.nidFrontImage %>', 'NID Front: <%= s.ownerName || s.shopName %>')">
+                                            🪪 Front ↗
+                                        </span>
+                                    <% } else { %>
+                                        <span class="doc-pill doc-pill-missing">✕ Front</span>
+                                    <% } %>
+
+                                    <% if (s.nidBackImage) { %>
+                                        <span class="doc-pill" onclick="openDocModal('<%= s.nidBackImage %>', 'NID Back: <%= s.ownerName || s.shopName %>')">
+                                            🪪 Back ↗
+                                        </span>
+                                    <% } else { %>
+                                        <span class="doc-pill doc-pill-missing">✕ Back</span>
+                                    <% } %>
+                                </div>
+                            </td>
+
+                            <!-- BANK DETAILS -->
+                            <td>
+                                <% if (s.bankDetails && s.bankDetails.bankName) { %>
+                                    <div style="font-weight: 700; color: #0F172A; font-size: 0.82rem;">
+                                        <%= s.bankDetails.bankName %>
+                                    </div>
+                                    <div style="color: #64748B; font-size: 0.75rem;">
+                                        A/C: <%= s.bankDetails.accountNumber || '—' %>
+                                    </div>
+                                    <div style="color: #94A3B8; font-size: 0.72rem;">
+                                        <%= s.bankDetails.accountHolderName || '' %>
+                                    </div>
+                                <% } else if (s.bankDetails && s.bankDetails.bkashNumber) { %>
+                                    <div style="font-weight: 700; color: #D946EF; font-size: 0.82rem;">
+                                        bKash: <%= s.bankDetails.bkashNumber %>
+                                    </div>
+                                <% } else { %>
+                                    <span style="color: #94A3B8; font-size: 0.78rem;">Bank pending</span>
+                                <% } %>
+                            </td>
+
+                            <!-- STATUS BADGE -->
+                            <td>
+                                <% if (isPending) { %>
+                                    <span class="status-badge badge-pending">
+                                        ● Pending Review
+                                    </span>
+                                <% } else if (isApproved) { %>
+                                    <span class="status-badge badge-approved">
+                                        ✓ Approved
+                                    </span>
+                                <% } else if (isSuspended) { %>
+                                    <span class="status-badge badge-suspended">
+                                        ⏸ Suspended
+                                    </span>
+                                    <div style="font-size: 0.72rem; color: #6B21A8; font-weight: 600; margin-top: 4px;">
+                                        Until: <%= s.suspendedUntil ? new Date(s.suspendedUntil).toLocaleDateString() : 'Indefinite' %>
+                                    </div>
+                                <% } else if (isBanned) { %>
+                                    <span class="status-badge badge-banned">
+                                        🚫 Banned
+                                    </span>
+                                <% } else if (isRejected) { %>
+                                    <span class="status-badge badge-rejected">
+                                        ✕ Rejected
+                                    </span>
+                                <% } %>
+
+                                <% if (s.suspensionReason) { %>
+                                    <div style="font-size: 0.7rem; color: #B45309; margin-top: 2px;">
+                                        "<%= s.suspensionReason %>"
+                                    </div>
+                                <% } %>
+                                <% if (s.banReason) { %>
+                                    <div style="font-size: 0.7rem; color: #DC2626; margin-top: 2px;">
+                                        "<%= s.banReason %>"
+                                    </div>
+                                <% } %>
+                                <% if (s.rejectionReason) { %>
+                                    <div style="font-size: 0.7rem; color: #991B1B; margin-top: 2px;">
+                                        "<%= s.rejectionReason %>"
+                                    </div>
+                                <% } %>
+                            </td>
+
+                            <!-- ACTIONS -->
+                            <td style="text-align: right;">
+                                <div class="action-group" style="justifyContent: flex-end;">
+                                    <% if (isPending || isRejected) { %>
+                                        <button class="btn-act btn-act-approve" onclick="handleApproveSeller('<%= s._id || s.id %>', '<%= s.shopName %>')">
+                                            ✓ Approve
+                                        </button>
+                                        <% if (!isRejected) { %>
+                                            <button class="btn-act btn-act-reject" onclick="openRejectModal('<%= s._id || s.id %>', '<%= s.shopName %>')">
+                                                ✕ Reject
+                                            </button>
+                                        <% } %>
+                                    <% } %>
+
+                                    <% if (isApproved) { %>
+                                        <button class="btn-act btn-act-suspend" onclick="openSuspendModal('<%= s._id || s.id %>', '<%= s.shopName %>')">
+                                            ⏸ Suspend
+                                        </button>
+                                        <button class="btn-act btn-act-ban" onclick="openBanModal('<%= s._id || s.id %>', '<%= s.shopName %>')">
+                                            🚫 Ban
+                                        </button>
+                                    <% } %>
+
+                                    <% if (isSuspended) { %>
+                                        <button class="btn-act btn-act-unsuspend" onclick="handleUnsuspendSeller('<%= s._id || s.id %>', '<%= s.shopName %>')">
+                                            ▶ Unsuspend
+                                        </button>
+                                        <button class="btn-act btn-act-ban" onclick="openBanModal('<%= s._id || s.id %>', '<%= s.shopName %>')">
+                                            🚫 Ban
+                                        </button>
+                                    <% } %>
+
+                                    <% if (isBanned) { %>
+                                        <button class="btn-act btn-act-unsuspend" onclick="handleUnsuspendSeller('<%= s._id || s.id %>', '<%= s.shopName %>')">
+                                            ▶ Reactivate
+                                        </button>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+    </div>
+
+</div>
+
+<!-- 1. DOCUMENT PREVIEW MODAL -->
+<div id="docViewerModal" class="modal-overlay" onclick="closeDocModal(event)">
+    <div class="modal-box modal-doc-viewer" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 id="docModalTitle" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A;">
+                Verification Document
+            </h3>
+            <button onclick="closeDocModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748B;">✕</button>
+        </div>
+        <div style="background: #0F172A; border-radius: 12px; padding: 12px; display: inline-block;">
+            <img id="docModalImg" src="" alt="Verification Document" />
+        </div>
+        <div style="margin-top: 16px;">
+            <a id="docModalLink" href="" target="_blank" class="tab-btn" style="background: #0F172A; color: #fff;">
+                Open Full Resolution ↗
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 2. REJECT REASON MODAL -->
+<div id="rejectModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: #DC2626;">
+            ✕ Reject Supplier Application
+        </h3>
+        <p id="rejectModalSub" style="margin: 0 0 16px 0; color: #64748B; font-size: 0.85rem;">
+            Please specify the rejection reason for this supplier.
+        </p>
+
+        <form onsubmit="submitReject(event)">
+            <input type="hidden" id="rejectSellerId" />
+            <div class="form-group">
+                <label>Common Rejection Reasons:</label>
+                <select id="quickRejectReason" onchange="setRejectReason(this.value)">
+                    <option value="">-- Select Common Reason --</option>
+                    <option value="Trade License document is expired or unclear.">Trade License document is expired or unclear</option>
+                    <option value="National ID (NID) photos are blurry or unreadable.">National ID (NID) photos are blurry or unreadable</option>
+                    <option value="Seller legal name does not match the National ID / Trade License.">Seller legal name does not match NID / Trade License</option>
+                    <option value="Incomplete submission: NID Back part is missing.">Incomplete submission: NID Back part is missing</option>
+                    <option value="Bank account holder name differs from the verified owner.">Bank account holder name differs from verified owner</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Custom Rejection Explanation *</label>
+                <textarea id="rejectReasonText" required placeholder="Describe what the supplier needs to correct..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeRejectModal()" class="tab-btn">Cancel</button>
+                <button type="submit" class="btn-act btn-act-reject" style="padding: 10px 20px; font-size: 0.9rem;">
+                    Confirm Rejection
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 3. SUSPEND MODAL -->
+<div id="suspendModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: #D97706;">
+            ⏸ Suspend Supplier Account
+        </h3>
+        <p id="suspendModalSub" style="margin: 0 0 16px 0; color: #64748B; font-size: 0.85rem;">
+            Suspended suppliers cannot list new products or place quotation bids during this period.
+        </p>
+
+        <form onsubmit="submitSuspend(event)">
+            <input type="hidden" id="suspendSellerId" />
+            
+            <div class="form-group">
+                <label>Suspension Period Duration *</label>
+                <select id="suspendDuration" required onchange="handleDurationChange(this.value)">
+                    <option value="7">7 Days (1 Week)</option>
+                    <option value="15">15 Days</option>
+                    <option value="30">30 Days (1 Month)</option>
+                    <option value="60">60 Days (2 Months)</option>
+                    <option value="custom">Custom Date Until...</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="customDateGroup" style="display: none;">
+                <label>Suspend Until Date *</label>
+                <input type="date" id="suspendCustomDate" />
+            </div>
+
+            <div class="form-group">
+                <label>Suspension Reason *</label>
+                <textarea id="suspendReasonText" required placeholder="Specify reason (e.g. Failure to dispatch accepted orders, packaging quality violations, customer complaint investigation)..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeSuspendModal()" class="tab-btn">Cancel</button>
+                <button type="submit" class="btn-act btn-act-suspend" style="padding: 10px 20px; font-size: 0.9rem;">
+                    Confirm Suspension
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 4. BAN MODAL -->
+<div id="banModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: #991B1B;">
+            🚫 Permanently Ban Supplier
+        </h3>
+        <p id="banModalSub" style="margin: 0 0 16px 0; color: #64748B; font-size: 0.85rem;">
+            This will permanently revoke all seller center privileges and remove all active listings.
+        </p>
+
+        <form onsubmit="submitBan(event)">
+            <input type="hidden" id="banSellerId" />
+
+            <div class="form-group">
+                <label>Permanent Ban Reason *</label>
+                <textarea id="banReasonText" required placeholder="Documented fraud, counterfeit materials, abusive conduct, or severe terms violation..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeBanModal()" class="tab-btn">Cancel</button>
+                <button type="submit" class="btn-act btn-act-ban" style="background: #991B1B; color: #fff; padding: 10px 20px; font-size: 0.9rem;">
+                    Confirm Permanent Ban
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Search handler
+    function handleSearch(e) {
+        if (e.key === 'Enter') {
+            const val = e.target.value.trim();
+            const currentUrl = new URL(window.location.href);
+            if (val) {
+                currentUrl.searchParams.set('search', val);
+            } else {
+                currentUrl.searchParams.delete('search');
+            }
+            window.location.href = currentUrl.toString();
+        }
+    }
+
+    // Document Modal
+    function openDocModal(imgUrl, title) {
+        document.getElementById('docModalImg').src = imgUrl;
+        document.getElementById('docModalLink').href = imgUrl;
+        document.getElementById('docModalTitle').innerText = title || 'Verification Document';
+        document.getElementById('docViewerModal').style.display = 'flex';
+    }
+
+    function closeDocModal(e) {
+        if (!e || e.target.id === 'docViewerModal' || e.target.tagName === 'BUTTON') {
+            document.getElementById('docViewerModal').style.display = 'none';
+        }
+    }
+
+    // Approve Handler
+    async function handleApproveSeller(sellerId, shopName) {
+        if (!confirm(`Are you sure you want to approve "${shopName}"?\n\nThis will activate their full catalog listing and wholesale bidding privileges.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/admin/sellers/${sellerId}/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Supplier approved successfully!');
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to approve supplier'));
+            }
+        } catch (err) {
+            alert('Network error while approving supplier: ' + err.message);
+        }
+    }
+
+    // Unsuspend Handler
+    async function handleUnsuspendSeller(sellerId, shopName) {
+        if (!confirm(`Reactivate supplier "${shopName}"?\n\nAll seller privileges will be restored to Approved.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/admin/sellers/${sellerId}/unsuspend`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Supplier reactivated successfully!');
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to reactivate supplier'));
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+        }
+    }
+
+    // Reject Modal
+    function openRejectModal(sellerId, shopName) {
+        document.getElementById('rejectSellerId').value = sellerId;
+        document.getElementById('rejectModalSub').innerText = `Rejecting application for "${shopName}".`;
+        document.getElementById('rejectReasonText').value = '';
+        document.getElementById('rejectModal').style.display = 'flex';
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+    }
+
+    function setRejectReason(val) {
+        if (val) {
+            document.getElementById('rejectReasonText').value = val;
+        }
+    }
+
+    async function submitReject(e) {
+        e.preventDefault();
+        const sellerId = document.getElementById('rejectSellerId').value;
+        const reason = document.getElementById('rejectReasonText').value.trim();
+
+        try {
+            const res = await fetch(`/admin/sellers/${sellerId}/reject`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Supplier application rejected.');
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to reject supplier'));
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+        }
+    }
+
+    // Suspend Modal
+    function openSuspendModal(sellerId, shopName) {
+        document.getElementById('suspendSellerId').value = sellerId;
+        document.getElementById('suspendModalSub').innerText = `Suspending supplier "${shopName}".`;
+        document.getElementById('suspendReasonText').value = '';
+        document.getElementById('suspendDuration').value = '7';
+        document.getElementById('customDateGroup').style.display = 'none';
+        document.getElementById('suspendModal').style.display = 'flex';
+    }
+
+    function closeSuspendModal() {
+        document.getElementById('suspendModal').style.display = 'none';
+    }
+
+    function handleDurationChange(val) {
+        document.getElementById('customDateGroup').style.display = (val === 'custom') ? 'block' : 'none';
+    }
+
+    async function submitSuspend(e) {
+        e.preventDefault();
+        const sellerId = document.getElementById('suspendSellerId').value;
+        const durationDays = document.getElementById('suspendDuration').value;
+        const suspendedUntil = (durationDays === 'custom') ? document.getElementById('suspendCustomDate').value : null;
+        const reason = document.getElementById('suspendReasonText').value.trim();
+
+        if (durationDays === 'custom' && !suspendedUntil) {
+            alert('Please select a custom expiration date.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/admin/sellers/${sellerId}/suspend`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ durationDays, suspendedUntil, reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Supplier suspended.');
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to suspend supplier'));
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+        }
+    }
+
+    // Ban Modal
+    function openBanModal(sellerId, shopName) {
+        document.getElementById('banSellerId').value = sellerId;
+        document.getElementById('banModalSub').innerText = `Permanently banning supplier "${shopName}".`;
+        document.getElementById('banReasonText').value = '';
+        document.getElementById('banModal').style.display = 'flex';
+    }
+
+    function closeBanModal() {
+        document.getElementById('banModal').style.display = 'none';
+    }
+
+    async function submitBan(e) {
+        e.preventDefault();
+        const sellerId = document.getElementById('banSellerId').value;
+        const reason = document.getElementById('banReasonText').value.trim();
+
+        try {
+            const res = await fetch(`/admin/sellers/${sellerId}/ban`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Supplier permanently banned.');
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to ban supplier'));
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>
