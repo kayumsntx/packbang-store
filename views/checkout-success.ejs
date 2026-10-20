@@ -337,24 +337,7 @@
     });
 
 
-    app.get("/checkout-success", requireAuth, (req, res) => {
-  const saleId = req.session.lastSaleId || null;
-  
-  console.log("📄 Checkout Success Page");
-  console.log("👤 Customer:", req.session.lastCustomerName);
-  console.log("🆔 Order ID:", saleId);
-  console.log("💰 Total:", req.session.lastTotalAmount);
-  
-  res.render("checkout-success", {
-    customerName: req.session.lastCustomerName || 'Valued Customer',
-    customerEmail: req.session.lastCustomerEmail || 'Not provided',
-    customerPhone: req.session.lastCustomerPhone || 'Not provided',
-    customerAddress: req.session.lastCustomerAddress || 'Walk-in Counter Sale',
-    totalAmount: req.session.lastTotalAmount || '0.00',
-    saleId: saleId,
-    user: req.session.user
-  });
-});
+
 </script>
 
 <%- include('partials/footer') %>

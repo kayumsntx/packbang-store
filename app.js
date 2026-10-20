@@ -3714,36 +3714,70 @@ app.get("/api/cart/view", async (req, res) => {
   }
 });
 
-// ---------- CHECKOUT ----------
+// ---------- CHECKOUT (Guest and Member) ----------
 app.post("/api/cart/checkout", async (req, res) => {
   console.log("🛒 API Checkout called");
 
-  if (!req.session.user) {
-    console.log("❌ User not logged in");
-    return res.status(401).json({
+  // Mandatory fields for everyone: Customer Name, Phone, and Delivery Address
+  const customerName = (req.body.customerName || (req.session.user && req.session.user.profile?.name) || "").trim();
+  const customerPhone = (req.body.customerPhone || (req.session.user && req.session.user.profile?.phone) || "").trim();
+  const customerAddress = (req.body.customerAddress || (req.session.user && req.session.user.profile?.address) || "").trim();
+  const customerEmail = (req.body.customerEmail || (req.session.user && (req.session.user.profile?.email || req.session.user.username)) || "").trim() || (customerPhone ? `${customerPhone}@guest.packbang.com` : "guest@packbang.com");
+
+  // Validate mandatory fields: Name, Phone, and Address are strictly required for everyone!
+  if (!customerName || !customerPhone || !customerAddress) {
+    const missing = [];
+    if (!customerName) missing.push("Customer Name");
+    if (!customerPhone) missing.push("Phone");
+    if (!customerAddress) missing.push("Delivery Address");
+    console.log("❌ Missing mandatory checkout fields:", missing.join(", "));
+    return res.status(400).json({
       success: false,
-      redirect: "/login?redirect=/cart",
-      message: "Please login to checkout"
+      message: `Fill the required fields: ${missing.join(", ")}`
     });
   }
 
-  const userCart = req.session.cart || [];
+  // Determine items to order (either direct single-product order or cart items)
+  let userCart = [];
+
+  if (req.body.directOrder && req.body.directOrder.productId) {
+    const { productId, quantity = 1, size = '', color = '' } = req.body.directOrder;
+    const targetProduct = await getProductById(productId);
+    if (!targetProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+    const qty = parseInt(quantity) || 1;
+    userCart = [{
+      id: targetProduct.id,
+      name: targetProduct.name,
+      price: getVariantPrice(targetProduct, size, color),
+      quantity: qty,
+      imagePath: targetProduct.imagePath || '/uploads/default.jpg',
+      size: size || '',
+      color: color || ''
+    }];
+  } else {
+    if (req.session.user) {
+      userCart = req.session.cart || [];
+    } else {
+      const guestCart = await getGuestCart(req.guestSessionId);
+      userCart = (guestCart && guestCart.items && guestCart.items.length > 0)
+        ? guestCart.items
+        : (req.session.cart || []);
+    }
+  }
+
   console.log("📦 Cart items:", userCart.length);
 
   if (userCart.length === 0) {
     console.log("❌ Cart is empty");
     return res.status(400).json({
       success: false,
-      message: "Your cart is empty"
+      message: "Your cart is empty. Please select a product to order."
     });
   }
 
   try {
-    const customerName = req.body.customerName || req.session.user.profile?.name || "Valued Customer";
-    const customerAddress = req.body.customerAddress || req.session.user.profile?.address || "Walk-in Counter Sale";
-    const customerEmail = req.body.customerEmail || req.session.user.profile?.email || req.session.user.username;
-    const customerPhone = req.body.customerPhone || req.session.user.profile?.phone || "";
-
     const totalAmount = userCart.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0
     );
@@ -3850,6 +3884,8 @@ app.post("/api/cart/checkout", async (req, res) => {
     
     if (req.session.user) {
       await saveUserCart(req.session.user.id, []);
+    } else if (req.guestSessionId) {
+      await deleteGuestCart(req.guestSessionId);
     }
 
     await Sale.deleteMany({ 
@@ -4684,8 +4720,8 @@ app.get("/admin/stock-report", requireAdmin, async (req, res) => {
   }
 });
 
-// ---------- CHECKOUT SUCCESS ----------
-app.get("/checkout-success", requireAuth, (req, res) => {
+// ---------- CHECKOUT SUCCESS (Guest and Member) ----------
+app.get("/checkout-success", (req, res) => {
   const saleId = req.session.lastSaleId || null;
   
   res.render("checkout-success", {
@@ -4695,7 +4731,8 @@ app.get("/checkout-success", requireAuth, (req, res) => {
     customerAddress: req.session.lastCustomerAddress || 'Walk-in Counter Sale',
     totalAmount: req.session.lastTotalAmount || '0.00',
     saleId: saleId,
-    user: req.session.user
+    user: req.session.user || null,
+    isGuest: !req.session.user
   });
 });
 

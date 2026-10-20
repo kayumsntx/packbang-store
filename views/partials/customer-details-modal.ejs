@@ -1,0 +1,565 @@
+<!-- ========================================== -->
+<!-- UNIVERSAL CUSTOMER DETAILS CHECKOUT MODAL   -->
+<!-- Direct guest & member checkout modal        -->
+<!-- ========================================== -->
+<div id="customerDetailsModal" class="cust-modal-overlay" style="display: none;" onclick="closeCustomerDetailsModal(event)">
+    <div class="cust-modal-card" onclick="event.stopPropagation()">
+        <!-- Header -->
+        <div class="cust-modal-header">
+            <div class="cust-modal-title">
+                <span class="cust-modal-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2V8H20" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 13H8" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 17H8" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 9H8" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <h3>Customer Details</h3>
+            </div>
+            <button type="button" class="cust-modal-close" onclick="closeCustomerDetailsModal()" aria-label="Close modal">&times;</button>
+        </div>
+
+        <!-- Optional Order Item Preview Strip (when ordering directly from product details) -->
+        <div id="custModalItemPreview" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #334155;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                <div style="font-weight: 700; color: #0F172A;" id="custModalItemName">Product Name</div>
+                <div style="color: #4F46E5; font-weight: 800;" id="custModalItemPrice">BDT 0.00</div>
+            </div>
+            <div style="font-size: 0.78rem; color: #64748B; margin-top: 3px;" id="custModalItemMeta">Qty: 1</div>
+        </div>
+
+        <!-- Validation Alert Box -->
+        <div id="custModalAlert" style="display: none; margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; background: #FEF2F2; border: 1.5px solid #FCA5A5; color: #991B1B; font-size: 0.86rem; font-weight: 700; line-height: 1.4;">
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                <span style="font-size: 16px;">⚠️</span>
+                <span id="custModalAlertText">Fill the required fields: Customer Name, Phone, and Delivery Address</span>
+            </div>
+        </div>
+
+        <form id="customerDetailsForm" onsubmit="handleCustomerConfirmOrder(event)">
+            <!-- Field 1: Customer Name (Mandatory) -->
+            <div class="cust-form-group">
+                <label for="custInputName">
+                    <span class="cust-field-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                    CUSTOMER NAME <span class="required-star">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="custInputName" 
+                    name="customerName" 
+                    placeholder="user" 
+                    value="<%= typeof user !== 'undefined' && user && user.profile && user.profile.name ? user.profile.name : '' %>"
+                    autocomplete="name"
+                    oninput="clearCustFieldError(this)"
+                />
+            </div>
+
+            <!-- Field 2: Email (Optional) -->
+            <div class="cust-form-group">
+                <label for="custInputEmail">
+                    <span class="cust-field-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </span>
+                    EMAIL
+                </label>
+                <input 
+                    type="email" 
+                    id="custInputEmail" 
+                    name="customerEmail" 
+                    placeholder="customer@example.com" 
+                    value="<%= typeof user !== 'undefined' && user && user.profile && user.profile.email ? user.profile.email : '' %>"
+                    autocomplete="email"
+                />
+            </div>
+
+            <!-- Field 3: Phone (Mandatory) -->
+            <div class="cust-form-group">
+                <label for="custInputPhone">
+                    <span class="cust-field-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                    </span>
+                    PHONE <span class="required-star">*</span>
+                </label>
+                <input 
+                    type="tel" 
+                    id="custInputPhone" 
+                    name="customerPhone" 
+                    placeholder="+880 1XXX-XXXXXX" 
+                    value="<%= typeof user !== 'undefined' && user && user.profile && user.profile.phone ? user.profile.phone : '' %>"
+                    autocomplete="tel"
+                    oninput="clearCustFieldError(this)"
+                />
+            </div>
+
+            <!-- Field 4: Delivery Address (Mandatory) -->
+            <div class="cust-form-group">
+                <label for="custInputAddress">
+                    <span class="cust-field-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </span>
+                    DELIVERY ADDRESS <span class="required-star">*</span>
+                </label>
+                <textarea 
+                    id="custInputAddress" 
+                    name="customerAddress" 
+                    rows="3" 
+                    placeholder="Enter delivery address"
+                    autocomplete="street-address"
+                    oninput="clearCustFieldError(this)"
+                ><%= typeof user !== 'undefined' && user && user.profile && user.profile.address ? user.profile.address : '' %></textarea>
+            </div>
+
+            <!-- Submit Button (Exact purple styling from screenshot) -->
+            <button type="submit" id="custConfirmOrderBtn" class="cust-confirm-btn">
+                <span class="cust-check-circle">✓</span>
+                <span id="custConfirmBtnText">Confirm Order</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+/* MODAL BACKDROP */
+.cust-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999999;
+    padding: 16px;
+    box-sizing: border-box;
+    animation: custModalFade 0.2s ease-out;
+}
+
+@keyframes custModalFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* MODAL CARD (Matches image layout & proportions) */
+.cust-modal-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px 28px 28px 28px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    position: relative;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: custCardPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes custCardPop {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* HEADER */
+.cust-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.cust-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cust-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cust-modal-title h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1E293B;
+    letter-spacing: -0.3px;
+}
+
+.cust-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: #94A3B8;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.cust-modal-close:hover {
+    color: #0F172A;
+    background: #F1F5F9;
+}
+
+/* FORM GROUPS */
+.cust-form-group {
+    margin-bottom: 18px;
+}
+
+.cust-form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #475569;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+}
+
+.cust-field-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cust-form-group .required-star {
+    color: #EF4444;
+    font-size: 0.9rem;
+}
+
+.cust-form-group input,
+.cust-form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: #0F172A;
+    background: #F8FAFC;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.cust-form-group input::placeholder,
+.cust-form-group textarea::placeholder {
+    color: #94A3B8;
+}
+
+.cust-form-group input:focus,
+.cust-form-group textarea:focus {
+    border-color: #6366F1;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.cust-form-group textarea {
+    resize: vertical;
+    min-height: 75px;
+}
+
+/* ERROR STATE */
+.cust-form-group.field-has-error input,
+.cust-form-group.field-has-error textarea {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* CONFIRM BUTTON (Purple with checkmark circle) */
+.cust-confirm-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px 20px;
+    background: #6366F1;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.cust-confirm-btn:hover:not(:disabled) {
+    background: #4F46E5;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+.cust-confirm-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.cust-confirm-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cust-check-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    color: #FFFFFF;
+}
+
+/* Shake Animation on Validation Error */
+@keyframes custShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.shake-error {
+    animation: custShake 0.4s ease-in-out;
+}
+</style>
+
+<script>
+// Global active order configuration (set when clicking "Order Now" on product details)
+window.custActiveDirectOrder = null;
+
+function openCustomerDetailsModal(directOrderConfig) {
+    const modal = document.getElementById('customerDetailsModal');
+    if (!modal) return;
+
+    window.custActiveDirectOrder = directOrderConfig || null;
+
+    // Reset error states
+    hideCustModalAlert();
+    clearAllCustFieldErrors();
+
+    // Reset button
+    const btn = document.getElementById('custConfirmOrderBtn');
+    const btnText = document.getElementById('custConfirmBtnText');
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = 'Confirm Order';
+
+    // Show/hide preview strip if direct order configuration is passed
+    const previewBox = document.getElementById('custModalItemPreview');
+    if (previewBox && directOrderConfig && directOrderConfig.name) {
+        document.getElementById('custModalItemName').textContent = directOrderConfig.name;
+        document.getElementById('custModalItemPrice').textContent = 'BDT ' + parseFloat(directOrderConfig.totalPrice || directOrderConfig.price || 0).toFixed(2);
+        
+        const metaParts = [];
+        if (directOrderConfig.quantity) metaParts.push('Qty: ' + directOrderConfig.quantity + ' pcs');
+        if (directOrderConfig.size) metaParts.push('Size: ' + directOrderConfig.size);
+        if (directOrderConfig.color) metaParts.push('Color: ' + directOrderConfig.color);
+        document.getElementById('custModalItemMeta').textContent = metaParts.join(' • ');
+        
+        previewBox.style.display = 'block';
+    } else if (previewBox) {
+        previewBox.style.display = 'none';
+    }
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Auto-focus on the first empty required field
+    setTimeout(() => {
+        const nameInput = document.getElementById('custInputName');
+        const phoneInput = document.getElementById('custInputPhone');
+        const addrInput = document.getElementById('custInputAddress');
+
+        if (nameInput && !nameInput.value.trim()) {
+            nameInput.focus();
+        } else if (phoneInput && !phoneInput.value.trim()) {
+            phoneInput.focus();
+        } else if (addrInput && !addrInput.value.trim()) {
+            addrInput.focus();
+        }
+    }, 100);
+}
+
+function closeCustomerDetailsModal(e) {
+    if (!e || e.target.id === 'customerDetailsModal' || (e.target.classList && e.target.classList.contains('cust-modal-close'))) {
+        const modal = document.getElementById('customerDetailsModal');
+        if (modal) modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function clearCustFieldError(inputEl) {
+    if (!inputEl) return;
+    const group = inputEl.closest('.cust-form-group');
+    if (group) group.classList.remove('field-has-error');
+    hideCustModalAlert();
+}
+
+function clearAllCustFieldErrors() {
+    document.querySelectorAll('.cust-form-group').forEach(el => el.classList.remove('field-has-error'));
+}
+
+function showCustModalAlert(msg) {
+    const box = document.getElementById('custModalAlert');
+    const textEl = document.getElementById('custModalAlertText');
+    if (box && textEl) {
+        textEl.textContent = msg || 'Fill the required fields: Customer Name, Phone, and Delivery Address';
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+function hideCustModalAlert() {
+    const box = document.getElementById('custModalAlert');
+    if (box) box.style.display = 'none';
+}
+
+// ==========================================
+// ORDER CONFIRMATION & STRICT VALIDATION
+// ==========================================
+async function handleCustomerConfirmOrder(e) {
+    e.preventDefault();
+
+    const nameInput = document.getElementById('custInputName');
+    const emailInput = document.getElementById('custInputEmail');
+    const phoneInput = document.getElementById('custInputPhone');
+    const addrInput = document.getElementById('custInputAddress');
+    const btn = document.getElementById('custConfirmOrderBtn');
+    const btnText = document.getElementById('custConfirmBtnText');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    const address = addrInput ? addrInput.value.trim() : '';
+
+    // Clear previous errors
+    clearAllCustFieldErrors();
+    hideCustModalAlert();
+
+    // STRICT VALIDATION: Customer Name, Phone, and Delivery Address are mandatory for everyone!
+    const missing = [];
+    if (!name) {
+        missing.push('Customer Name');
+        if (nameInput) nameInput.closest('.cust-form-group').classList.add('field-has-error');
+    }
+    if (!phone) {
+        missing.push('Phone Number');
+        if (phoneInput) phoneInput.closest('.cust-form-group').classList.add('field-has-error');
+    }
+    if (!address) {
+        missing.push('Delivery Address');
+        if (addrInput) addrInput.closest('.cust-form-group').classList.add('field-has-error');
+    }
+
+    if (missing.length > 0) {
+        const errorMsg = 'Fill the required fields: ' + missing.join(', ') + '.';
+        showCustModalAlert(errorMsg);
+
+        // Shake the modal card to indicate validation failure
+        const card = document.querySelector('.cust-modal-card');
+        if (card) {
+            card.classList.remove('shake-error');
+            void card.offsetWidth; // Trigger reflow
+            card.classList.add('shake-error');
+        }
+
+        // Focus the first empty field
+        if (!name && nameInput) nameInput.focus();
+        else if (!phone && phoneInput) phoneInput.focus();
+        else if (!address && addrInput) addrInput.focus();
+        return;
+    }
+
+    // Validation passed -> proceed with order placement
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.textContent = 'Processing Order...';
+
+    const payload = {
+        customerName: name,
+        customerEmail: email,
+        customerPhone: phone,
+        customerAddress: address
+    };
+
+    // If direct single order from product page:
+    if (window.custActiveDirectOrder) {
+        payload.directOrder = {
+            productId: window.custActiveDirectOrder.productId,
+            quantity: window.custActiveDirectOrder.quantity || 1,
+            size: window.custActiveDirectOrder.size || '',
+            color: window.custActiveDirectOrder.color || ''
+        };
+    }
+
+    try {
+        const res = await fetch('/api/cart/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+            showCustModalAlert(data.message || 'Failed to complete order. Please check inputs.');
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.textContent = 'Confirm Order';
+            return;
+        }
+
+        // Success!
+        if (btnText) btnText.textContent = '✓ Order Confirmed!';
+        
+        // Redirect to checkout success page
+        window.location.href = data.redirect || '/checkout-success';
+    } catch (err) {
+        console.error('Checkout error:', err);
+        showCustModalAlert('Network error occurred. Please check your internet connection.');
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.textContent = 'Confirm Order';
+    }
+}
+
+// Escape key to close modal
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('customerDetailsModal');
+        if (modal && modal.style.display === 'flex') {
+            closeCustomerDetailsModal();
+        }
+    }
+});
+</script>

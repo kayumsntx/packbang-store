@@ -495,9 +495,9 @@
     </div>
 
     <% if (isGuest) { %>
-        <div class="guest-notice">
-            <i class="fas fa-info-circle"></i>
-            <span>You are shopping as a guest. <a href="/login">Login</a> to save your cart and checkout.</span>
+        <div class="guest-notice" style="background: #EEF2FF; border-left: 4px solid #6366F1; color: #3730A3;">
+            <i class="fas fa-check-circle" style="color: #6366F1;"></i>
+            <span>Guest Checkout is active! You can order directly without creating an account.</span>
         </div>
     <% } %>
 
@@ -543,15 +543,9 @@
                 <span class="total-amount">BDT. <%= cartTotal %></span>
             </div>
             <div>
-                <% if (isGuest) { %>
-                    <a href="/login?redirect=/cart" class="btn-login-checkout">
-                        <i class="fas fa-sign-in-alt"></i> Login to Checkout
-                    </a>
-                <% } else { %>
-                    <button class="btn-checkout" onclick="openCheckoutModal()">
-                        <i class="fas fa-credit-card"></i> Proceed to Checkout
-                    </button>
-                <% } %>
+                <button class="btn-checkout" onclick="openCustomerDetailsModal()">
+                    <i class="fas fa-credit-card"></i> Proceed to Checkout
+                </button>
             </div>
         </div>
     <% } else { %>
@@ -567,62 +561,19 @@
 </div>
 
 
-<div id="checkoutModal">
-    <div class="modal-content">
-        <!-- 1 -->
-        <div id="modalStepInput">
-            <div class="modal-header">
-                <h3><i class="fas fa-file-invoice"></i> Customer Details</h3>
-                <button class="close-btn" onclick="closeCheckoutModal()">&times;</button>
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-user"></i> Customer Name</label>
-                <input type="text" id="modalName" placeholder="Enter customer name" value="<%= user && user.profile && user.profile.name ? user.profile.name : '' %>" />
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-envelope"></i> Email</label>
-                <input type="email" id="modalEmail" placeholder="customer@example.com" value="<%= user && user.profile && user.profile.email ? user.profile.email : '' %>" />
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-phone"></i> Phone</label>
-                <input type="tel" id="modalPhone" placeholder="+880 1XXX-XXXXXX" value="<%= user && user.profile && user.profile.phone ? user.profile.phone : '' %>" />
-            </div>
-
-            <div class="form-group">
-                <label><i class="fas fa-map-marker-alt"></i> Delivery Address</label>
-                <textarea id="modalAddress" rows="3" placeholder="Enter delivery address"><%= user && user.profile && user.profile.address ? user.profile.address : '' %></textarea>
-            </div>
-
-            <button class="btn-submit" onclick="processCheckout()" id="confirmOrderBtn">
-                <i class="fas fa-check-circle"></i> Confirm Order
-            </button>
-        </div>
-
-        <!--2-->
-        <div id="modalStepSuccess" class="success-step">
-            <div class="icon">🎉</div>
-            <h4>Order Confirmed!</h4>
-            <p>Your order has been placed successfully.</p>
-            <div class="customer-info">
-                <div><strong>Customer:</strong> <span id="confirmName">-</span></div>
-                <div><strong>Email:</strong> <span id="confirmEmail">-</span></div>
-                <div><strong>Phone:</strong> <span id="confirmPhone">-</span></div>
-                <div><strong>Address:</strong> <span id="confirmAddress">-</span></div>
-            </div>
-            <button class="btn-submit" onclick="finalizeCheckout()" style="background: linear-gradient(135deg, #2d3748, #1a202c);">
-                <i class="fas fa-check-circle"></i> Complete Order
-            </button>
-        </div>
-    </div>
-</div>
+<!-- Universal customer details modal provided via footer -->
 
 <script>
    
 
-    $(document).ready(function() {
+        $(document).ready(function() {
+        if (window.location.search.includes('checkout=1') || window.location.search.includes('order=1')) {
+            setTimeout(function() {
+                if (typeof openCustomerDetailsModal === 'function') {
+                    openCustomerDetailsModal();
+                }
+            }, 250);
+        }
         //PLUS BUTT
         $(document).on('click', '.qty-plus', function() {
             const productId = $(this).data('product-id');
@@ -719,15 +670,14 @@
 
    
     function openCheckoutModal() {
-        document.getElementById('checkoutModal').style.display = 'flex';
-        document.getElementById('modalStepInput').style.display = 'block';
-        document.getElementById('modalStepSuccess').style.display = 'none';
-        document.body.style.overflow = 'hidden';
+        if (typeof openCustomerDetailsModal === 'function') {
+            openCustomerDetailsModal();
+        }
     }
-
     function closeCheckoutModal() {
-        document.getElementById('checkoutModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
+        if (typeof closeCustomerDetailsModal === 'function') {
+            closeCustomerDetailsModal();
+        }
     }
 
     function processCheckout() {

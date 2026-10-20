@@ -1273,41 +1273,34 @@
             });
         };
 
-        // ===== Buy Now =====
+        // ===== Buy Now / Order Now (Direct Customer Details Modal) =====
         window.buyNow = function() {
-            var quantity = currentQty;
-            var size = selectedSize;
-            var color = selectedColor;
+            if (maxStock <= 0) {
+                alert('This product is currently out of stock.');
+                return;
+            }
 
-            var btn = document.querySelector('.btn-buy-now');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            var quantity = currentQty || 1;
+            var size = selectedSize || '';
+            var color = selectedColor || '';
+            var combo = getComboPrice(size, color);
+            var unitPrice = combo.price;
+            var totalPrice = unitPrice * quantity;
 
-            $.ajax({
-                url: '/api/cart/add',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ 
-                    productId: productId, 
+            // Direct checkout: Open Customer Details modal immediately!
+            if (typeof openCustomerDetailsModal === 'function') {
+                openCustomerDetailsModal({
+                    productId: productId,
+                    name: '<%= (product.name || "").replace(/'/g, "\\'") %>',
+                    price: unitPrice,
+                    totalPrice: totalPrice,
                     quantity: quantity,
                     size: size,
                     color: color
-                }),
-                success: function(response) {
-                    if (response.success) {
-                        window.location.href = '/cart';
-                    } else {
-                        showNotification('❌ Failed to process', 'error');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-bolt"></i> Order Now';
-                    }
-                },
-                error: function() {
-                    showNotification('❌ Failed to process', 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-bolt"></i> Order Now';
-                }
-            });
+                });
+            } else {
+                window.location.href = '/cart';
+            }
         };
 
         // ===== Update Cart Count =====
