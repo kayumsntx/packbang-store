@@ -503,12 +503,12 @@
 
     <% if (cart && cart.length > 0) { %>
         <% cart.forEach(item => { %>
-            <div class="cart-item" data-product-id="<%= item.id %>">
+            <div class="cart-item" data-product-id="<%= item.id %>" data-size="<%= item.size || '' %>" data-color="<%= item.color || '' %>">
                 <img src="<%= item.imagePath || '/uploads/default.jpg' %>" alt="<%= item.name %>" onerror="this.onerror=null; this.src='/uploads/default.jpg';" />
                 <div class="item-details">
                     <div class="item-name"><%= item.name %></div>
-                    <div class="item-price">BDT. <%= item.price.toFixed(2) %></div>
-                    <!-- ✅ Variant Info (Size & Color) -->
+                    <div class="item-price">BDT. <%= Number(item.price).toFixed(2) %></div>
+                    <!-- Variant Info (Size & Color) -->
                     <% if (item.size || item.color) { %>
                         <div class="variant-info">
                             <% if (item.color) { %>
@@ -521,15 +521,28 @@
                     <% } %>
                 </div>
                 <div class="item-controls">
-                    <button class="qty-btn qty-minus" data-product-id="<%= item.id %>" <%= item.quantity <= 1 ? 'disabled' : '' %>>
+                    <button class="qty-btn qty-minus" 
+                            data-product-id="<%= item.id %>" 
+                            data-size="<%= item.size || '' %>" 
+                            data-color="<%= item.color || '' %>" 
+                            <%= item.quantity <= 1 ? 'disabled' : '' %>
+                            title="Decrease quantity">
                         <i class="fas fa-minus"></i>
                     </button>
-                    <span class="qty-display" id="qty-<%= item.id %>"><%= item.quantity %></span>
-                    <button class="qty-btn qty-plus" data-product-id="<%= item.id %>">
+                    <span class="qty-display"><%= item.quantity %></span>
+                    <button class="qty-btn qty-plus" 
+                            data-product-id="<%= item.id %>" 
+                            data-size="<%= item.size || '' %>" 
+                            data-color="<%= item.color || '' %>"
+                            title="Increase quantity">
                         <i class="fas fa-plus"></i>
                     </button>
                    
-                    <button class="qty-btn qty-remove" data-product-id="<%= item.id %>" title="Remove item">
+                    <button class="qty-btn qty-remove" 
+                            data-product-id="<%= item.id %>" 
+                            data-size="<%= item.size || '' %>" 
+                            data-color="<%= item.color || '' %>" 
+                            title="Remove item from cart">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -564,9 +577,7 @@
 <!-- Universal customer details modal provided via footer -->
 
 <script>
-   
-
-        $(document).ready(function() {
+    $(document).ready(function() {
         if (window.location.search.includes('checkout=1') || window.location.search.includes('order=1')) {
             setTimeout(function() {
                 if (typeof openCustomerDetailsModal === 'function') {
@@ -574,10 +585,13 @@
                 }
             }, 250);
         }
-        //PLUS BUTT
+
+        // Plus button: increases quantity by 1 for this exact product + variant
         $(document).on('click', '.qty-plus', function() {
-            const productId = $(this).data('product-id');
             const $btn = $(this);
+            const productId = $btn.data('product-id');
+            const size = $btn.data('size') || '';
+            const color = $btn.data('color') || '';
 
             $btn.prop('disabled', true);
             $btn.html('<i class="fas fa-spinner fa-spin"></i>');
@@ -586,58 +600,41 @@
                 url: '/api/cart/add',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ productId: productId, quantity: 1 }),
+                data: JSON.stringify({ 
+                    productId: productId, 
+                    quantity: 1,
+                    size: size,
+                    color: color
+                }),
                 success: function(response) {
                     if (response.success) {
                         location.reload();
+                    } else {
+                        const errMsg = response.message || 'Could not increase quantity.';
+                        alert(errMsg);
+                        $btn.html('<i class="fas fa-plus"></i>');
+                        $btn.prop('disabled', false);
                     }
-                    $btn.html('<i class="fas fa-plus"></i>');
-                    $btn.prop('disabled', false);
                 },
-                error: function() {
+                error: function(xhr) {
+                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Could not increase quantity. Stock limit reached or server error.';
+                    alert(errMsg);
                     $btn.html('<i class="fas fa-plus"></i>');
                     $btn.prop('disabled', false);
                 }
             });
         });
 
-      
+        // Minus button: decrements quantity by 1 for this exact product + variant
         $(document).on('click', '.qty-minus', function() {
-            const productId = $(this).data('product-id');
             const $btn = $(this);
-            const currentQty = parseInt($(`#qty-${productId}`).text()) || 0;
+            const productId = $btn.data('product-id');
+            const size = $btn.data('size') || '';
+            const color = $btn.data('color') || '';
+            const $display = $btn.closest('.item-controls').find('.qty-display');
+            const currentQty = parseInt($display.text(), 10) || 0;
 
-            if (currentQty <= 0) return;
-
-            $btn.prop('disabled', true);
-            $btn.html('<i class="fas fa-spinner fa-spin"></i>');
-
-            $.ajax({
-                url: '/api/cart/remove',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ productId: productId }),
-                success: function(response) {
-                    if (response.success) {
-                        location.reload();
-                    }
-                    $btn.html('<i class="fas fa-minus"></i>');
-                    $btn.prop('disabled', false);
-                },
-                error: function() {
-                    $btn.html('<i class="fas fa-minus"></i>');
-                    $btn.prop('disabled', false);
-                }
-            });
-        });
-
-   
-        $(document).on('click', '.qty-remove', function() {
-            const productId = $(this).data('product-id');
-            const $btn = $(this);
-            const productName = $btn.closest('.cart-item').find('.item-name').text();
-
-            if (!confirm(`Remove "${productName}" from cart?`)) {
+            if (currentQty <= 1) {
                 return;
             }
 
@@ -648,19 +645,63 @@
                 url: '/api/cart/remove',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ productId: productId }),
+                data: JSON.stringify({ 
+                    productId: productId,
+                    size: size,
+                    color: color,
+                    removeAll: false 
+                }),
                 success: function(response) {
                     if (response.success) {
-                        if (typeof showNotification === 'function') {
-                            showNotification('🗑️ Item removed from cart', 'warning');
-                        }
                         location.reload();
+                    } else {
+                        const errMsg = response.message || 'Could not decrease quantity.';
+                        alert(errMsg);
+                        $btn.html('<i class="fas fa-minus"></i>');
+                        $btn.prop('disabled', false);
                     }
-                    $btn.html('<i class="fas fa-trash"></i>');
-                    $btn.prop('disabled', false);
                 },
-                error: function() {
-                    alert('❌ Failed to remove item. Please try again.');
+                error: function(xhr) {
+                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Could not decrease quantity.';
+                    alert(errMsg);
+                    $btn.html('<i class="fas fa-minus"></i>');
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        // Delete button: immediately deletes the full row of added product
+        $(document).on('click', '.qty-remove', function() {
+            const $btn = $(this);
+            const productId = $btn.data('product-id');
+            const size = $btn.data('size') || '';
+            const color = $btn.data('color') || '';
+
+            $btn.prop('disabled', true);
+            $btn.html('<i class="fas fa-spinner fa-spin"></i>');
+
+            $.ajax({
+                url: '/api/cart/remove',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ 
+                    productId: productId,
+                    size: size,
+                    color: color,
+                    removeAll: true 
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message || 'Failed to remove item.');
+                        $btn.html('<i class="fas fa-trash"></i>');
+                        $btn.prop('disabled', false);
+                    }
+                },
+                error: function(xhr) {
+                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to remove item. Please try again.';
+                    alert(errMsg);
                     $btn.html('<i class="fas fa-trash"></i>');
                     $btn.prop('disabled', false);
                 }
@@ -668,126 +709,18 @@
         });
     });
 
-   
+    // Fallback handlers if referenced by other legacy callers
     function openCheckoutModal() {
         if (typeof openCustomerDetailsModal === 'function') {
             openCustomerDetailsModal();
         }
     }
+
     function closeCheckoutModal() {
         if (typeof closeCustomerDetailsModal === 'function') {
             closeCustomerDetailsModal();
         }
     }
-
-    function processCheckout() {
-        const name = document.getElementById('modalName').value.trim() || 'Valued Customer';
-        const email = document.getElementById('modalEmail').value.trim();
-        const phone = document.getElementById('modalPhone').value.trim();
-        const address = document.getElementById('modalAddress').value.trim() || 'Walk-in Counter Sale';
-
-        if (!name) {
-            alert('⚠️ Please enter your name');
-            return;
-        }
-
-        if (!address) {
-            alert('⚠️ Please enter your delivery address');
-            return;
-        }
-
-        document.getElementById('confirmName').textContent = name;
-        document.getElementById('confirmEmail').textContent = email || 'Not provided';
-        document.getElementById('confirmPhone').textContent = phone || 'Not provided';
-        document.getElementById('confirmAddress').textContent = address;
-
-        document.getElementById('modalStepInput').style.display = 'none';
-        document.getElementById('modalStepSuccess').style.display = 'block';
-    }
-
-
-    function finalizeCheckout() {
-        const btn = document.querySelector('#modalStepSuccess .btn-submit');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        btn.disabled = true;
-
-        const name = document.getElementById('confirmName').textContent;
-        const email = document.getElementById('confirmEmail').textContent;
-        const phone = document.getElementById('confirmPhone').textContent;
-        const address = document.getElementById('confirmAddress').textContent;
-
-        const finalEmail = (email !== 'Not provided' && email) ? email : '';
-        const finalPhone = (phone !== 'Not provided' && phone) ? phone : '';
-
-        fetch('/api/cart/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                customerName: name,
-                customerEmail: finalEmail,
-                customerPhone: finalPhone,
-                customerAddress: address
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                closeCheckoutModal();
-                
-                if (typeof showNotification === 'function') {
-                    showNotification('✅ Order placed successfully!', 'success');
-                }
-
-                setTimeout(() => {
-                    window.location.href = data.redirect || '/checkout-success';
-                }, 1500);
-            } else {
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                } else {
-                    const errorMsg = data.message || 'Checkout failed. Please try again.';
-                    if (typeof showNotification === 'function') {
-                        showNotification('❌ ' + errorMsg, 'error');
-                    } else {
-                        alert('❌ ' + errorMsg);
-                    }
-                    document.getElementById('modalStepSuccess').style.display = 'none';
-                    document.getElementById('modalStepInput').style.display = 'block';
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }
-            }
-        })
-        .catch(err => {
-            console.error('Checkout Error:', err);
-            if (typeof showNotification === 'function') {
-                showNotification('❌ Checkout failed. Please try again.', 'error');
-            } else {
-                alert('❌ Checkout failed. Please try again.');
-            }
-            document.getElementById('modalStepSuccess').style.display = 'none';
-            document.getElementById('modalStepInput').style.display = 'block';
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
-    }
-
-
-    document.getElementById('checkoutModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeCheckoutModal();
-        }
-    });
-
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeCheckoutModal();
-        }
-    });
 
     function showNotification(message, type) {
         if (typeof window.showNotification === 'function') {

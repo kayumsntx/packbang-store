@@ -3626,21 +3626,37 @@ app.post("/api/cart/add", async (req, res) => {
 });
 
 app.post("/api/cart/remove", async (req, res) => {
-  const { productId } = req.body;
+  const { productId, size = '', color = '', removeAll = false } = req.body;
   let cartCount = 0;
 
   try {
+    // Helper to find index matching product ID and variants (size & color)
+    const findItemIndex = (items) => {
+      let idx = items.findIndex(item => 
+        item.id === productId && 
+        (item.size || '') === (size || '') && 
+        (item.color || '') === (color || '')
+      );
+      // Fallback to product ID matching if exact variant not found
+      if (idx === -1) {
+        idx = items.findIndex(item => item.id === productId);
+      }
+      return idx;
+    };
+
     if (req.session.user) {
       if (!req.session.cart) {
         req.session.cart = [];
       }
 
-      const itemIndex = req.session.cart.findIndex(item => item.id === productId);
+      const itemIndex = findItemIndex(req.session.cart);
       if (itemIndex !== -1) {
-        if (req.session.cart[itemIndex].quantity > 1) {
-          req.session.cart[itemIndex].quantity -= 1;
-        } else {
+        // If removeAll is true (delete button clicked), delete the whole row!
+        // Otherwise decrement by 1 (minus button clicked)
+        if (removeAll || req.session.cart[itemIndex].quantity <= 1) {
           req.session.cart.splice(itemIndex, 1);
+        } else {
+          req.session.cart[itemIndex].quantity -= 1;
         }
       }
 
@@ -3650,16 +3666,18 @@ app.post("/api/cart/remove", async (req, res) => {
     } else {
       const guestSessionId = req.guestSessionId;
       const guestCart = await getGuestCart(guestSessionId);
-      if (!guestCart) {
+      if (!guestCart || !guestCart.items) {
         return res.json({ success: false, message: "Cart is empty" });
       }
 
-      const itemIndex = guestCart.items.findIndex(item => item.id === productId);
+      const itemIndex = findItemIndex(guestCart.items);
       if (itemIndex !== -1) {
-        if (guestCart.items[itemIndex].quantity > 1) {
-          guestCart.items[itemIndex].quantity -= 1;
-        } else {
+        // If removeAll is true (delete button clicked), delete the whole row!
+        // Otherwise decrement by 1 (minus button clicked)
+        if (removeAll || guestCart.items[itemIndex].quantity <= 1) {
           guestCart.items.splice(itemIndex, 1);
+        } else {
+          guestCart.items[itemIndex].quantity -= 1;
         }
         await saveGuestCart(guestSessionId, guestCart.items);
         cartCount = guestCart.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -3676,7 +3694,7 @@ app.post("/api/cart/remove", async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Cart updated",
+      message: removeAll ? "Item completely removed from cart" : "Cart updated",
       cartCount: cartCount
     });
   } catch (err) {
