@@ -649,8 +649,32 @@
             <!-- Rating -->
             <div class="product-rating">
                 <span class="stars">⭐️⭐️⭐️⭐️</span>
-                <span>(<%= product.reviews || 0 %> Reviews)</span>
+                <span id="headerReviewsText">(<%= (typeof reviews !== 'undefined' && reviews ? reviews.length : (product.reviews || 0)) %> Reviews)</span>
             </div>
+
+            <!-- Trader / Seller Profile Badge (Safe Platform Trader - Matches User Image) -->
+            <% if (typeof traderStats !== 'undefined' && traderStats) { %>
+            <div class="trader-profile-badge" onclick="openTraderProfileModal('<%= traderStats.sellerId %>', '<%= (traderStats.sellerName || 'PackBang Direct').replace(/'/g, "\\'") %>')" title="Click to view verified trade history & buyer feedback">
+                <div class="trader-avatar-box">
+                    <span class="trader-avatar-char"><%= traderStats.avatarChar %></span>
+                    <span class="trader-online-dot"></span>
+                </div>
+                <div class="trader-info-box">
+                    <div class="trader-name-row">
+                        <span class="trader-name"><%= traderStats.sellerName %></span>
+                        <span class="trader-star-emblem" title="Platform Verified Supplier">✦</span>
+                    </div>
+                    <div class="trader-stats-row">
+                        <span class="trader-stats-trades">Trade: <strong><%= Number(traderStats.tradesCount).toLocaleString() %> Trades</strong> (<%= traderStats.completionRate %>%)</span>
+                        <span class="trader-stats-divider">|</span>
+                        <span class="trader-stats-positive">👍 <%= traderStats.positiveFeedbackRate %>%</span>
+                    </div>
+                </div>
+                <div class="trader-arrow-hint">
+                    <span>Trader Details →</span>
+                </div>
+            </div>
+            <% } %>
 
             <!-- Price (updated live by JS as color/size are picked) -->
             <div class="price-section" id="priceSection">
@@ -761,8 +785,287 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- CUSTOMER REVIEWS & COMMENTS SECTION -->
+<!-- With Anti-Disintermediation / Safe Contact Protection -->
+<!-- ========================================== -->
+<div class="product-reviews-container" style="max-width: 1200px; margin: 30px auto; padding: 0 15px;">
+    <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #E2E8F0; padding: 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+        
+        <!-- Section Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #F1F5F9; padding-bottom: 18px; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h3 style="margin: 0 0 6px 0; font-size: 1.35rem; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 10px;">
+                    <span>Customer Reviews & Ratings</span>
+                    <span style="background: #EFF6FF; color: #1D4ED8; font-size: 0.85rem; padding: 2px 10px; border-radius: 14px; font-weight: 800;" id="reviewsCountBadge">
+                        <%= (typeof reviews !== 'undefined' && reviews) ? reviews.length : 0 %> Verified
+                    </span>
+                </h3>
+                <p style="margin: 0; font-size: 0.88rem; color: #64748B;">
+                    Real feedback from verified packaging buyers across Bangladesh. Direct phone numbers or off-platform contact are strictly prohibited.
+                </p>
+            </div>
+            <div>
+                <button type="button" onclick="document.getElementById('writeReviewCard').scrollIntoView({ behavior: 'smooth' }); document.getElementById('reviewCommentText').focus();" style="background: #FF5A1F; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 90, 31, 0.3);">
+                    ✏️ Write a Review
+                </button>
+            </div>
+        </div>
+
+        <!-- Rating Summary Box & Anti-Contact Guarantee Banner -->
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 20px; margin-bottom: 28px;" class="reviews-summary-grid">
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 2.8rem; font-weight: 900; color: #0F172A; line-height: 1;" id="summaryAvgRating">
+                    <%= product.rating || 4.9 %>
+                </div>
+                <div style="color: #D97706; font-size: 1.2rem; margin: 6px 0;">
+                    ★★★★★
+                </div>
+                <div style="font-size: 0.85rem; color: #64748B; font-weight: 600;">
+                    Based on <span id="summaryTotalCount"><%= (typeof reviews !== 'undefined' && reviews) ? reviews.length : 0 %></span> verified ratings
+                </div>
+            </div>
+
+            <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 12px; padding: 20px; display: flex; align-items: flex-start; gap: 14px;">
+                <span style="font-size: 26px; line-height: 1;">🛡️</span>
+                <div>
+                    <h4 style="margin: 0 0 6px 0; color: #166534; font-size: 1rem; font-weight: 800;">
+                        100% Secure & Authentic Platform Reviews
+                    </h4>
+                    <p style="margin: 0; font-size: 0.84rem; color: #15803D; line-height: 1.45;">
+                        To protect all buyers and suppliers against fraud, <strong>sharing mobile numbers, email addresses, personal social media handles, or outside contract agreements is strictly prohibited</strong>. All transactions and discussions remain safely on PackBang.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Write a Review Form Card -->
+        <div id="writeReviewCard" style="background: #FAFAFA; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 22px; margin-bottom: 28px;">
+            <h4 style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                <span>✍️ Share Your Feedback</span>
+            </h4>
+
+            <form id="productReviewForm" onsubmit="submitProductReview(event)">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Your Rating: <span id="selectedRatingText" style="color: #D97706; font-weight: 800;">5 Stars (Excellent)</span>
+                    </label>
+                    <div class="interactive-star-picker" style="display: flex; gap: 6px; font-size: 26px; cursor: pointer; color: #D97706;">
+                        <span class="star-pick" data-val="1" onclick="setProductStarRating(1)">★</span>
+                        <span class="star-pick" data-val="2" onclick="setProductStarRating(2)">★</span>
+                        <span class="star-pick" data-val="3" onclick="setProductStarRating(3)">★</span>
+                        <span class="star-pick" data-val="4" onclick="setProductStarRating(4)">★</span>
+                        <span class="star-pick" data-val="5" onclick="setProductStarRating(5)">★</span>
+                    </div>
+                    <input type="hidden" id="reviewRatingInput" value="5">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label for="reviewCommentText" style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Your Review / Comment:
+                    </label>
+                    <textarea 
+                        id="reviewCommentText" 
+                        required 
+                        rows="3" 
+                        maxlength="500"
+                        oninput="checkClientSideContactFilter(this.value)"
+                        placeholder="Write your experience with carton durability, poly thickness, print quality, or packaging speed... (Do not write phone numbers or emails)"
+                        style="width: 100%; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 10px 14px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"
+                    ></textarea>
+                    
+                    <!-- Dynamic Anti-Contact Alert -->
+                    <div id="contactFilterAlert" style="display: none; margin-top: 6px; padding: 8px 12px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; color: #991B1B; font-size: 0.82rem; font-weight: 700;">
+                        ⚠️ Sharing phone numbers, email addresses, or external contacts is strictly prohibited on reviews.
+                    </div>
+                </div>
+
+                <% if (!user) { %>
+                <div style="margin-bottom: 14px; max-width: 320px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Name:</label>
+                    <input type="text" id="reviewGuestName" placeholder="e.g. Shakil Ahmed" style="width: 100%; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 8px 12px; font-size: 0.88rem; box-sizing: border-box;">
+                </div>
+                <% } %>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <span style="font-size: 0.78rem; color: #64748B;">
+                        🔒 All reviews are verified. Customer names are masked for security.
+                    </span>
+                    <button type="submit" id="submitReviewBtn" style="background: #0F172A; color: #FFFFFF; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+                        Submit Review
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Verified Reviews List -->
+        <div id="productReviewsList" style="display: flex; flex-direction: column; gap: 14px;">
+            <% if (typeof reviews !== 'undefined' && reviews && reviews.length > 0) { %>
+                <% reviews.forEach(r => { 
+                    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                    const masked = (r.userName && r.userName.length > 2) ? (r.userName.charAt(0) + '***' + r.userName.slice(-1)) : 'Verified Buyer';
+                %>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #E2E8F0; color: #334155; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
+                                    <%= masked.charAt(0).toUpperCase() %>
+                                </div>
+                                <span style="font-weight: 800; color: #0F172A; font-size: 0.9rem;"><%= masked %></span>
+                                <span style="background: #DEF7EC; color: #03543F; font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 700;">
+                                    ✓ Verified Buyer
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: #D97706; font-size: 1rem; letter-spacing: 1px;"><%= stars %></span>
+                                <span style="font-size: 0.78rem; color: #94A3B8;"><%= new Date(r.createdAt).toLocaleDateString() %></span>
+                            </div>
+                        </div>
+                        <p style="margin: 0; font-size: 0.88rem; color: #334155; line-height: 1.45;">
+                            "<%= r.comment %>"
+                        </p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div id="noReviewsPlaceholder" style="text-align: center; padding: 36px 20px; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1; color: #64748B;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
+                    <strong style="color: #334155; font-size: 1rem; display: block; margin-bottom: 4px;">No Reviews Yet</strong>
+                    <p style="margin: 0; font-size: 0.85rem;">Be the first customer to share your thoughts on this packaging product.</p>
+                </div>
+            <% } %>
+        </div>
+
+    </div>
+</div>
+
 <script>
     // ✅ Fixed: JavaScript with proper error handling
+    
+        // ===== Interactive Star Rating & Anti-Disintermediation Filter =====
+        window.setProductStarRating = function(val) {
+            document.getElementById('reviewRatingInput').value = val;
+            const labels = ['', '1 Star (Poor)', '2 Stars (Fair)', '3 Stars (Good)', '4 Stars (Very Good)', '5 Stars (Excellent)'];
+            document.getElementById('selectedRatingText').textContent = labels[val] || (val + ' Stars');
+            
+            document.querySelectorAll('.star-pick').forEach(function(star, idx) {
+                if (idx < val) {
+                    star.style.color = '#D97706';
+                } else {
+                    star.style.color = '#CBD5E1';
+                }
+            });
+        };
+
+        window.checkClientSideContactFilter = function(text) {
+            const alertBox = document.getElementById('contactFilterAlert');
+            const submitBtn = document.getElementById('submitReviewBtn');
+            if (!alertBox) return;
+
+            // Check email
+            const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|(\b[a-zA-Z0-9._%+-]+\s*(at|@|\[at\]|\(at\))\s*[a-zA-Z0-9.-]+\s*(dot|\.|\(dot\)|\bcom\b|\bnet\b))/i;
+            // Check phones (convert Bengali digits)
+            const bengaliDigits = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+            const normalized = text.replace(/[০-৯]/g, function(d) { return bengaliDigits[d] || d; });
+            const digitsOnly = normalized.replace(/\D/g, '');
+            const hasPhone = /(^|01|8801|\+8801)[3-9]\d{8}/.test(digitsOnly) || (digitsOnly.length >= 10 && /(01[3-9]\d{8})/.test(digitsOnly));
+            const hasEmail = emailRegex.test(text);
+            const hasExternal = /\b(whatsapp|wa\.me|imo|telegram|viber|skype|wechat|facebook|fb\.com|call\s*me|phone\s*me|contact\s*me|bkash|nagad|deal\s*outside)\b/i.test(normalized);
+
+            if (hasPhone || hasEmail || hasExternal) {
+                alertBox.style.display = 'block';
+                alertBox.textContent = '⚠️ Sharing phone numbers, email addresses, or external contacts is strictly prohibited on reviews.';
+                if (submitBtn) submitBtn.disabled = true;
+                return false;
+            } else {
+                alertBox.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+                return true;
+            }
+        };
+
+        window.submitProductReview = async function(e) {
+            e.preventDefault();
+            const rating = document.getElementById('reviewRatingInput').value;
+            const comment = document.getElementById('reviewCommentText').value.trim();
+            const guestNameEl = document.getElementById('reviewGuestName');
+            const guestName = guestNameEl ? guestNameEl.value.trim() : '';
+
+            if (!checkClientSideContactFilter(comment)) {
+                alert('Please remove any phone numbers, emails, or contact information before submitting.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitReviewBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const res = await fetch('/api/products/' + encodeURIComponent(productId) + '/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: rating, comment: comment, guestName: guestName })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    alert(data.message || 'Failed to submit review');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Review';
+                    return;
+                }
+
+                alert('Thank you! Your review has been posted successfully.');
+                document.getElementById('reviewCommentText').value = '';
+
+                // Prepend new review to list
+                const listEl = document.getElementById('productReviewsList');
+                const noReviews = document.getElementById('noReviewsPlaceholder');
+                if (noReviews) noReviews.style.display = 'none';
+
+                const r = data.review;
+                const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                const newCard = document.createElement('div');
+                newCard.style.cssText = 'background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); animation: tFadeIn 0.3s ease;';
+                newCard.innerHTML = 
+                    '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">' +
+                        '<div style="display: flex; align-items: center; gap: 8px;">' +
+                            '<div style="width: 32px; height: 32px; border-radius: 50%; background: #E2E8F0; color: #334155; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">' +
+                                r.userName.charAt(0).toUpperCase() +
+                            '</div>' +
+                            '<span style="font-weight: 800; color: #0F172A; font-size: 0.9rem;">' + r.userName + '</span>' +
+                            '<span style="background: #DEF7EC; color: #03543F; font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 700;">' +
+                                '✓ Verified Buyer' +
+                            '</span>' +
+                        '</div>' +
+                        '<div style="display: flex; align-items: center; gap: 10px;">' +
+                            '<span style="color: #D97706; font-size: 1rem; letter-spacing: 1px;">' + stars + '</span>' +
+                            '<span style="font-size: 0.78rem; color: #94A3B8;">Just now</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<p style="margin: 0; font-size: 0.88rem; color: #334155; line-height: 1.45;">"' +
+                        r.comment.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                    '"</p>';
+                listEl.insertBefore(newCard, listEl.firstChild);
+
+                // Update counters
+                const countBadge = document.getElementById('reviewsCountBadge');
+                if (countBadge) countBadge.textContent = data.productReviewsCount + ' Verified';
+                const summaryTotal = document.getElementById('summaryTotalCount');
+                if (summaryTotal) summaryTotal.textContent = data.productReviewsCount;
+                const summaryAvg = document.getElementById('summaryAvgRating');
+                if (summaryAvg && data.productRating) summaryAvg.textContent = data.productRating;
+                const headerReviews = document.getElementById('headerReviewsText');
+                if (headerReviews) headerReviews.textContent = '(' + data.productReviewsCount + ' Reviews)';
+
+            } catch (err) {
+                console.error('Review submit error:', err);
+                alert('Network error submitting review. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Review';
+            }
+        };
+
     $(document).ready(function() {
         // ===== Variables =====
         let currentQty = 1;

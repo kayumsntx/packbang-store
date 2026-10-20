@@ -1,0 +1,610 @@
+<!-- ========================================== -->
+<!-- TRADER PROFILE DETAILS MODAL (SAFE PLATFORM TRADER) -->
+<!-- Strictly displays performance, verified ratings & reviews without contact info -->
+<!-- ========================================== -->
+<div id="traderProfileModal" class="trader-modal-overlay" style="display: none;" onclick="if(event.target === this) closeTraderProfileModal();">
+    <div class="trader-modal-card">
+        <!-- Close Button -->
+        <button type="button" class="trader-modal-close-btn" onclick="closeTraderProfileModal()" aria-label="Close modal">&times;</button>
+
+        <!-- Trader Header -->
+        <div class="trader-modal-header">
+            <div class="trader-avatar-circle" id="tModalAvatar">P<span class="t-online-dot"></span></div>
+            <div class="trader-header-text">
+                <div class="trader-title-line">
+                    <h3 id="tModalName">PackBang Direct</h3>
+                    <span class="trader-verified-star" title="Platform Verified Supplier">✦</span>
+                    <span class="trader-badge-pill" id="tModalBadge">Verified Supplier</span>
+                </div>
+                <div class="trader-sub-line">
+                    <span id="tModalTier">Authenticated Partner</span> • 
+                    <span>Member Since <span id="tModalSince">2024</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4-Metric Performance Grid (Matches Image: Trades, Completion Rate, Positive %) -->
+        <div class="trader-metrics-grid">
+            <div class="trader-metric-box">
+                <div class="t-metric-label">Fulfilled Trades</div>
+                <div class="t-metric-value" id="tModalTrades">3,087</div>
+                <div class="t-metric-sub">Platform Orders</div>
+            </div>
+            <div class="trader-metric-box">
+                <div class="t-metric-label">Completion Rate</div>
+                <div class="t-metric-value highlight" id="tModalCompletion">99.80%</div>
+                <div class="t-metric-sub">On-Time Delivery</div>
+            </div>
+            <div class="trader-metric-box">
+                <div class="t-metric-label">Positive Feedback</div>
+                <div class="t-metric-value green" id="tModalPositive">👍 99.88%</div>
+                <div class="t-metric-sub">Buyer Satisfaction</div>
+            </div>
+            <div class="trader-metric-box">
+                <div class="t-metric-label">Average Rating</div>
+                <div class="t-metric-value gold" id="tModalRating">⭐ 4.95</div>
+                <div class="t-metric-sub">5-Star Standard</div>
+            </div>
+        </div>
+
+        <!-- Platform Safety & Anti-Contract Warning Banner -->
+        <div class="trader-safety-banner">
+            <div class="t-safety-icon">🛡️</div>
+            <div class="t-safety-text">
+                <strong>PackBang Safe Marketplace Policy</strong>
+                <p>All packaging orders, escrow payments, and product warranties are exclusively guaranteed on PackBang. Sharing direct phone numbers, emails, or off-platform contracts is strictly prohibited to protect all members from fraud.</p>
+            </div>
+        </div>
+
+        <!-- Specialized Categories -->
+        <div class="trader-categories-section">
+            <span class="t-sec-title">Factory Packaging Specialization:</span>
+            <div class="t-categories-tags" id="tModalCategories">
+                <span class="t-tag">Corrugated Cartons</span>
+                <span class="t-tag">Courier Poly Bags</span>
+                <span class="t-tag">Bubble Wrap & Cushioning</span>
+            </div>
+        </div>
+
+        <!-- Verified Customer Reviews Section -->
+        <div class="trader-reviews-section">
+            <div class="t-reviews-header">
+                <h4>Verified Customer Reviews & Feedback (<span id="tModalReviewCount">0</span>)</h4>
+                <span class="t-safe-badge"><i class="fas fa-lock"></i> Protected Transactions</span>
+            </div>
+            <div class="t-reviews-list" id="tModalReviewsList">
+                <div class="t-empty-reviews" id="tModalEmptyReviews">
+                    Loading verified feedback...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Trader Profile Styles */
+.trader-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: tFadeIn 0.2s ease-out;
+}
+
+@keyframes tFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.trader-modal-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    border: 1px solid #E2E8F0;
+    font-family: inherit;
+}
+
+.trader-modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: #F1F5F9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.trader-modal-close-btn:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+.trader-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.trader-avatar-circle {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #0F172A;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 22px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.t-online-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 11px;
+    height: 11px;
+    background: #10B981;
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+}
+
+.trader-header-text {
+    flex: 1;
+}
+
+.trader-title-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.trader-title-line h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.trader-verified-star {
+    color: #D97706;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.trader-badge-pill {
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid #FDE68A;
+}
+
+.trader-sub-line {
+    font-size: 0.82rem;
+    color: #64748B;
+    margin-top: 3px;
+}
+
+.trader-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 18px 0;
+}
+
+@media (max-width: 520px) {
+    .trader-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.trader-metric-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+}
+
+.t-metric-label {
+    font-size: 0.72rem;
+    color: #64748B;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.t-metric-value {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #0F172A;
+    margin: 4px 0 2px 0;
+}
+
+.t-metric-value.highlight {
+    color: #2563EB;
+}
+
+.t-metric-value.green {
+    color: #059669;
+}
+
+.t-metric-value.gold {
+    color: #D97706;
+}
+
+.t-metric-sub {
+    font-size: 0.7rem;
+    color: #94A3B8;
+}
+
+.trader-safety-banner {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.t-safety-icon {
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.t-safety-text strong {
+    display: block;
+    font-size: 0.82rem;
+    color: #166534;
+    margin-bottom: 2px;
+}
+
+.t-safety-text p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #15803D;
+    line-height: 1.35;
+}
+
+.trader-categories-section {
+    margin-bottom: 16px;
+}
+
+.t-sec-title {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.t-categories-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.t-tag {
+    background: #F1F5F9;
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+}
+
+.trader-reviews-section {
+    border-top: 1px solid #F1F5F9;
+    padding-top: 16px;
+}
+
+.t-reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.t-reviews-header h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.t-safe-badge {
+    font-size: 0.72rem;
+    color: #059669;
+    background: #ECFDF5;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.t-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.t-review-card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.t-review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.t-review-user {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0F172A;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.t-verified-check {
+    font-size: 0.68rem;
+    color: #059669;
+    font-weight: 600;
+}
+
+.t-review-stars {
+    color: #D97706;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.t-review-body {
+    font-size: 0.82rem;
+    color: #334155;
+    margin: 0 0 4px 0;
+    line-height: 1.35;
+}
+
+.t-review-date {
+    font-size: 0.7rem;
+    color: #94A3B8;
+}
+
+.t-empty-reviews {
+    text-align: center;
+    padding: 20px;
+    color: #94A3B8;
+    font-size: 0.85rem;
+}
+
+/* Trader Profile Badge Element (Shown across product & custom order pages) */
+.trader-profile-badge {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin: 12px 0;
+    text-decoration: none;
+    max-width: 100%;
+}
+
+.trader-profile-badge:hover {
+    border-color: #CBD5E1;
+    background: #F8FAFC;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.trader-avatar-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #0F172A;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.trader-avatar-box .trader-online-dot {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: 9px;
+    height: 9px;
+    background: #10B981;
+    border: 1.5px solid #FFFFFF;
+    border-radius: 50%;
+}
+
+.trader-info-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.trader-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.trader-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.trader-star-emblem {
+    color: #D97706;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.trader-stats-row {
+    font-size: 0.8rem;
+    color: #71717A;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    font-weight: 500;
+    flex-wrap: wrap;
+}
+
+.trader-stats-trades {
+    border-bottom: 1px dotted #A1A1AA;
+    color: #52525B;
+}
+
+.trader-stats-divider {
+    color: #D4D4D8;
+}
+
+.trader-stats-positive {
+    color: #059669;
+    font-weight: 700;
+}
+
+.trader-arrow-hint {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #2563EB;
+    background: #EFF6FF;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #DBEAFE;
+    white-space: nowrap;
+}
+</style>
+
+<script>
+// Global Trader Profile Modal Handler
+async function openTraderProfileModal(sellerId, fallbackName) {
+    const modal = document.getElementById('traderProfileModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    // Set initial loading values
+    document.getElementById('tModalName').textContent = fallbackName || 'Verified Supplier';
+    document.getElementById('tModalAvatar').innerHTML = (fallbackName ? fallbackName.charAt(0).toUpperCase() : 'P') + '<span class="t-online-dot"></span>';
+    document.getElementById('tModalEmptyReviews').style.display = 'block';
+    document.getElementById('tModalEmptyReviews').textContent = 'Loading verified feedback...';
+    document.getElementById('tModalReviewsList').innerHTML = '<div class="t-empty-reviews">Loading verified feedback...</div>';
+
+    try {
+        const queryId = encodeURIComponent(sellerId || 'admin');
+        const queryName = encodeURIComponent(fallbackName || '');
+        const res = await fetch('/api/trader/' + queryId + '/profile?name=' + queryName);
+        const data = await res.json();
+
+        if (data.success && data.trader) {
+            const t = data.trader;
+            document.getElementById('tModalName').textContent = t.sellerName;
+            document.getElementById('tModalAvatar').innerHTML = t.avatarChar + '<span class="t-online-dot"></span>';
+            document.getElementById('tModalBadge').textContent = t.badge;
+            document.getElementById('tModalTier').textContent = t.isVerified ? 'Verified Platform Partner' : 'Standard Supplier';
+            document.getElementById('tModalSince').textContent = t.memberSince || '2024';
+
+            document.getElementById('tModalTrades').textContent = Number(t.tradesCount).toLocaleString();
+            document.getElementById('tModalCompletion').textContent = t.completionRate + '%';
+            document.getElementById('tModalPositive').textContent = '👍 ' + t.positiveFeedbackRate + '%';
+            document.getElementById('tModalRating').textContent = '⭐ ' + t.averageRating;
+
+            // Categories
+            const catContainer = document.getElementById('tModalCategories');
+            if (catContainer && t.categories) {
+                catContainer.innerHTML = t.categories.map(c => '<span class="t-tag">' + c + '</span>').join('');
+            }
+
+            // Reviews
+            const reviewsCountEl = document.getElementById('tModalReviewCount');
+            if (reviewsCountEl) reviewsCountEl.textContent = t.reviews ? t.reviews.length : '0';
+
+            const listEl = document.getElementById('tModalReviewsList');
+            if (t.reviews && t.reviews.length > 0) {
+                listEl.innerHTML = t.reviews.map(r => {
+                    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                    const dateStr = new Date(r.createdAt).toLocaleDateString();
+                    const itemDesc = r.reviewType === 'custom_order' ? ('Custom Order: ' + (r.customOrderTitle || 'Packaging Batch')) : (r.productName || 'Packaging Item');
+                    return '<div class="t-review-card">' +
+                        '<div class="t-review-top">' +
+                            '<span class="t-review-user">' + r.userName + ' <span class="t-verified-check">✓ Verified Buyer</span></span>' +
+                            '<span class="t-review-stars">' + stars + '</span>' +
+                        '</div>' +
+                        '<p class="t-review-body">"' + escapeHtml(r.comment) + '"</p>' +
+                        '<div class="t-review-date"><small>' + itemDesc + ' • ' + dateStr + '</small></div>' +
+                    '</div>';
+                }).join('');
+            } else {
+                listEl.innerHTML = '<div class="t-empty-reviews">No customer reviews yet. This trader maintains a 100% dispute-free record.</div>';
+            }
+        }
+    } catch (err) {
+        console.warn('Failed to load trader profile:', err);
+    }
+}
+
+function closeTraderProfileModal() {
+    const modal = document.getElementById('traderProfileModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+</script>

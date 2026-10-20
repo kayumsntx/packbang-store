@@ -409,7 +409,9 @@
                         <span style="font-weight:800; color:#059669;"><i class="fas fa-handshake"></i> Agreed Price: BDT. <%= order.agreedPrice.toFixed(2) %></span>
                     <% } %>
                     <% if (order.assignedSellerName) { %>
-                        <span><i class="fas fa-industry"></i> Supplier: <%= order.assignedSellerName %></span>
+                        <span onclick="openTraderProfileModal('<%= order.assignedSellerId %>', '<%= (order.assignedSellerName || 'Supplier').replace(/'/g, "\\'") %>')" style="cursor: pointer; color: #2563EB; font-weight: 700; background: #EFF6FF; padding: 2px 8px; border-radius: 6px; border: 1px solid #DBEAFE;" title="Click to view verified trader statistics">
+                            <i class="fas fa-industry"></i> Supplier: <%= order.assignedSellerName %> ✦
+                        </span>
                     <% } %>
                     <% if (order.quantity && order.quantity > 1) { %>
                         <span><i class="fas fa-cubes"></i> Qty: <%= order.quantity.toLocaleString() %> pcs</span>
@@ -490,8 +492,10 @@
                                             </div>
                                             <div class="seller-details">
                                                 <div class="seller-title-row">
-                                                    <span class="seller-name"><%= bid.sellerName %></span>
-                                                    <span class="verified-tag"><i class="fas fa-shield-alt"></i> Verified Supplier</span>
+                                                    <span class="seller-name" onclick="openTraderProfileModal('<%= bid.sellerId %>', '<%= (bid.sellerName || 'Verified Supplier').replace(/'/g, "\\'") %>')" style="cursor: pointer; text-decoration: underline;" title="Click to view verified trader statistics">
+                                                        <%= bid.sellerName %> ✦
+                                                    </span>
+                                                    <span class="verified-tag"><i class="fas fa-shield-alt"></i> PackBang Protected</span>
                                                 </div>
                                                 <div class="seller-meta-row">
                                                     <span class="seller-rating"><i class="fas fa-star"></i> 4.9 (Factory Direct)</span>
