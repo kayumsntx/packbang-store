@@ -565,6 +565,18 @@
                         ${order.budget ? `| <i class="fas fa-money-bill"></i> Target Budget: BDT ${order.budget}` : ''}
                     </div>
                     <div class="meta"><strong>Description:</strong> ${order.description.substring(0, 150)}${order.description.length > 150 ? '...' : ''}</div>
+                    ${order.images && order.images.length > 0 ? `
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;">
+                            ${order.images.map((img, idx) => `
+                                <div onclick="openOrderImagePreview('${img}', 'Packaging Specification #${idx + 1} - #${order.id}')" title="Click to preview specification image" style="position:relative; width:70px; height:70px; border-radius:8px; overflow:hidden; cursor:pointer; border:2px solid #CBD5E1; background:#F8FAFC; transition:all 0.2s;">
+                                    <img src="${img}" alt="Specification #${idx + 1}" style="width:100%; height:100%; object-fit:cover;">
+                                    <div style="position:absolute; inset:0; background:rgba(15,23,42,0.55); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; opacity:0; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                                        <i class="fas fa-search-plus"></i>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                     
                     <!-- Escrow & Financial Summary Box -->
                     <div class="escrow-summary-box">

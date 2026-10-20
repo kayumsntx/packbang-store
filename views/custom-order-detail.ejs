@@ -374,6 +374,34 @@
         font-size: 0.9rem;
     }
     .btn-back:hover { background: #1e293b; color: white; }
+
+    .order-img-thumb-wrap {
+        position: relative;
+        width: 96px;
+        height: 96px;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid #E2E8F0;
+        transition: all 0.2s ease;
+        background: #F8FAFC;
+    }
+    .order-img-thumb-wrap:hover {
+        border-color: #FF5A1F !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(255, 90, 31, 0.25);
+    }
+    .order-img-thumb-wrap:hover .img-zoom-hint {
+        opacity: 1 !important;
+    }
+    .seller-portal-card {
+        background: #F8FAFC;
+        border: 2px solid #3B82F6;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 24px 0;
+    }
+
 </style>
 
 <div class="order-detail-page">
@@ -418,12 +446,22 @@
     </div>
 
     <% if (order.images && order.images.length > 0) { %>
-        <div class="detail-row" style="flex-wrap: wrap;">
-            <span class="label">Reference Specs</span>
-            <div class="order-images">
-                <% order.images.forEach(img => { %>
-                    <img src="<%= img %>" alt="Reference Image" onclick="window.open(this.src,'_blank')">
-                <% }) %>
+        <div class="detail-row" style="flex-wrap: wrap; align-items: flex-start;">
+            <span class="label"><i class="fas fa-images" style="color: #FF5A1F; margin-right: 6px;"></i> Reference Specs</span>
+            <div class="value">
+                <div class="order-images" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <% order.images.forEach((img, imgIdx) => { %>
+                        <div class="order-img-thumb-wrap" onclick="openOrderImagePreview('<%= img %>', 'Packaging Specification #<%= imgIdx + 1 %> - Order <%= order.id %>')" title="Click to preview full specification in modal">
+                            <img src="<%= img %>" alt="Specification #<%= imgIdx + 1 %>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div class="img-zoom-hint" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; opacity: 0; transition: opacity 0.2s;">
+                                <i class="fas fa-search-plus" style="margin-right: 4px;"></i> Preview
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+                <div style="font-size: 12px; color: #64748B; margin-top: 6px;">
+                    <i class="fas fa-info-circle"></i> Click any sample or blueprint image to open interactive modal preview with 90° rotation and full resolution tools.
+                </div>
             </div>
         </div>
     <% } %>
@@ -432,6 +470,118 @@
         <div class="detail-row">
             <span class="label">Admin Notes</span>
             <span class="value"><%= order.adminNotes %></span>
+        </div>
+    <% } %>
+
+    <!-- ===== SUPPLIER / SELLER MANAGEMENT PORTAL ===== -->
+    <% if (typeof isSeller !== 'undefined' && isSeller) { %>
+        <% 
+            const mySellerId = (user && user.id) || (currentSeller && (currentSeller._id || currentSeller.id)) || '';
+            const isAssignedToMe = (order.assignedSellerId === mySellerId) || (order.bids && order.bids.some(b => b.sellerId === mySellerId && b.status === 'accepted'));
+            const myExistingBid = order.bids ? order.bids.find(b => b.sellerId === mySellerId) : null;
+        %>
+        <div class="seller-portal-card" style="background: #F0FDF4; border: 2px solid #22C55E; border-radius: 14px; padding: 22px; margin: 24px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">🏭</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #166534;">
+                            Packaging Supplier Portal
+                        </h3>
+                        <span style="font-size: 12px; color: #15803D;">
+                            Viewing as Verified Supplier: <strong><%= (currentSeller && currentSeller.shopName) || (user && user.profile && user.profile.name) || (user && user.username) || 'Supplier' %></strong>
+                        </span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="openSafeChatModal('<%= order.id %>', '<%= mySellerId %>', '<%= (user && user.profile && user.profile.name) || 'Supplier' %>')" style="background: #EFF6FF; color: #1D4ED8; border: 1.5px solid #BFDBFE; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-comments"></i> Chat with Buyer
+                    </button>
+                </div>
+            </div>
+
+            <% if (isAssignedToMe) { %>
+                <% if (order.paymentStatus === 'paid_to_admin' && order.status !== 'seller_completed' && order.status !== 'received' && order.status !== 'completed') { %>
+                    <div style="background: #FFFFFF; border: 1.5px solid #86EFAC; border-radius: 10px; padding: 18px; margin-top: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                            <div>
+                                <div style="font-weight: 800; color: #166534; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-shield-alt"></i> Payment Secured in Admin Escrow!
+                                </div>
+                                <div style="font-size: 13.5px; color: #15803D; margin-top: 4px;">
+                                    Customer has deposited <strong>BDT <%= (order.agreedPrice || order.budget || 0).toFixed(2) %></strong>. You are fully authorized to manufacture and dispatch this order.
+                                </div>
+                            </div>
+                            <button type="button" onclick="sellerMarkCompleted('<%= order.id %>')" style="background: linear-gradient(135deg, #10B981, #059669); color: #FFFFFF; border: none; padding: 12px 22px; border-radius: 8px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-check-circle"></i> Mark Order Complete & Shipped
+                            </button>
+                        </div>
+                    </div>
+                <% } else if (order.paymentStatus === 'unpaid') { %>
+                    <div style="background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 10px; padding: 16px; color: #92400E;">
+                        <div style="font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-hourglass-half"></i> Assigned to You! Awaiting Buyer Escrow Deposit
+                        </div>
+                        <p style="margin: 6px 0 0 0; font-size: 13px;">
+                            The customer has accepted your quotation. Manufacturing will begin as soon as the customer deposits BDT <%= (order.agreedPrice || 0).toFixed(2) %> to PackBang Admin Escrow.
+                        </p>
+                    </div>
+                <% } else if (order.status === 'seller_completed') { %>
+                    <div style="background: #F3E8FF; border: 1.5px solid #E9D5FF; border-radius: 10px; padding: 16px; color: #6B21A8;">
+                        <div style="font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-check-circle"></i> Production Completed & Delivered
+                        </div>
+                        <p style="margin: 6px 0 0 0; font-size: 13px;">
+                            You have marked manufacturing complete. Waiting for customer receipt inspection. Payout will be released by Admin upon receipt confirmation.
+                        </p>
+                    </div>
+                <% } %>
+            <% } else if (myExistingBid) { %>
+                <div style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 16px; margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <span style="font-size: 12px; color: #64748B; font-weight: 700; text-transform: uppercase;">Your Submitted Quotation</span>
+                            <div style="font-size: 18px; font-weight: 900; color: #FF5A1F; margin-top: 2px;">
+                                ৳ <%= parseFloat(myExistingBid.amount).toFixed(2) %> / pc
+                            </div>
+                            <div style="font-size: 12.5px; color: #475569; margin-top: 4px;">
+                                Delivery Time: <strong><%= myExistingBid.deliveryTime || 'As specified' %></strong>
+                                <% if (myExistingBid.note) { %> • Note: "<%= myExistingBid.note %>"<% } %>
+                            </div>
+                        </div>
+                        <span class="status-badge status-<%= myExistingBid.status %>" style="font-size: 13px; padding: 6px 14px;">
+                            <%= myExistingBid.status.toUpperCase() %>
+                        </span>
+                    </div>
+                </div>
+            <% } else if (order.status === 'approved') { %>
+                <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-top: 10px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                        ⚡ Place Factory Quotation / Bid
+                    </h4>
+                    <form id="sellerDirectBidForm" onsubmit="handleSellerDetailBid(event, '<%= order.id %>')" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <input type="hidden" name="sellerId" value="<%= mySellerId %>">
+                        <input type="hidden" name="sellerName" value="<%= (currentSeller && currentSeller.shopName) || (user && user.profile && user.profile.name) || (user && user.username) || 'Supplier' %>">
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 4px;">Unit Quotation (BDT) *</label>
+                            <input type="number" name="amount" placeholder="e.g. 45.00" required step="0.01" min="0.1" style="width: 100%; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 4px;">Delivery Timeline</label>
+                            <input type="text" name="deliveryTime" placeholder="e.g. 3-5 Business Days" style="width: 100%; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; box-sizing: border-box;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 4px;">Production Note & Specifications</label>
+                            <textarea name="note" placeholder="Paper GSM, coating, lamination, packaging details..." rows="2" style="width: 100%; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; box-sizing: border-box; resize: vertical;"></textarea>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button type="submit" id="sellerBidSubmitBtn" style="background: #FF5A1F; color: #FFFFFF; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                ⚡ Submit Factory Quotation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            <% } %>
         </div>
     <% } %>
 
@@ -651,7 +801,7 @@
         </div>
     <% } %>
 
-    <a href="/my-custom-orders" class="btn-back"><i class="fas fa-arrow-left"></i> Back to My Orders</a>
+    <a href="<%= (typeof isSeller !== 'undefined' && isSeller) ? '/seller/custom-orders' : '/my-custom-orders' %>" class="btn-back"><i class="fas fa-arrow-left"></i> <%= (typeof isSeller !== 'undefined' && isSeller) ? 'Back to Custom Requests' : 'Back to My Orders' %></a>
 </div>
 
 <!-- ===== SAFE CHAT MODAL (SECURE ESCROW CHAT & PRIVACY PROTECTION) ===== -->

@@ -2409,21 +2409,83 @@ app.post("/api/public/custom-order/:id/message", async (req, res) => {
 // ==========================================
 // CUSTOM ORDER - SINGLE VIEW (Customer/Admin/Seller)
 // ==========================================
-app.get("/custom-order/:id", requireAuth, async (req, res) => {
+app.get("/custom-order/:id", async (req, res) => {
     try {
         const order = await CustomOrder.findOne({ id: req.params.id });
         if (!order) {
             return res.status(404).send("Order not found");
         }
 
-        // Permission check
-        const user = req.session.user;
-        const isOwner = order.customerId === user.id;
-        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
-        const isSeller = user.role === 'seller' || user.role === 'authorized_cashier';
+        let user = req.session ? req.session.user : null;
+        let isSeller = false;
+        let isOwner = false;
+        let isAdmin = false;
+        let currentSeller = null;
 
+        // Check if customer or admin is already authenticated in session
+        if (user) {
+            isOwner = order.customerId === user.id;
+            isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+            isSeller = user.role === 'seller' || user.role === 'authorized_cashier';
+        }
+
+        // Support direct access for sellers via seller query parameter or seller session
+        const querySellerId = req.query.sellerId || req.query.sellerPhone;
+        if (!isAdmin && (!user || !isSeller)) {
+            if (querySellerId) {
+                const queryOr = [];
+                if (typeof querySellerId === 'string' && querySellerId.match(/^[0-9a-fA-F]{24}$/)) {
+                    queryOr.push({ _id: querySellerId });
+                }
+                queryOr.push({ id: querySellerId });
+                queryOr.push({ phone: querySellerId });
+
+                const sellerDoc = await Seller.findOne({ $or: queryOr });
+                if (sellerDoc) {
+                    isSeller = true;
+                    currentSeller = sellerDoc;
+                    if (!user) {
+                        user = {
+                            id: sellerDoc._id.toString(),
+                            username: sellerDoc.shopName,
+                            role: 'seller',
+                            phone: sellerDoc.phone,
+                            profile: {
+                                name: sellerDoc.ownerName || sellerDoc.shopName,
+                                phone: sellerDoc.phone
+                            }
+                        };
+                    }
+                }
+            }
+        }
+
+        // Check if user is seller through seller session if set
+        if (!isSeller && req.session && req.session.seller) {
+            isSeller = true;
+            currentSeller = req.session.seller;
+            if (!user) {
+                user = {
+                    id: req.session.seller._id || req.session.seller.id,
+                    username: req.session.seller.shopName,
+                    role: 'seller',
+                    phone: req.session.seller.phone,
+                    profile: {
+                        name: req.session.seller.ownerName || req.session.seller.shopName,
+                        phone: req.session.seller.phone
+                    }
+                };
+            }
+        }
+
+        // If not logged in and not recognized as seller, redirect to login
+        if (!user && !isSeller) {
+            return res.redirect(`/login?redirect=/custom-order/${encodeURIComponent(req.params.id)}`);
+        }
+
+        // Access control: Only owner, admin, or sellers can view custom order details
         if (!isOwner && !isAdmin && !isSeller) {
-            return res.status(403).send("Access denied");
+            return res.status(403).send("Access denied. You do not have permission to view this custom order.");
         }
 
         res.render("custom-order-detail", {
@@ -2432,6 +2494,7 @@ app.get("/custom-order/:id", requireAuth, async (req, res) => {
             isOwner,
             isAdmin,
             isSeller,
+            currentSeller,
             isGuest: false
         });
     } catch (err) {
