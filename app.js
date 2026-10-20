@@ -1376,6 +1376,65 @@ function validateDisintermediation(rawText) {
 app.get("/custom-order", (req, res) => {
     res.redirect("/custom-orders");
 });
+
+// ---------- HELPER: VERIFY SELLER CAN BID ON CUSTOM ORDER (KYC REQUIRED) ----------
+async function verifySellerCanBidCustomOrder(sellerId, sellerPhone) {
+    if (!sellerId && !sellerPhone) {
+        return { allowed: true };
+    }
+    try {
+        const queryOr = [];
+        if (sellerId) {
+            queryOr.push({ _id: sellerId });
+            queryOr.push({ id: sellerId });
+        }
+        if (sellerPhone) {
+            queryOr.push({ phone: sellerPhone });
+        }
+
+        const sellerDoc = await Seller.findOne({ $or: queryOr });
+        if (sellerDoc) {
+            const st = sellerDoc.status || 'active';
+            if (st === 'suspended') {
+                if (sellerDoc.suspendedUntil && new Date(sellerDoc.suspendedUntil) <= new Date()) {
+                    sellerDoc.status = 'active';
+                    sellerDoc.suspendedUntil = null;
+                    sellerDoc.suspensionReason = '';
+                    await sellerDoc.save();
+                } else {
+                    return {
+                        allowed: false,
+                        reason: `Your seller account is suspended until ${sellerDoc.suspendedUntil ? new Date(sellerDoc.suspendedUntil).toLocaleDateString() : 'further notice'}. Reason: ${sellerDoc.suspensionReason || 'Compliance review'}`
+                    };
+                }
+            }
+            if (st === 'banned') {
+                return {
+                    allowed: false,
+                    reason: `Your seller account has been permanently banned. Reason: ${sellerDoc.banReason || 'Policy violation'}`
+                };
+            }
+
+            // Custom order bidding requires Trade License and NID (front & back)
+            const hasTradeLicense = Boolean(sellerDoc.tradeLicenseNumber || sellerDoc.tradeLicenseImage);
+            const hasNid = Boolean(sellerDoc.nidFrontImage && sellerDoc.nidBackImage);
+
+            if (!hasTradeLicense || !hasNid) {
+                return {
+                    allowed: false,
+                    requiresKyc: true,
+                    reason: "To place bids on custom orders, you must provide your Trade License and National ID (NID Front & Back parts) in your seller profile."
+                };
+            }
+
+            return { allowed: true };
+        }
+    } catch (e) {
+        console.warn("Seller KYC check note:", e.message);
+    }
+    return { allowed: true };
+}
+
 // ==========================================
 // CUSTOM ORDER ROUTES
 // ==========================================
@@ -1446,10 +1505,10 @@ app.get("/api/public/approved-custom-orders", async (req, res) => {
 app.post("/api/public/custom-order/:id/bid", async (req, res) => {
     const { sellerId, sellerName, amount, deliveryTime, note } = req.body;
     try {
-        // Check admin approval status for bidding
-        const approvalCheck = await verifySellerApproved(sellerId);
-        if (!approvalCheck.allowed) {
-            return res.status(403).json({ success: false, message: approvalCheck.reason });
+        // Custom order bidding requires Trade License and NID (KYC updated)
+        const kycCheck = await verifySellerCanBidCustomOrder(sellerId);
+        if (!kycCheck.allowed) {
+            return res.status(403).json({ success: false, requiresKyc: kycCheck.requiresKyc || false, message: kycCheck.reason });
         }
         const order = await CustomOrder.findOne({ id: req.params.id });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
@@ -1548,10 +1607,10 @@ app.post("/api/custom-order/:id/bid", requireSellerOrAdmin, async (req, res) => 
     const user = req.session.user;
     
     try {
-        // Check admin approval status for bidding
-        const approvalCheck = await verifySellerApproved(user.id, user.phone);
-        if (!approvalCheck.allowed) {
-            return res.status(403).json({ success: false, message: approvalCheck.reason });
+        // Custom order bidding requires Trade License and NID (KYC updated)
+        const kycCheck = await verifySellerCanBidCustomOrder(user.id, user.phone);
+        if (!kycCheck.allowed) {
+            return res.status(403).json({ success: false, requiresKyc: kycCheck.requiresKyc || false, message: kycCheck.reason });
         }
         const order = await CustomOrder.findOne({ id: req.params.id });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
@@ -1848,10 +1907,36 @@ app.post('/api/seller/products/create', (req, res, next) => {
             imagePath: providedImagePath
         } = req.body;
 
-        // Check admin approval status for the seller
-        const approvalCheck = await verifySellerApproved(sellerId, sellerPhone);
-        if (!approvalCheck.allowed) {
-            return res.status(403).json({ success: false, message: approvalCheck.reason });
+        // Check if seller account is suspended or banned
+        if (sellerId || sellerPhone) {
+            try {
+                const sellerDoc = await Seller.findOne({
+                    $or: [
+                        ...(sellerId ? [{ _id: sellerId }, { id: sellerId }] : []),
+                        ...(sellerPhone ? [{ phone: sellerPhone }] : [])
+                    ]
+                });
+                if (sellerDoc) {
+                    if (sellerDoc.status === 'suspended') {
+                        if (sellerDoc.suspendedUntil && new Date(sellerDoc.suspendedUntil) <= new Date()) {
+                            sellerDoc.status = 'active';
+                            sellerDoc.suspendedUntil = null;
+                            await sellerDoc.save();
+                        } else {
+                            return res.status(403).json({
+                                success: false,
+                                message: `Your seller account is suspended until ${sellerDoc.suspendedUntil ? new Date(sellerDoc.suspendedUntil).toLocaleDateString() : 'further notice'}. Reason: ${sellerDoc.suspensionReason || 'Compliance review'}`
+                            });
+                        }
+                    }
+                    if (sellerDoc.status === 'banned') {
+                        return res.status(403).json({
+                            success: false,
+                            message: `Your seller account has been permanently banned. Reason: ${sellerDoc.banReason || 'Policy violation'}`
+                        });
+                    }
+                }
+            } catch (e) {}
         }
 
         const productName = (name || title || '').trim();
