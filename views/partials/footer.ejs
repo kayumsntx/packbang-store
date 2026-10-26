@@ -97,9 +97,14 @@
         padding: 40px 20px 0 20px;
         margin-top: 40px;
         font-size: 0.9rem;
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
+        overflow-x: hidden;
     }
 
     .footer-container {
+        width: 100%;
         max-width: 1200px;
         margin: 0 auto;
         display: grid;
@@ -107,6 +112,7 @@
         gap: 30px;
         padding-bottom: 30px;
         border-bottom: 1px solid #2d3748;
+        box-sizing: border-box;
     }
 
     .footer-col h4 {
@@ -232,23 +238,39 @@
 
 
     @media (max-width: 768px) {
+        .bagnest-footer {
+            width: 100% !important;
+            max-width: 100vw !important;
+            padding: 30px 12px 20px 12px !important;
+            box-sizing: border-box !important;
+            overflow-x: hidden !important;
+        }
+
         .footer-container {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            width: 100% !important;
+            max-width: 100% !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 16px !important;
+            box-sizing: border-box !important;
+        }
+
+        .footer-col {
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            text-align: center;
         }
 
         .footer-bottom {
+            width: 100% !important;
+            max-width: 100% !important;
             flex-direction: column;
             text-align: center;
+            box-sizing: border-box !important;
         }
 
         .footer-col h4::after {
             left: 50%;
             transform: translateX(-50%);
-        }
-
-        .footer-col {
-            text-align: center;
         }
 
         .app-buttons {
@@ -262,12 +284,12 @@
 
     @media (max-width: 480px) {
         .footer-container {
-            grid-template-columns: 1fr;
-            gap: 25px;
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
         }
 
         .bagnest-footer {
-            padding: 30px 15px 0 15px;
+            padding: 24px 10px 16px 10px !important;
         }
     }
         @media (max-width: 480px) {
