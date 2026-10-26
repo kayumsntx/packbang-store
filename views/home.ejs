@@ -315,6 +315,8 @@
         margin-bottom: 40px;
     }
     .home-card {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
         background: #FFFFFF;
         border-radius: 12px;
         overflow: hidden;
@@ -636,9 +638,14 @@
             right: 6px;
         }
         .factory-tag {
-            font-size: 0.62rem;
-            padding: 1px 5px;
-            margin-bottom: 4px;
+            font-size: 0.62rem !important;
+            padding: 2px 6px !important;
+            margin-bottom: 4px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            max-width: 100% !important;
+            display: inline-block !important;
         }
         .home-card-body {
             padding: 8px 8px 10px 8px !important;
@@ -655,18 +662,39 @@
         }
         .product-price { 
             font-size: 1.05rem !important; 
-            font-weight: 800 !important;
+            font-weight: 900 !important;
+            color: #FF4500 !important;
         }
-        .old-price {
+        .original-price {
             font-size: 0.72rem !important;
+            color: #94A3B8 !important;
+            text-decoration: line-through !important;
         }
-        .stock-tag-live {
+        .sales-rating-row {
+            font-size: 0.68rem !important;
+            margin-bottom: 6px !important;
+        }
+        .urgency-bar-wrap {
+            margin-bottom: 6px !important;
+        }
+        .urgency-bar-text {
             font-size: 0.65rem !important;
+            margin-bottom: 2px !important;
         }
-        .btn-home-card {
-            padding: 6px 10px !important;
-            font-size: 0.78rem !important;
+        .urgency-bar-track {
+            height: 4px !important;
+        }
+        .card-action-wrap {
+            padding-top: 6px !important;
+            border-top: 1px solid #F1F5F9 !important;
+            margin-top: auto !important;
+        }
+        .btn-card-details {
+            padding: 6px 8px !important;
+            font-size: 0.75rem !important;
             border-radius: 6px !important;
+            font-weight: 700 !important;
+            gap: 4px !important;
         }
     }
 
@@ -833,7 +861,7 @@
 
         <div class="home-catalog-grid">
             <% products.forEach((product, idx) => { %>
-                <div class="home-card" data-product-id="<%= product.id %>">
+                <div class="home-card" data-product-id="<%= product.id %>" onclick="if (!event.target.closest('button, a')) window.location.href='/product/<%= product.id %>'">
                     <div class="product-img-wrap">
                         <a href="/product/<%= product.id %>">
                             <img src="<%= product.imagePath %>" alt="<%= product.name %>" loading="lazy">

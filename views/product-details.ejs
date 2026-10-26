@@ -412,61 +412,21 @@
         font-size: 0.95rem;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-        .product-details-container {
-            grid-template-columns: 1fr;
-            padding: 20px;
-        }
-
-        .product-gallery {
-            position: relative;
-            top: 0;
-        }
-
-        .product-info .product-name {
-            font-size: 1.4rem;
-        }
-
-        .price-section .current-price {
-            font-size: 1.6rem;
-        }
-
-        .add-to-cart-section {
-            flex-direction: column;
-        }
-
-        .btn-add-to-cart, .btn-buy-now {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .product-details-page {
-            padding: 0 10px;
-        }
-
-        .product-details-container {
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .thumbnail-item {
-            width: 60px;
-            height: 60px;
-            min-width: 60px;
-        }
-
-        .size-option {
-            width: 38px;
-            height: 38px;
-            font-size: 0.8rem;
-        }
-
-        .color-option {
-            width: 34px;
-            height: 34px;
-        }
+    /* ===== COMPREHENSIVE MOBILE-FRIENDLY RESPONSIVE STYLES ===== */
+    /* Base Desktop Spec Option Fixes */
+    .size-option {
+        min-width: 50px;
+        width: auto !important;
+        height: 42px !important;
+        padding: 0 16px !important;
+        font-size: 0.9rem !important;
+        font-weight: 700;
+        border-radius: 8px;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
     }
 
     /* ===== Marketplace Multi-Vendor Seller Showcase ===== */
@@ -612,15 +572,271 @@
         font-weight: 700;
     }
 
-
-    /* ==========================================
-       MOBILE-FIRST STICKY PURCHASE BAR
-       ========================================== */
+    /* Sticky Mobile Purchase Bar Base */
     .mobile-pdp-sticky-bar {
         display: none;
     }
 
+    /* ==========================================
+       MOBILE & TABLET RESPONSIVE OVERRIDES
+       ========================================== */
     @media (max-width: 768px) {
+        .product-details-page {
+            padding: 0 8px !important;
+            margin: 10px auto !important;
+        }
+
+        .product-details-container {
+            grid-template-columns: 1fr !important;
+            padding: 16px 14px !important;
+            gap: 20px !important;
+            border-radius: 14px !important;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .product-gallery {
+            position: static !important;
+            top: 0 !important;
+        }
+
+        .main-image-container {
+            border-radius: 12px !important;
+            max-height: 420px !important;
+        }
+
+        .thumbnail-nav {
+            margin-top: 10px !important;
+            gap: 8px !important;
+            -webkit-overflow-scrolling: touch !important;
+            padding-bottom: 4px !important;
+        }
+
+        .thumbnail-item {
+            width: 58px !important;
+            height: 58px !important;
+            min-width: 58px !important;
+            border-radius: 8px !important;
+        }
+
+        .product-info .product-name {
+            font-size: 1.35rem !important;
+            font-weight: 800 !important;
+            line-height: 1.3 !important;
+            margin: 0 !important;
+        }
+
+        .product-info .product-rating {
+            font-size: 0.85rem !important;
+            gap: 6px !important;
+            flex-wrap: wrap !important;
+        }
+
+        .trader-profile-badge {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 10px 12px !important;
+            justify-content: space-between !important;
+            margin: 8px 0 !important;
+        }
+
+        .trader-avatar-box {
+            width: 38px !important;
+            height: 38px !important;
+            font-size: 15px !important;
+        }
+
+        .trader-name {
+            font-size: 0.9rem !important;
+        }
+
+        .trader-stats-row {
+            font-size: 0.75rem !important;
+        }
+
+        .trader-arrow-hint {
+            margin-left: 0 !important;
+            font-size: 0.72rem !important;
+            padding: 3px 8px !important;
+        }
+
+        .price-section {
+            padding: 10px 0 !important;
+            gap: 10px !important;
+            align-items: baseline !important;
+        }
+
+        .price-section .current-price {
+            font-size: 1.7rem !important;
+            font-weight: 900 !important;
+            color: #FF5A1F !important;
+        }
+
+        .price-section .original-price {
+            font-size: 1rem !important;
+        }
+
+        .price-section .discount-badge {
+            font-size: 0.75rem !important;
+            padding: 3px 10px !important;
+        }
+
+        .stock-status {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 8px 12px !important;
+            font-size: 0.85rem !important;
+            margin-bottom: 16px !important;
+        }
+
+        .variant-section {
+            padding: 10px 0 !important;
+        }
+
+        .variant-section .variant-label {
+            font-size: 0.88rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 8px !important;
+        }
+
+        .size-options {
+            display: flex !important;
+            gap: 8px !important;
+            flex-wrap: wrap !important;
+        }
+
+        .size-option {
+            min-width: 50px !important;
+            width: auto !important;
+            height: 42px !important;
+            padding: 0 14px !important;
+            font-size: 0.88rem !important;
+            font-weight: 700 !important;
+            border-radius: 8px !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+        }
+
+        .color-options {
+            display: flex !important;
+            gap: 10px !important;
+            flex-wrap: wrap !important;
+        }
+
+        .color-option {
+            width: 38px !important;
+            height: 38px !important;
+        }
+
+        .quantity-section {
+            display: flex !important;
+            align-items: center !important;
+            gap: 14px !important;
+            margin-bottom: 18px !important;
+        }
+
+        .quantity-controls {
+            border-radius: 8px !important;
+        }
+
+        .quantity-controls button {
+            width: 44px !important;
+            height: 42px !important;
+            font-size: 1.3rem !important;
+        }
+
+        .qty-display {
+            width: 52px !important;
+            height: 42px !important;
+            font-size: 1rem !important;
+        }
+
+        .add-to-cart-section {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 10px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .btn-add-to-cart {
+            flex: 1 !important;
+            height: 46px !important;
+            padding: 0 10px !important;
+            font-size: 0.92rem !important;
+            font-weight: 800 !important;
+            border-radius: 10px !important;
+            background: #FFF4EB !important;
+            color: #FF5A1F !important;
+            border: 1.5px solid #FF5A1F !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+        }
+
+        .btn-buy-now {
+            flex: 1.25 !important;
+            height: 46px !important;
+            padding: 0 10px !important;
+            font-size: 0.92rem !important;
+            font-weight: 800 !important;
+            border-radius: 10px !important;
+            background: linear-gradient(135deg, #FF5A1F, #FF7A45) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            box-shadow: 0 4px 14px rgba(255, 90, 31, 0.35) !important;
+        }
+
+        .seller-marketplace-card {
+            padding: 14px 12px !important;
+            margin-top: 18px !important;
+            border-radius: 10px !important;
+        }
+
+        .seller-trust-perks {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+        }
+
+        .specs-table td {
+            padding: 8px 10px !important;
+        }
+
+        .specs-key {
+            width: 45% !important;
+            font-size: 0.82rem !important;
+        }
+
+        .specs-val {
+            font-size: 0.82rem !important;
+        }
+
+        .product-reviews-container {
+            padding: 0 8px 100px 8px !important;
+            margin: 16px auto !important;
+        }
+
+        .product-reviews-container > div {
+            padding: 16px 14px !important;
+            border-radius: 12px !important;
+        }
+
+        #writeReviewCard {
+            padding: 16px 12px !important;
+            border-radius: 10px !important;
+        }
+
+        #reviewCommentText, #reviewGuestName {
+            font-size: 16px !important; /* Prevents iOS auto-zoom */
+        }
+
+        /* Persistent Mobile Sticky Bar */
         .mobile-bottom-nav {
             display: none !important;
         }
@@ -631,13 +847,13 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 58px;
+            height: 60px;
             background: #FFFFFF;
             border-top: 1px solid #E2E8F0;
-            box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.08);
-            z-index: 9999;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 99999;
             align-items: center;
-            padding: 6px 12px;
+            padding: 6px 10px;
             gap: 8px;
             box-sizing: border-box;
         }
@@ -654,6 +870,7 @@
             cursor: pointer;
             text-decoration: none;
             flex-shrink: 0;
+            width: 46px;
         }
 
         .mobile-pdp-icon-btn i {
@@ -683,13 +900,14 @@
 
         .btn-pdp-sticky-cart {
             flex: 1;
+            height: 44px;
             background: #FFF4EB;
             color: #FB7701;
             border: 1.5px solid #FB7701;
-            padding: 9px 8px;
+            padding: 0 8px;
             border-radius: 8px;
             font-weight: 800;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -699,13 +917,14 @@
 
         .btn-pdp-sticky-buy {
             flex: 1.25;
+            height: 44px;
             background: linear-gradient(135deg, #FB7701 0%, #E06400 100%);
             color: #FFFFFF;
             border: none;
-            padding: 9px 8px;
+            padding: 0 8px;
             border-radius: 8px;
             font-weight: 800;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -719,11 +938,35 @@
             cursor: not-allowed;
         }
 
-        /* Adjust body padding for sticky bar */
         body {
-            padding-bottom: 64px !important;
+            padding-bottom: 84px !important;
         }
     }
+
+    @media (max-width: 480px) {
+        .product-info .product-name {
+            font-size: 1.22rem !important;
+        }
+        .price-section .current-price {
+            font-size: 1.55rem !important;
+        }
+        .thumbnail-item {
+            width: 52px !important;
+            height: 52px !important;
+            min-width: 52px !important;
+        }
+        .size-option {
+            min-width: 46px !important;
+            padding: 0 12px !important;
+            font-size: 0.82rem !important;
+            height: 38px !important;
+        }
+        .color-option {
+            width: 36px !important;
+            height: 36px !important;
+        }
+    }
+
 </style>
 
 <div class="product-details-page">
@@ -731,8 +974,11 @@
         
         <!-- Left: Image Gallery -->
         <div class="product-gallery">
-            <div class="main-image-container">
+            <div class="main-image-container" style="cursor: zoom-in;" onclick="openOrderImagePreview(document.getElementById('mainProductImage').src, document.querySelector('.product-name') ? document.querySelector('.product-name').innerText : 'Packaging Product')" title="Click or tap to view high-resolution image">
                 <img src="<%= product.imagePath %>" alt="<%= product.name %>" id="mainProductImage">
+                <span class="img-zoom-hint" style="position: absolute; bottom: 8px; right: 8px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(2px); color: #FFFFFF; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; gap: 5px; pointer-events: none;">
+                    <i class="fas fa-search-plus"></i> Tap to Zoom
+                </span>
             </div>
             
             <!-- Thumbnails -->
