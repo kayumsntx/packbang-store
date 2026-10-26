@@ -41,7 +41,7 @@
     /* KPI STATS ROW */
     .kpi-stats-grid {
         display: grid;
-        grid-templateColumns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 16px;
         margin-bottom: 24px;
     }
@@ -389,6 +389,110 @@
         resize: vertical;
         min-height: 80px;
     }
+
+    /* =========================================================
+       MOBILE & TABLET RESPONSIVE STYLES
+       ========================================================= */
+    @media (max-width: 768px) {
+        .seller-admin-wrapper {
+            margin: 16px auto 40px auto;
+            padding: 0 12px;
+        }
+
+        .page-header-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .page-header-row h1 {
+            font-size: 1.3rem;
+        }
+
+        .kpi-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card {
+            padding: 12px 14px;
+            gap: 12px;
+        }
+
+        .kpi-icon {
+            width: 38px;
+            height: 38px;
+            font-size: 1.15rem;
+        }
+
+        .kpi-info .kpi-num {
+            font-size: 1.3rem;
+        }
+
+        .kpi-info .kpi-label {
+            font-size: 0.72rem;
+        }
+
+        .controls-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            padding: 12px 14px;
+        }
+
+        .filter-tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            display: flex;
+            gap: 6px;
+            padding-bottom: 4px;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            flex-shrink: 0;
+            padding: 7px 12px;
+            font-size: 0.78rem;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            font-size: 16px !important; /* Prevents auto-zoom on iOS */
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Modal Dialogs on Mobile */
+        .modal-card,
+        .modal-card-kyc {
+            width: 95vw !important;
+            max-width: 95vw !important;
+            max-height: 90vh !important;
+            padding: 18px 14px !important;
+            border-radius: 14px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .seller-admin-wrapper {
+            padding: 0 8px;
+        }
+    }
+
 </style>
 
 <div class="seller-admin-wrapper">

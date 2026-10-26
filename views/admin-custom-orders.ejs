@@ -299,6 +299,95 @@
         font-size: 1.05rem;
         color: #059669;
     }
+
+    /* ===== COMPREHENSIVE RESPONSIVE STYLES ===== */
+    @media (max-width: 768px) {
+        .admin-orders-container {
+            padding: 12px;
+            margin: 15px auto;
+        }
+        .admin-orders-container h2 {
+            font-size: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .commission-settings-card {
+            padding: 16px !important;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+        }
+        .commission-info {
+            max-width: 100% !important;
+        }
+        .commission-form {
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .commission-form > div {
+            width: 100%;
+        }
+        .commission-input-wrapper {
+            width: 100%;
+        }
+        .commission-input-wrapper input {
+            flex: 1;
+            font-size: 16px !important;
+        }
+        .btn-save-commission {
+            width: 100%;
+            justify-content: center;
+            padding: 12px;
+        }
+        .order-card {
+            padding: 16px 14px;
+        }
+        .order-card .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .order-card .title {
+            font-size: 1.05rem;
+        }
+        .order-card .meta {
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+        .escrow-summary-box {
+            padding: 12px;
+            gap: 10px;
+        }
+        .order-card .actions {
+            flex-direction: column;
+            gap: 8px;
+        }
+        .order-card .actions button,
+        .order-card .actions a {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+        }
+        .modal-content {
+            width: 95vw !important;
+            max-width: 95vw !important;
+            padding: 16px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .escrow-summary-box {
+            grid-template-columns: 1fr;
+        }
+        .calc-box {
+            padding: 12px;
+        }
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+    }
+
 </style>
 
 <div class="admin-orders-container">

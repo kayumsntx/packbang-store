@@ -8,6 +8,46 @@
     .input-group input[type="file"] { padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
     .input-group button { background: #f39c12; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
     #cancelBtn { background: #e74c3c; display: none; }
+
+    @media (max-width: 768px) {
+        .cat-container {
+            margin: 15px auto;
+            padding: 16px 14px;
+            border-radius: 8px;
+        }
+        .input-group {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+        .input-group input[type="text"],
+        .input-group select,
+        .input-group input[type="file"],
+        .input-group button {
+            width: 100%;
+            font-size: 16px !important;
+            box-sizing: border-box;
+        }
+        .cat-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 6px;
+        }
+        .cat-item > div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            width: 100%;
+        }
+        .cat-order-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px 10px;
+            margin: 0;
+            font-size: 13px;
+        }
+    }
 </style>
 
 <div class="cat-container">

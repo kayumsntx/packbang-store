@@ -402,6 +402,130 @@
         margin: 24px 0;
     }
 
+
+    /* =========================================================
+       MOBILE & TABLET RESPONSIVE STYLES
+       ========================================================= */
+    @media (max-width: 768px) {
+        .order-detail-page {
+            margin: 14px 10px 40px 10px;
+            padding: 16px 14px;
+            border-radius: 12px;
+        }
+
+        .order-detail-page h2 {
+            font-size: 1.2rem;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+
+        .detail-row {
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .detail-row .label {
+            width: 100%;
+            font-size: 0.82rem;
+            color: #94A3B8;
+        }
+
+        .detail-row .value {
+            font-size: 0.92rem;
+        }
+
+        .order-images img {
+            width: 75px;
+            height: 75px;
+            border-radius: 8px;
+        }
+
+        /* Bid cards on mobile */
+        .bid-card-item {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 14px 14px;
+            gap: 12px;
+        }
+
+        .bid-seller-info {
+            min-width: unset;
+        }
+
+        .bid-pricing-box {
+            text-align: left;
+            border-top: 1px dashed #E2E8F0;
+            padding-top: 10px;
+        }
+
+        .bid-actions-box,
+        .btn-group-actions {
+            width: 100%;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-bid-chat,
+        .btn-bid-accept,
+        .btn-bid-reject {
+            flex: 1;
+            justify-content: center;
+            padding: 9px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Escrow breakdown card */
+        .escrow-flow-card {
+            padding: 14px 16px;
+            border-radius: 12px;
+        }
+
+        .escrow-header h3 {
+            font-size: 1.05rem;
+        }
+
+        .escrow-breakdown {
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px 14px;
+        }
+
+        .btn-pay-now,
+        .btn-confirm-received {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Payment modal */
+        .payment-modal {
+            padding: 10px;
+        }
+
+        .payment-modal-card {
+            width: 100%;
+            max-width: 100%;
+            padding: 20px 16px !important;
+            border-radius: 14px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .order-detail-page {
+            margin: 10px 6px 36px 6px;
+            padding: 14px 10px;
+        }
+
+        .order-detail-page h2 {
+            font-size: 1.1rem;
+        }
+
+        .order-images img {
+            width: 64px;
+            height: 64px;
+        }
+    }
+
 </style>
 
 <div class="order-detail-page">
