@@ -449,6 +449,177 @@
         stream.scrollTop = stream.scrollHeight;
     }
 </script>
+
+<!-- ========================================== -->
+<!-- APP-STYLE STICKY MOBILE BOTTOM NAVIGATION BAR -->
+<!-- ========================================== -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+    <a href="/" class="mobile-nav-item" id="mobileNavHome">
+        <i class="fas fa-house"></i>
+        <span>Home</span>
+    </a>
+    <a href="/#categories" class="mobile-nav-item" id="mobileNavCats">
+        <i class="fas fa-border-all"></i>
+        <span>Categories</span>
+    </a>
+    <a href="/custom-orders" class="mobile-nav-item" id="mobileNavCustom">
+        <i class="fas fa-pencil-ruler"></i>
+        <span>Custom</span>
+    </a>
+    <a href="/cart" class="mobile-nav-item mobile-cart-item" id="mobileNavCart">
+        <div class="mobile-nav-badge-wrap">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="mobile-bottom-cart-badge" id="mobileBottomCartBadge">0</span>
+        </div>
+        <span>Cart</span>
+    </a>
+    <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/profile" class="mobile-nav-item" id="mobileNavAccount">
+            <i class="fas fa-user-circle"></i>
+            <span>Account</span>
+        </a>
+    <% } else { %>
+        <a href="/login" class="mobile-nav-item" id="mobileNavLogin">
+            <i class="fas fa-user"></i>
+            <span>Login</span>
+        </a>
+    <% } %>
+</nav>
+
+<style>
+/* STICKY BOTTOM APP NAVIGATION */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+    z-index: 9998;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #64748B;
+    font-size: 0.68rem;
+    font-weight: 700;
+    gap: 3px;
+    padding: 6px 0;
+    transition: color 0.15s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item i {
+    font-size: 1.18rem;
+    line-height: 1;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:active {
+    color: #FB7701;
+}
+
+.mobile-nav-badge-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-bottom-cart-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: #FB7701;
+    color: #FFFFFF;
+    font-size: 0.62rem;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 5px rgba(251, 119, 1, 0.4);
+}
+
+.mobile-bottom-cart-badge.zero {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex !important;
+    }
+
+    /* Live Chat Floating Button adjusted above bottom bar */
+    #chat-desk-btn {
+        bottom: 74px !important;
+        right: 14px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    #chat-window-desk {
+        bottom: 135px !important;
+        right: 12px !important;
+        width: calc(100vw - 24px) !important;
+        max-width: 320px !important;
+        height: 380px !important;
+    }
+}
+</style>
+
+<script>
+    // Live update bottom cart badge
+    $(document).ready(function() {
+        function syncMobileCartBadge() {
+            var badgeText = $('#cartCount').text().trim();
+            if (badgeText) {
+                var count = parseInt(badgeText, 10) || 0;
+                var $mBadge = $('#mobileBottomCartBadge');
+                $mBadge.text(count);
+                if (count === 0) {
+                    $mBadge.addClass('zero');
+                } else {
+                    $mBadge.removeClass('zero');
+                }
+            }
+        }
+        syncMobileCartBadge();
+
+        // Check active route for bottom bar styling
+        var currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath === '') {
+            $('#mobileNavHome').addClass('active');
+        } else if (currentPath.indexOf('/custom') === 0) {
+            $('#mobileNavCustom').addClass('active');
+        } else if (currentPath.indexOf('/cart') === 0) {
+            $('#mobileNavCart').addClass('active');
+        } else if (currentPath.indexOf('/profile') === 0 || currentPath.indexOf('/login') === 0) {
+            $('#mobileNavAccount, #mobileNavLogin').addClass('active');
+        }
+
+        // Re-sync badge on mutations or interval
+        var targetObserver = document.getElementById('cartCount');
+        if (targetObserver && window.MutationObserver) {
+            var observer = new MutationObserver(syncMobileCartBadge);
+            observer.observe(targetObserver, { childList: true, characterData: true, subtree: true });
+        }
+    });
+</script>
 <%- include("trader-profile-modal") %>
 <%- include("image-preview-modal") %>
 <%- include("customer-details-modal") %>

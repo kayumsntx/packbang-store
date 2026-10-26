@@ -355,6 +355,28 @@
 .shake-error {
     animation: custShake 0.4s ease-in-out;
 }
+
+/* Mobile Responsiveness for Checkout Modal */
+@media (max-width: 480px) {
+    .cust-modal-overlay {
+        padding: 0 !important;
+        align-items: flex-end !important;
+    }
+    .cust-modal-card {
+        border-radius: 20px 20px 0 0 !important;
+        padding: 20px 18px 28px 18px !important;
+        max-height: 92vh !important;
+    }
+    .cust-form-group input,
+    .cust-form-group textarea {
+        font-size: 16px !important; /* Prevents iOS Safari input focus auto-zoom */
+        padding: 10px 12px !important;
+    }
+    .cust-confirm-btn {
+        font-size: 1rem !important;
+        padding: 13px 20px !important;
+    }
+}
 </style>
 
 <script>

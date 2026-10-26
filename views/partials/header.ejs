@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="theme-color" content="#FB7701" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>PACKBANG.COM | Factory-Direct Packaging & eCommerce Supplies</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -514,15 +517,413 @@
         .notification-warning { background: #F59E0B; }
         .notification-error { background: #EF4444; }
 
+        
+        /* =========================================================
+           MOBILE-FIRST APP-LIKE RESPONSIVE NAVIGATION STYLES
+           ========================================================= */
+        .mobile-drawer-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #111111;
+            font-size: 1.35rem;
+            padding: 6px 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .mobile-drawer-btn:active {
+            background: #F1F5F9;
+        }
+
+        .mobile-seller-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--temu-orange-light);
+            color: var(--temu-orange);
+            font-size: 0.95rem;
+            text-decoration: none;
+            border: 1px solid rgba(251, 119, 1, 0.25);
+        }
+
+        /* Slide-out Mobile Drawer */
+        .mobile-drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 10001;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .mobile-side-drawer {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 300px;
+            max-width: 86vw;
+            height: 100vh;
+            background: #FFFFFF;
+            z-index: 10002;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 6px 0 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-side-drawer.active {
+            transform: translateX(320px);
+        }
+
+        .drawer-header {
+            padding: 16px 18px;
+            background: #0F172A;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--temu-orange);
+        }
+
+        .drawer-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .drawer-brand span {
+            color: #FFFFFF;
+            font-weight: 900;
+            font-size: 1.25rem;
+            letter-spacing: -0.5px;
+        }
+
+        .drawer-brand span em {
+            color: var(--temu-orange);
+            font-style: normal;
+        }
+
+        .drawer-close-btn {
+            background: transparent;
+            border: none;
+            color: #94A3B8;
+            font-size: 1.8rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .drawer-close-btn:hover {
+            color: #FFFFFF;
+        }
+
+        .drawer-user-box {
+            padding: 14px 18px;
+            background: #F8FAFC;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .drawer-user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .drawer-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--temu-orange);
+            color: #FFFFFF;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drawer-user-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #0F172A;
+        }
+
+        .drawer-user-role {
+            font-size: 0.75rem;
+            color: #64748B;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .drawer-guest-box {
+            text-align: center;
+        }
+
+        .drawer-guest-box p {
+            margin: 0 0 10px 0;
+            font-size: 0.85rem;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .drawer-auth-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-drawer-login {
+            flex: 1;
+            background: #0F172A;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-decoration: none;
+        }
+
+        .btn-drawer-register {
+            flex: 1;
+            background: var(--temu-orange);
+            color: #FFFFFF;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-decoration: none;
+        }
+
+        .drawer-menu-links {
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .drawer-menu-links a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            color: #1E293B;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.15s;
+        }
+
+        .drawer-menu-links a i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: #64748B;
+        }
+
+        .drawer-menu-links a:hover,
+        .drawer-menu-links a:active {
+            background: #F1F5F9;
+            color: var(--temu-orange);
+        }
+
+        .drawer-menu-links a:hover i {
+            color: var(--temu-orange);
+        }
+
+        .drawer-divider {
+            height: 1px;
+            background: #E2E8F0;
+            margin: 8px 12px;
+        }
+
+        .drawer-section-heading {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 14px;
+        }
+
+        .drawer-logout-link {
+            color: #EF4444 !important;
+        }
+
+        .drawer-logout-link i {
+            color: #EF4444 !important;
+        }
+
         @media (max-width: 768px) {
-            .temu-top-strip { display: none; }
-            .navbar-row { padding: 10px 14px; gap: 10px; }
-            .nav-brand { font-size: 1.25rem; }
-            .header-logo { height: 30px; }
-            .nav-brand-badge { display: none; }
-            .search-submit-btn span { display: none; }
-            .cart-text { display: none; }
-            .nav-seller-pill { display: none; }
+            .temu-top-strip { display: none !important; }
+            
+            /* Navbar Header Row 1 on Mobile */
+            .navbar-row-top {
+                padding: 8px 12px !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+
+            .mobile-drawer-btn {
+                display: flex !important;
+            }
+
+            .nav-brand-container {
+                gap: 6px !important;
+            }
+
+            .nav-brand {
+                font-size: 1.22rem !important;
+                font-weight: 900 !important;
+            }
+
+            .header-logo {
+                height: 30px !important;
+            }
+
+            .nav-brand-badge {
+                display: none !important;
+            }
+
+            .nav-seller-pill {
+                display: none !important;
+            }
+
+            .mobile-seller-btn {
+                display: flex !important;
+            }
+
+            .navbar-actions {
+                gap: 8px !important;
+                margin-left: auto !important;
+            }
+
+            .nav-cart-link {
+                padding: 6px 8px !important;
+            }
+
+            .cart-text {
+                display: none !important;
+            }
+
+            .nav-cart-icon-wrap {
+                font-size: 1.15rem !important;
+            }
+
+            .user-menu-toggle {
+                padding: 6px 10px !important;
+                font-size: 0.8rem !important;
+            }
+
+            .user-name-text {
+                max-width: 70px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .btn-login {
+                padding: 6px 12px !important;
+                font-size: 0.8rem !important;
+            }
+
+            /* Full-width Search Input on Mobile */
+            .header-search-box {
+                order: 3 !important;
+                width: 100% !important;
+                flex: 1 1 100% !important;
+                max-width: 100% !important;
+                margin-top: 4px !important;
+            }
+
+            .search-input-wrap {
+                border-width: 1.5px !important;
+            }
+
+            #globalProductSearch {
+                padding: 8px 12px !important;
+                font-size: 0.88rem !important;
+            }
+
+            .search-submit-btn {
+                padding: 8px 16px !important;
+            }
+
+            .search-submit-btn span {
+                display: none !important;
+            }
+
+            /* Navbar Row 2 (Categories / Sub-nav) on Mobile */
+            .navbar-row-bottom {
+                padding: 4px 10px !important;
+                gap: 8px !important;
+                overflow-x: auto !important;
+                white-space: nowrap !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+            }
+
+            .navbar-row-bottom::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .nav-links {
+                gap: 6px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .nav-links li a {
+                font-size: 0.78rem !important;
+                padding: 4px 10px !important;
+                border-radius: 14px !important;
+            }
+
+            .nav-category-select {
+                padding: 4px 10px !important;
+                font-size: 0.78rem !important;
+                border-radius: 14px !important;
+                flex-shrink: 0 !important;
+                max-width: 160px !important;
+            }
+
+            /* Body padding to accommodate sticky bottom navigation */
+            body {
+                padding-bottom: 64px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-row-top {
+                padding: 6px 8px !important;
+            }
+            .nav-brand {
+                font-size: 1.15rem !important;
+            }
+            .header-logo {
+                height: 28px !important;
+            }
         }
     </style>
 </head>
@@ -555,6 +956,9 @@
     <nav class="main-navbar">
         <!-- Row 1: Brand, Search, Cart, Account -->
         <div class="navbar-row navbar-row-top">
+            <button type="button" class="mobile-drawer-btn" id="mobileDrawerOpen" aria-label="Open Navigation">
+                <i class="fas fa-bars"></i>
+            </button>
             <a href="/" class="nav-brand-container">
                 <img src="https://res.cloudinary.com/o4zunnbp/image/upload/v1791517536/packbanglogo_molbe0.png" alt="PACKBANG Logo" class="header-logo" />
                 <span class="nav-brand">
@@ -576,6 +980,9 @@
             </div>
 
             <div class="navbar-actions">
+                <a href="https://seller.packbang.com/" class="mobile-seller-btn" title="Seller Hub">
+                    <i class="fas fa-store"></i>
+                </a>
                 <a href="https://seller.packbang.com/" class="nav-seller-pill">
                     <i class="fas fa-store"></i> Seller Hub
                 </a>
@@ -684,6 +1091,69 @@
         </div>
     </nav>
 
+    <!-- MOBILE SIDE DRAWER -->
+    <div id="mobileDrawerOverlay" class="mobile-drawer-overlay"></div>
+    <aside id="mobileSideDrawer" class="mobile-side-drawer">
+        <div class="drawer-header">
+            <a href="/" class="drawer-brand">
+                <span>PACKBANG <em>DIRECT</em></span>
+            </a>
+            <button type="button" class="drawer-close-btn" id="mobileDrawerClose" aria-label="Close Menu">&times;</button>
+        </div>
+
+        <div class="drawer-user-box">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <div class="drawer-user-card">
+                    <div class="drawer-avatar"><%= (user.username || 'U').charAt(0).toUpperCase() %></div>
+                    <div>
+                        <div class="drawer-user-name"><%= user.username %></div>
+                        <div class="drawer-user-role"><%= user.role || 'Member' %></div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="drawer-guest-box">
+                    <p>Welcome to Packbang Direct Wholesale!</p>
+                    <div class="drawer-auth-btns">
+                        <a href="/login" class="btn-drawer-login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        <a href="/register" class="btn-drawer-register"><i class="fas fa-user-plus"></i> Register</a>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="drawer-menu-links">
+            <a href="/"><i class="fas fa-house"></i> Home</a>
+            <a href="/#lightning-deals"><i class="fas fa-bolt" style="color:var(--temu-orange);"></i> Lightning Deals</a>
+            <a href="/custom-orders"><i class="fas fa-pencil-ruler"></i> Custom Packaging Orders</a>
+            <a href="/make-custom-order"><i class="fas fa-plus-circle"></i> Create Custom Order</a>
+            <a href="/#categories"><i class="fas fa-border-all"></i> All Categories</a>
+            <a href="https://seller.packbang.com/"><i class="fas fa-store" style="color:var(--temu-orange);"></i> Seller Hub Portal</a>
+            <a href="/track-order"><i class="fas fa-truck"></i> Track Order</a>
+
+            <% if (typeof user !== 'undefined' && user) { %>
+                <div class="drawer-divider"></div>
+                <div class="drawer-section-heading">My Account</div>
+                <a href="/profile"><i class="fas fa-id-card"></i> Profile & Address</a>
+                <a href="/my-orders"><i class="fas fa-box"></i> My Orders</a>
+                <a href="/my-custom-orders"><i class="fas fa-list-ul"></i> My Custom Orders</a>
+
+                <% if (user.role === 'admin' || user.role === 'superadmin' || user.username === 'admin') { %>
+                    <div class="drawer-divider"></div>
+                    <div class="drawer-section-heading">Store Management</div>
+                    <a href="/admin/sellers"><i class="fas fa-store"></i> Seller Management</a>
+                    <a href="/admin/custom-orders"><i class="fas fa-clipboard-list"></i> Review Custom Orders</a>
+                    <a href="/admin/orders"><i class="fas fa-shopping-bag"></i> Orders</a>
+                    <a href="/admin/inventory"><i class="fas fa-warehouse"></i> Inventory</a>
+                    <a href="/sales"><i class="fas fa-chart-bar"></i> Sales Report</a>
+                <% } %>
+
+                <div class="drawer-divider"></div>
+                <a href="/logout" class="drawer-logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <% } %>
+        </div>
+    </aside>
+    
+
     <% if (typeof user === 'undefined' || !user) { %>
         <div class="guest-cart-banner">
             <i class="fas fa-bolt" style="color:var(--temu-orange);"></i>
@@ -696,6 +1166,25 @@
 
     <script>
         $(document).ready(function() {
+            // Mobile Drawer Toggle
+            $('#mobileDrawerOpen').on('click', function() {
+                $('#mobileSideDrawer').addClass('active');
+                $('#mobileDrawerOverlay').addClass('active');
+                $('body').css('overflow', 'hidden');
+            });
+
+            $('#mobileDrawerClose, #mobileDrawerOverlay').on('click', function() {
+                $('#mobileSideDrawer').removeClass('active');
+                $('#mobileDrawerOverlay').removeClass('active');
+                $('body').css('overflow', '');
+            });
+
+            $('.drawer-menu-links a').on('click', function() {
+                $('#mobileSideDrawer').removeClass('active');
+                $('#mobileDrawerOverlay').removeClass('active');
+                $('body').css('overflow', '');
+            });
+    
             $('#userMenuToggle').on('click', function(e) {
                 e.stopPropagation();
                 $('#userMenuDropdown').toggleClass('open');

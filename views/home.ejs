@@ -506,12 +506,184 @@
         transform: translateY(-1px);
     }
 
+    /* =========================================================
+       COMPREHENSIVE MOBILE-FIRST RESPONSIVE STYLES
+       ========================================================= */
     @media (max-width: 768px) {
-        .temu-home-wrap { padding: 10px 12px 60px 12px; }
-        .home-catalog-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .lightning-deals-banner { padding: 14px 16px; }
-        .lightning-title { font-size: 1.1rem; }
-        .product-price { font-size: 1.1rem; }
+        .temu-home-wrap { 
+            padding: 8px 8px 40px 8px; 
+        }
+
+        /* Banner Slider on Mobile */
+        .packbang-hero {
+            margin-bottom: 14px;
+            border-radius: 12px;
+        }
+        .packbang-slider {
+            aspect-ratio: 16 / 9;
+            min-height: 180px;
+        }
+        .packbang-arrow {
+            width: 32px;
+            height: 32px;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .packbang-prev { left: 8px; }
+        .packbang-next { right: 8px; }
+        .packbang-dots { bottom: 8px; }
+        .packbang-dot { width: 7px; height: 7px; }
+        .packbang-dot.active { width: 18px; }
+
+        /* Lightning Deals Banner */
+        .lightning-deals-banner { 
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            gap: 10px;
+        }
+        .lightning-icon-box {
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+        }
+        .lightning-title { 
+            font-size: 1.05rem; 
+        }
+        .lightning-subtitle {
+            font-size: 0.76rem;
+        }
+        .countdown-timer-wrap {
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            gap: 6px;
+        }
+        .timer-block {
+            font-size: 0.85rem;
+            padding: 3px 6px;
+            min-width: 26px;
+        }
+
+        /* 4-Pillars Trust Strip (2x2 Grid on Mobile) */
+        .temu-trust-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .trust-pill-card {
+            padding: 10px 12px;
+            border-radius: 10px;
+            gap: 10px;
+        }
+        .trust-icon-wrap {
+            width: 34px;
+            height: 34px;
+            font-size: 1.05rem;
+            border-radius: 8px;
+        }
+        .trust-pill-card h4 {
+            font-size: 0.78rem;
+            margin: 0;
+        }
+        .trust-pill-card p {
+            display: none; /* Hide verbose subtitle on mobile for sleek grid */
+        }
+
+        /* Category Carousel */
+        .section-headline {
+            margin-bottom: 10px;
+        }
+        .section-headline h2 {
+            font-size: 1.08rem;
+        }
+        .category-carousel {
+            gap: 10px;
+            padding: 2px 2px 10px 2px;
+        }
+        .category-pill-card {
+            min-width: 72px;
+        }
+        .cat-avatar {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 6px;
+        }
+        .category-pill-card span {
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        /* 2-Column Product Catalog Grid (Modern E-Commerce Standard) */
+        .home-catalog-grid { 
+            grid-template-columns: repeat(2, 1fr) !important; 
+            gap: 8px !important;
+            margin-bottom: 24px;
+        }
+        .home-card {
+            border-radius: 10px;
+        }
+        .temu-badge-top-left {
+            font-size: 0.58rem;
+            padding: 2px 6px;
+            top: 6px;
+            left: 6px;
+        }
+        .temu-discount-badge {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            top: 6px;
+            right: 6px;
+        }
+        .factory-tag {
+            font-size: 0.62rem;
+            padding: 1px 5px;
+            margin-bottom: 4px;
+        }
+        .home-card-body {
+            padding: 8px 8px 10px 8px !important;
+        }
+        .home-card-body .product-name {
+            font-size: 0.8rem !important;
+            line-height: 1.25 !important;
+            height: 32px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            margin-bottom: 4px !important;
+        }
+        .product-price { 
+            font-size: 1.05rem !important; 
+            font-weight: 800 !important;
+        }
+        .old-price {
+            font-size: 0.72rem !important;
+        }
+        .stock-tag-live {
+            font-size: 0.65rem !important;
+        }
+        .btn-home-card {
+            padding: 6px 10px !important;
+            font-size: 0.78rem !important;
+            border-radius: 6px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .temu-home-wrap { 
+            padding: 6px 6px 36px 6px; 
+        }
+        .home-catalog-grid {
+            gap: 6px !important;
+        }
+        .cat-avatar {
+            width: 54px;
+            height: 54px;
+        }
+        .category-pill-card {
+            min-width: 66px;
+        }
     }
 </style>
 

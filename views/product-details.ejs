@@ -612,6 +612,118 @@
         font-weight: 700;
     }
 
+
+    /* ==========================================
+       MOBILE-FIRST STICKY PURCHASE BAR
+       ========================================== */
+    .mobile-pdp-sticky-bar {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-bottom-nav {
+            display: none !important;
+        }
+
+        .mobile-pdp-sticky-bar {
+            display: flex !important;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 58px;
+            background: #FFFFFF;
+            border-top: 1px solid #E2E8F0;
+            box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.08);
+            z-index: 9999;
+            align-items: center;
+            padding: 6px 12px;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+
+        .mobile-pdp-icon-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 6px;
+            color: #64748B;
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .mobile-pdp-icon-btn i {
+            font-size: 1.15rem;
+        }
+
+        .pdp-sticky-cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: #FB7701;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            min-width: 15px;
+            height: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+        }
+
+        .pdp-sticky-cart-badge.zero {
+            display: none;
+        }
+
+        .btn-pdp-sticky-cart {
+            flex: 1;
+            background: #FFF4EB;
+            color: #FB7701;
+            border: 1.5px solid #FB7701;
+            padding: 9px 8px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-pdp-sticky-buy {
+            flex: 1.25;
+            background: linear-gradient(135deg, #FB7701 0%, #E06400 100%);
+            color: #FFFFFF;
+            border: none;
+            padding: 9px 8px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            box-shadow: 0 3px 10px rgba(251, 119, 1, 0.35);
+        }
+
+        .btn-pdp-sticky-cart:disabled, .btn-pdp-sticky-buy:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Adjust body padding for sticky bar */
+        body {
+            padding-bottom: 64px !important;
+        }
+    }
 </style>
 
 <div class="product-details-page">
@@ -938,6 +1050,27 @@
     </div>
 </div>
 
+
+<!-- STICKY MOBILE ACTION BAR FOR PRODUCT DETAILS -->
+<div class="mobile-pdp-sticky-bar" id="mobilePdpStickyBar">
+    <a href="/" class="mobile-pdp-icon-btn" title="Home">
+        <i class="fas fa-house"></i>
+        <span>Home</span>
+    </a>
+    <a href="/cart" class="mobile-pdp-icon-btn" title="Cart">
+        <div style="position: relative; display: inline-flex;">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="pdp-sticky-cart-badge" id="pdpStickyCartBadge">0</span>
+        </div>
+        <span>Cart</span>
+    </a>
+    <button type="button" class="btn-pdp-sticky-cart" onclick="addToCart()" <%= product.stock <= 0 ? 'disabled' : '' %>>
+        <i class="fas fa-cart-plus"></i> Add
+    </button>
+    <button type="button" class="btn-pdp-sticky-buy" onclick="buyNow()" <%= product.stock <= 0 ? 'disabled' : '' %>>
+        <i class="fas fa-bolt"></i> Order Now
+    </button>
+</div>
 <script>
     // ✅ Fixed: JavaScript with proper error handling
     
@@ -1305,6 +1438,7 @@
 
         // ===== Update Cart Count =====
         function updateCartCount(count) {
+            syncPdpStickyCart(count);
             var $badge = $('#cartCount');
             $badge.text(count);
             if (count === 0) {
