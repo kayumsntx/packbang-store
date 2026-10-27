@@ -1173,14 +1173,7 @@
                             <a href="/profile"><i class="fas fa-user-circle"></i> Profile</a>
                             <a href="/my-orders"><i class="fas fa-box"></i> My Orders</a>
                             <a href="/my-custom-orders"><i class="fas fa-list-ul"></i> My Custom Orders</a>
-            <% if (user.role === 'seller' || user.role === 'authorized_cashier') { %>
-                <div class="drawer-divider"></div>
-                <div class="drawer-section-heading">Seller Tools</div>
-                <a href="/seller/custom-orders"><i class="fas fa-gavel"></i> Bid on Orders</a>
-                <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
-                    <a href="/admin/commission-report"><i class="fas fa-file-invoice-dollar"></i> IT Support & Commission Report</a>
-                                <a href="/admin/commission-report"><i class="fas fa-file-invoice-dollar"></i> IT Support & Commission Report</a>
-            <% } %>
+
 
                             <% if (user.role === 'seller' || user.role === 'authorized_cashier' || user.isSuperAdmin === true) { %>
                                 <div class="menu-divider"></div>
@@ -1203,11 +1196,20 @@
                                 <a href="/admin/custom-orders"><i class="fas fa-clipboard-list"></i> Review Custom Orders</a>
                                 <a href="/admin/orders"><i class="fas fa-clipboard-list"></i> Order Management</a>
                                 <a href="/admin/inventory"><i class="fas fa-warehouse"></i> Inventory</a>
-                                <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
                                 <a href="/admin/categories"><i class="fas fa-tags"></i> Categories</a>
-                                <a href="/admin/stock-report"><i class="fas fa-boxes"></i> Stock Report</a>
                                 <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
                                 <a href="/admin/banners"><i class="fas fa-images"></i> Banners</a>
+                                <div class="admin-menu-group">
+                                    <div class="admin-menu-group-header" onclick="toggleTermsMenu(event, 'desktopReportsSubmenu', 'desktopReportsCaret')">
+                                        <span class="group-title-text"><i class="fas fa-chart-pie"></i> Reports</span>
+                                        <i class="fas fa-chevron-down terms-caret" id="desktopReportsCaret"></i>
+                                    </div>
+                                    <div class="admin-submenu" id="desktopReportsSubmenu">
+                                        <a href="/sales" class="admin-submenu-link"><i class="fas fa-chart-line"></i> Sales Report</a>
+                                        <a href="/admin/commission-report" class="admin-submenu-link"><i class="fas fa-file-invoice-dollar"></i> IT Support & Commission Report</a>
+                                        <a href="/admin/stock-report" class="admin-submenu-link"><i class="fas fa-boxes"></i> Stock Report</a>
+                                    </div>
+                                </div>
                                 <div class="admin-menu-group">
                                     <div class="admin-menu-group-header" onclick="toggleTermsMenu(event, 'desktopTermsSubmenu', 'desktopTermsCaret')">
                                         <span class="group-title-text"><i class="fas fa-file-contract"></i> Terms & Conditions</span>
@@ -1325,7 +1327,17 @@
                     <a href="/admin/custom-orders"><i class="fas fa-clipboard-list"></i> Review Custom Orders</a>
                     <a href="/admin/orders"><i class="fas fa-shopping-bag"></i> Orders</a>
                     <a href="/admin/inventory"><i class="fas fa-warehouse"></i> Inventory</a>
-                    <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
+                    <div class="drawer-menu-group">
+                        <div class="drawer-group-header" onclick="toggleTermsMenu(event, 'drawerReportsSubmenu', 'drawerReportsCaret')">
+                            <span class="drawer-group-title"><i class="fas fa-chart-pie"></i> Reports</span>
+                            <i class="fas fa-chevron-down terms-caret" id="drawerReportsCaret"></i>
+                        </div>
+                        <div class="drawer-submenu" id="drawerReportsSubmenu">
+                            <a href="/sales" class="drawer-submenu-link"><i class="fas fa-chart-line"></i> Sales Report</a>
+                            <a href="/admin/commission-report" class="drawer-submenu-link"><i class="fas fa-file-invoice-dollar"></i> IT Support & Commission Report</a>
+                            <a href="/admin/stock-report" class="drawer-submenu-link"><i class="fas fa-boxes"></i> Stock Report</a>
+                        </div>
+                    </div>
                     <div class="drawer-menu-group">
                         <div class="drawer-group-header" onclick="toggleTermsMenu(event, 'drawerTermsSubmenu', 'drawerTermsCaret')">
                             <span class="drawer-group-title"><i class="fas fa-file-contract"></i> Terms & Conditions</span>
