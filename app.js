@@ -4841,6 +4841,16 @@ app.get("/packing-slip/:saleId", requireAuth, async (req, res) => {
   }
 });
 
+// Fallback route for /track-order
+app.get("/track-order", requireAuth, (req, res) => {
+  const isSuperAdmin = req.session.user.username === 'superadmin' || req.session.user.profile?.isSuperAdmin === true;
+  const isAdmin = req.session.user.role === 'admin' || req.session.user.username?.toLowerCase() === 'admin';
+  if (isAdmin || isSuperAdmin) {
+    return res.redirect("/admin/orders");
+  }
+  return res.redirect("/my-orders");
+});
+
 // ---------- TRACK ORDER ----------
 app.get("/track-order/:saleId", requireAuth, async (req, res) => {
   try {

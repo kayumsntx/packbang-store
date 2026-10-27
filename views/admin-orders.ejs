@@ -212,6 +212,29 @@
         box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
     }
 
+    .btn-track {
+        background: #3182ce;
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.75rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 2px 0;
+    }
+
+    .btn-track:hover {
+        background: #2b6cb0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+    }
+
+
     .empty-state {
         text-align: center;
         padding: 40px;
@@ -478,7 +501,8 @@
         }
 
         .order-actions-wrap .action-btn,
-        .order-actions-wrap .btn-slip {
+        .order-actions-wrap .btn-slip,
+        .order-actions-wrap .btn-track {
             width: 100% !important;
             padding: 10px 8px !important;
             font-size: 0.82rem !important;
@@ -696,6 +720,10 @@
                                         </button>
                                     <% } %>
 
+                                    <button class="btn-track" onclick="trackOrder('<%= order.saleId %>')" style="margin-top: 2px;">
+                                        <i class="fas fa-map-marked-alt"></i> Track
+                                    </button>
+
                                     <% if (order.courier && order.courier.consignmentId) { %>
                                         <div style="margin-top: 4px; font-size: 0.7rem; color: #2f855a;">
                                             <i class="fas fa-truck"></i> Sent (CID: <%= order.courier.consignmentId %>)
@@ -846,6 +874,11 @@
                 $btn.prop('disabled', false);
             }
         });
+    }
+
+    
+    function trackOrder(saleId) {
+        window.location.href = '/track-order/' + saleId;
     }
 
     function updateOrderStatus(saleId, status) {

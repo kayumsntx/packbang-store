@@ -476,8 +476,8 @@
         </div>
 
   
-        <a href="/my-orders" class="back-btn">
-            <i class="fas fa-arrow-left"></i> Back to Orders
+        <a href="<%= (typeof isAdmin !== 'undefined' && isAdmin) ? '/admin/orders' : '/my-orders' %>" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to <%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'Admin Orders' : 'Orders' %>
         </a>
     </div>
 </div>
