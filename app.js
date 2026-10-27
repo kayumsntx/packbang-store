@@ -3261,6 +3261,11 @@ app.get("/seller/custom-orders", requireSellerOrAdmin, (req, res) => {
     });
 });
 
+// Alias redirect for custom orders
+app.get("/make-custom-order", (req, res) => {
+    res.redirect("/custom-orders");
+});
+
 // ---------- MAKE CUSTOM ORDER PAGE (public route for logged-in users) ----------
 app.get("/custom-orders", requireAuth, async (req, res) => {
     try {
