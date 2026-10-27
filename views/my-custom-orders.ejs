@@ -447,13 +447,22 @@
 
                 <!-- Escrow Quick Action Prompts -->
                 <% if ((order.assignedSellerId || order.status === 'assigned') && order.paymentStatus === 'unpaid') { %>
-                    <div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:10px; padding:12px 18px; margin:10px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <%
+                        const productAmt = order.agreedPrice || order.budget || 0;
+                        const feePct = order.adminCommissionPercent || 5.0;
+                        const feeAmt = order.adminCommissionAmount || Math.round((productAmt * feePct) / 100 * 100) / 100;
+                        const grandTotalAmt = order.grandTotal || Math.round((productAmt + feeAmt) * 100) / 100;
+                    %>
+                    <div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:12px; padding:14px 18px; margin:10px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div>
-                            <strong style="color:#92400e; display:block; font-size:0.9rem;"><i class="fas fa-shield-alt"></i> Payment Required for Production</strong>
-                            <span style="font-size:0.82rem; color:#78350f;">Deposit BDT <%= (order.agreedPrice || order.budget || 0).toFixed(2) %> to PackBang Admin Escrow to start manufacturing safely.</span>
+                            <strong style="color:#92400e; display:block; font-size:0.92rem;"><i class="fas fa-shield-alt"></i> Payment Required for Production</strong>
+                            <div style="font-size:0.83rem; color:#78350f; margin-top:3px;">
+                                Product: <strong>BDT <%= productAmt.toFixed(2) %></strong> + Total Admin Fee (<%= feePct %>%): <strong>BDT <%= feeAmt.toFixed(2) %></strong> = Grand Total: <strong style="color:#059669; font-size:1rem;">BDT <%= grandTotalAmt.toFixed(2) %></strong>
+                            </div>
+                            <span style="font-size:0.75rem; color:#b45309; display:block; margin-top:2px;">Funds remain 100% protected in Admin Escrow until you inspect and verify delivery.</span>
                         </div>
-                        <button type="button" onclick="openPaymentModal('<%= order.id %>', <%= (order.agreedPrice || order.budget || 0) %>, '<%= (order.title || ('Order #' + order.id)).replace(/'/g, "\\'") %>')" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:white; padding:8px 16px; border:none; border-radius:8px; cursor:pointer; font-weight:800; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px;">
-                            <i class="fas fa-lock"></i> Pay to Escrow
+                        <button type="button" onclick="openPaymentModal('<%= order.id %>', <%= productAmt %>, <%= feeAmt %>, <%= grandTotalAmt %>, <%= feePct %>, '<%= (order.title || ('Order #' + order.id)).replace(/'/g, "\\'") %>')" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:800; font-size:0.88rem; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(217, 119, 6, 0.25);">
+                            <i class="fas fa-lock"></i> Pay Grand Total (BDT <%= grandTotalAmt.toFixed(2) %>)
                         </button>
                     </div>
                 <% } else if (order.status === 'seller_completed') { %>
@@ -620,12 +629,15 @@
 
                         <% if (order.paymentStatus === 'unpaid') { %>
                             <% 
-                                const payableAmount = order.agreedPrice || order.budget || 0;
+                                const productAmt = order.agreedPrice || order.budget || 0;
+                                const feePct = order.adminCommissionPercent || 5.0;
+                                const feeAmt = order.adminCommissionAmount || Math.round((productAmt * feePct) / 100 * 100) / 100;
+                                const grandTotalAmt = order.grandTotal || Math.round((productAmt + feeAmt) * 100) / 100;
                             %>
                             <button type="button" 
                                     class="btn-pay-action" 
-                                    onclick="openPaymentModal('<%= order.id %>', <%= payableAmount %>, '<%= (order.title || ('Order #' + order.id)).replace(/'/g, "\\'") %>')">
-                                <i class="fas fa-lock"></i> Pay Now (BDT <%= payableAmount.toFixed(2) %>)
+                                    onclick="openPaymentModal('<%= order.id %>', <%= productAmt %>, <%= feeAmt %>, <%= grandTotalAmt %>, <%= feePct %>, '<%= (order.title || ('Order #' + order.id)).replace(/'/g, "\\'") %>')">
+                                <i class="fas fa-lock"></i> Pay Grand Total (BDT <%= grandTotalAmt.toFixed(2) %>)
                             </button>
                         <% } else if (order.paymentStatus === 'paid_to_admin' && order.status === 'seller_completed') { %>
                             <button type="button" 
@@ -939,13 +951,39 @@
     // ===== ESCROW PAYMENT & CONFIRMATION FUNCTIONS =====
     let currentPaymentOrderId = null;
     let selectedPaymentMethod = 'bkash';
+    let currentProductAmount = 0;
+    let currentAdminFeeAmount = 0;
+    let currentGrandTotal = 0;
 
-    function openPaymentModal(orderId, amount, title) {
+    function openPaymentModal(orderId, productAmount, adminFeeAmount, grandTotal, feePct, title) {
         currentPaymentOrderId = orderId;
-        const parsedAmount = parseFloat(amount) || 0;
+        const pAmt = parseFloat(productAmount) || 0;
+        const fPct = parseFloat(feePct) || 5.0;
+        const fAmt = (adminFeeAmount !== undefined && adminFeeAmount !== null) ? parseFloat(adminFeeAmount) : Math.round((pAmt * fPct) / 100 * 100) / 100;
+        const gTotal = (grandTotal !== undefined && grandTotal !== null) ? parseFloat(grandTotal) : Math.round((pAmt + fAmt) * 100) / 100;
+
+        currentProductAmount = pAmt;
+        currentAdminFeeAmount = fAmt;
+        currentGrandTotal = gTotal;
+
         document.getElementById('modalOrderTitle').textContent = title || ('Order #' + orderId);
-        document.getElementById('modalOrderAmount').textContent = 'BDT ' + parsedAmount.toFixed(2);
-        document.getElementById('modalAmountInput').value = parsedAmount;
+        const prodEl = document.getElementById('modalProductAmount');
+        if (prodEl) prodEl.textContent = 'BDT ' + pAmt.toFixed(2);
+
+        const feePctEl = document.getElementById('modalFeePct');
+        if (feePctEl) feePctEl.textContent = fPct.toFixed(1);
+
+        const feeAmtEl = document.getElementById('modalAdminFeeAmount');
+        if (feeAmtEl) feeAmtEl.textContent = '+ BDT ' + fAmt.toFixed(2);
+
+        const grandEl = document.getElementById('modalGrandTotal');
+        if (grandEl) grandEl.textContent = 'BDT ' + gTotal.toFixed(2);
+
+        document.getElementById('modalAmountInput').value = gTotal;
+
+        const btnAmount = document.getElementById('btnPayAmount');
+        if (btnAmount) btnAmount.textContent = gTotal.toFixed(2);
+
         selectPaymentMethod('bkash');
         document.getElementById('escrowPaymentModal').style.display = 'flex';
     }
@@ -990,7 +1028,10 @@
                 body: JSON.stringify({
                     paymentMethod: selectedPaymentMethod,
                     accountNumber: accountNumber,
-                    amount: amount
+                    amount: currentGrandTotal,
+                    productAmount: currentProductAmount,
+                    adminFeeAmount: currentAdminFeeAmount,
+                    grandTotal: currentGrandTotal
                 })
             });
 
@@ -1049,9 +1090,24 @@
                 <span style="font-size: 0.85rem; color: #64748b;">Payment will be held in Admin Escrow until you confirm receipt.</span>
             </div>
 
-            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.9rem; color: #475569; font-weight: 700;">Deposit Amount:</span>
-                <span id="modalOrderAmount" style="font-size: 1.35rem; font-weight: 900; color: #059669;">BDT 0.00</span>
+            <!-- Financial Breakdown in Modal -->
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; color: #475569;">
+                    <span><i class="fas fa-box"></i> Product / Manufacturing Price:</span>
+                    <strong id="modalProductAmount" style="color: #0F172A;">BDT 0.00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; color: #EA580C;">
+                    <span><i class="fas fa-percentage"></i> Total Admin Fee (<span id="modalFeePct">5.0</span>%):</span>
+                    <strong id="modalAdminFeeAmount">+ BDT 0.00</strong>
+                </div>
+                <div style="height: 1px; border-top: 1.5px dashed #CBD5E1; margin: 2px 0;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-size: 0.95rem; font-weight: 800; color: #065F46; display: block;">Grand Total Amount:</span>
+                        <span style="font-size: 0.72rem; color: #059669; font-weight: 700; text-transform: uppercase;">Payable to Admin Escrow</span>
+                    </div>
+                    <span id="modalGrandTotal" style="font-size: 1.35rem; font-weight: 900; color: #059669;">BDT 0.00</span>
+                </div>
             </div>
 
             <div>
@@ -1087,7 +1143,7 @@
             </div>
 
             <button type="submit" id="submitPaymentBtn" class="payment-btn-submit">
-                <i class="fas fa-check-circle"></i> Confirm & Deposit to Admin Escrow
+                <i class="fas fa-lock"></i> Pay Grand Total BDT <span id="btnPayAmount">0.00</span> to Admin Escrow
             </button>
         </form>
     </div>

@@ -1271,8 +1271,11 @@ const customOrderSchema = new mongoose.Schema({
     sellerCompletedAt: { type: Date, default: null },
     customerConfirmedReceived: { type: Boolean, default: false },
     customerConfirmedAt: { type: Date, default: null },
-    adminCommissionPercent: { type: Number, default: 10 },
+    adminCommissionPercent: { type: Number, default: 5 },
     adminCommissionAmount: { type: Number, default: 0 },
+    adminFeePercent: { type: Number, default: 5 },
+    adminFeeAmount: { type: Number, default: 0 },
+    grandTotal: { type: Number, default: 0 },
     sellerPayoutAmount: { type: Number, default: 0 },
     payoutStatus: { 
         type: String, 
@@ -1672,6 +1675,11 @@ app.post("/api/custom-order/create", requireAuth, uploadOrderImages, async (req,
             imageUrls = req.files.map(file => file.path);
         }
         
+        const commissionConfig = await getAdminCommissionConfig();
+        const totalFeePct = commissionConfig.percent || 5.0;
+        const feeAmount = Math.round((budgetNum * totalFeePct) / 100 * 100) / 100;
+        const grandTotalVal = Math.round((budgetNum + feeAmount) * 100) / 100;
+
         const order = new CustomOrder({
             id: "CO-" + Date.now(),
             customerId: req.session.user.id || req.session.user._id,
@@ -1684,6 +1692,11 @@ app.post("/api/custom-order/create", requireAuth, uploadOrderImages, async (req,
             unit: (unit || 'KG').trim(),
             unitPrice: unitPriceNum,
             budget: budgetNum,
+            adminCommissionPercent: totalFeePct,
+            adminCommissionAmount: feeAmount,
+            adminFeePercent: totalFeePct,
+            adminFeeAmount: feeAmount,
+            grandTotal: grandTotalVal,
             deadline: deadline ? new Date(deadline) : null,
             images: imageUrls,
             termsAccepted: true,
@@ -2696,6 +2709,20 @@ async function getAdminCommissionPercent() {
     return config.percent;
 }
 
+app.get("/api/public/commission", async (req, res) => {
+    try {
+        const config = await getAdminCommissionConfig();
+        res.json({
+            success: true,
+            totalPercent: config.percent,
+            itMaintenancePercent: config.itMaintenancePercent,
+            adminCommissionPercent: config.adminCommissionPercent
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, totalPercent: 5.0 });
+    }
+});
+
 app.get("/api/admin/commission", requireAdmin, async (req, res) => {
     try {
         const config = await getAdminCommissionConfig();
@@ -2797,16 +2824,27 @@ app.post("/api/custom-order/:orderId/pay", requireAuth, async (req, res) => {
             order.selectedBidId = acceptedBid._id;
         }
 
-        // Calculate amount from request, agreedPrice, accepted bid, or budget
-        let amount = req.body.amount ? parseFloat(req.body.amount) : order.agreedPrice;
-        if (!amount || amount <= 0) {
+        // Determine Base Product Amount (manufacturing cost)
+        let productAmount = req.body.productAmount ? parseFloat(req.body.productAmount) : (order.agreedPrice || 0);
+        if (productAmount <= 0) {
             if (acceptedBid) {
-                amount = Math.round(acceptedBid.amount * (order.quantity || 1) * 100) / 100;
+                productAmount = Math.round(acceptedBid.amount * (order.quantity || 1) * 100) / 100;
             } else if (order.budget && order.budget > 0) {
-                amount = order.budget;
+                productAmount = order.budget;
             } else {
-                amount = 1000; // Default nominal deposit
+                productAmount = 1000;
             }
+        }
+
+        const currentCommission = await getAdminCommissionPercent();
+        const totalFeePercent = order.adminCommissionPercent || currentCommission || 5.0;
+        const calculatedAdminFee = Math.round((productAmount * totalFeePercent) / 100 * 100) / 100;
+        const calculatedGrandTotal = Math.round((productAmount + calculatedAdminFee) * 100) / 100;
+
+        // Total amount customer deposits to Admin Escrow is the Grand Total (Product + Admin Fee)
+        let grandTotalDeposit = req.body.grandTotal ? parseFloat(req.body.grandTotal) : calculatedGrandTotal;
+        if (isNaN(grandTotalDeposit) || grandTotalDeposit <= 0) {
+            grandTotalDeposit = calculatedGrandTotal;
         }
 
         // Process deposit into Admin Escrow via payment service
@@ -2816,21 +2854,24 @@ app.post("/api/custom-order/:orderId/pay", requireAuth, async (req, res) => {
             customerId: order.customerId,
             customerName: order.customerName,
             customerPhone: order.customerPhone,
-            amount: amount,
+            amount: grandTotalDeposit,
             paymentMethod: paymentMethod,
             accountNumber: accountNumber
         });
 
-        const currentCommission = await getAdminCommissionPercent();
-
-        order.agreedPrice = amount;
-        order.escrowAmount = amount;
+        order.agreedPrice = productAmount;
+        order.adminCommissionPercent = totalFeePercent;
+        order.adminCommissionAmount = calculatedAdminFee;
+        order.adminFeePercent = totalFeePercent;
+        order.adminFeeAmount = calculatedAdminFee;
+        order.grandTotal = grandTotalDeposit;
+        order.escrowAmount = grandTotalDeposit;
+        order.sellerPayoutAmount = productAmount;
         order.paymentStatus = 'paid_to_admin';
         order.paymentMethod = paymentMethod;
         order.paymentTransactionId = paymentResult.transactionId;
         order.paidAt = new Date();
         order.status = 'in_progress';
-        order.adminCommissionPercent = currentCommission;
         order.payoutStatus = 'pending';
 
         if (!order.messages) order.messages = [];
@@ -2839,7 +2880,7 @@ app.post("/api/custom-order/:orderId/pay", requireAuth, async (req, res) => {
             senderName: 'PackBang Escrow System',
             senderRole: 'admin',
             sellerId: order.assignedSellerId,
-            text: `Payment of BDT. ${amount.toFixed(2)} received & securely held in Admin Escrow via ${paymentMethod.toUpperCase()} (TX: ${paymentResult.transactionId}). Assigned supplier ${order.assignedSellerName || ''} is now authorized to begin production.`,
+            text: `Grand Total of BDT. ${grandTotalDeposit.toFixed(2)} (Product: BDT ${productAmount.toFixed(2)} + Total Admin Fee: BDT ${calculatedAdminFee.toFixed(2)}) received & securely deposited into Admin Escrow via ${paymentMethod.toUpperCase()} (TX: ${paymentResult.transactionId}). Assigned supplier ${order.assignedSellerName || ''} is now authorized to begin production.`,
             createdAt: new Date()
         });
 
@@ -3398,14 +3439,19 @@ app.get("/make-custom-order", (req, res) => {
 app.get("/custom-orders", requireAuth, async (req, res) => {
     try {
         const categories = await Category.find().sort({ order: 1 });
-        const terms = await getOrCreateTerms();
+        const terms = await getOrCreateTerms('customer');
+        const commissionConfig = await getAdminCommissionConfig();
+        const totalFeePercent = commissionConfig.percent || 5.0;
         res.render("make-custom-order", {
             user: req.session.user,
             isGuest: false,
             categories: categories,
             currentCategory: null,
             termsTitle: terms.title,
-            termsContent: terms.content
+            termsContent: terms.content,
+            totalAdminFeePercent: totalFeePercent,
+            itMaintenancePercent: commissionConfig.itMaintenancePercent || 2.5,
+            adminCommissionPercent: commissionConfig.adminCommissionPercent || 2.5
         });
     } catch (err) {
         console.error("Custom order page error:", err);

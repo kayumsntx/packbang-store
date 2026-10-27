@@ -181,50 +181,154 @@
         display: block;
     }
 
-    /* Total Budget Next Row Display Card */
-    .total-budget-card {
+    /* Executive Financial Breakdown & Grand Total Card */
+    .financial-summary-card {
+        background: #FFFFFF;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .breakdown-line-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        background: #F8FAFC;
+    }
+
+    .breakdown-line-item.fee-item {
+        background: #FFF7ED;
+        border: 1px solid #FFEDD5;
+    }
+
+    .breakdown-line-item .item-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .breakdown-line-item .item-icon {
+        font-size: 1.25rem;
+    }
+
+    .breakdown-line-item .item-label strong {
+        font-size: 0.92rem;
+        color: #0F172A;
+    }
+
+    .breakdown-line-item .item-subtext {
+        font-size: 0.78rem;
+        color: #64748B;
+        margin-top: 2px;
+    }
+
+    .breakdown-line-item .item-amount {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0F172A;
+        white-space: nowrap;
+    }
+
+    .breakdown-line-item .item-amount.fee-highlight {
+        color: #EA580C;
+    }
+
+    .breakdown-line-item .item-amount span {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748B;
+        margin-right: 2px;
+    }
+
+    .breakdown-divider {
+        height: 1px;
+        border-top: 1.5px dashed #CBD5E1;
+        margin: 2px 0;
+    }
+
+    .grand-total-highlight-row {
         background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
         border: 2px solid #86EFAC;
         border-radius: 12px;
-        padding: 16px 20px;
+        padding: 16px 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 12px;
-        box-shadow: 0 2px 10px rgba(16, 185, 129, 0.08);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
     }
 
-    .total-budget-card .formula-info {
+    .grand-total-label {
         display: flex;
-        flex-direction: column;
-        gap: 3px;
+        align-items: center;
+        gap: 10px;
     }
 
-    .total-budget-card .formula-calc {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #166534;
+    .grand-total-label .grand-icon {
+        font-size: 1.6rem;
     }
 
-    .total-budget-card .formula-note {
-        font-size: 0.78rem;
-        color: #15803D;
-    }
-
-    .total-budget-card .total-value-display {
-        font-size: 1.45rem;
+    .grand-total-label .grand-title {
+        font-size: 1.05rem;
         font-weight: 900;
-        color: #15803D;
+        color: #065F46;
+        display: block;
+    }
+
+    .grand-total-label .grand-badge {
+        display: inline-block;
+        background: #059669;
+        color: #FFFFFF;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-top: 3px;
+    }
+
+    .grand-total-value {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #065F46;
         text-align: right;
         white-space: nowrap;
     }
 
-    .total-budget-card .total-value-display span {
-        font-size: 0.9rem;
+    .grand-total-value small {
+        font-size: 0.95rem;
         font-weight: 700;
-        color: #166534;
         margin-right: 4px;
+        color: #047857;
+    }
+
+    .escrow-notice-strip {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: #475569;
+        line-height: 1.45;
+    }
+
+    .escrow-notice-strip i {
+        color: #10B981;
+        margin-top: 2px;
+        font-size: 0.9rem;
     }
 
     /* Image Upload Preview */
@@ -607,25 +711,74 @@
             </span>
         </div>
         
-        <!-- 5. Total Budget (Next Row Calculated Automatically) -->
+        <!-- 5. Financial Breakdown & Grand Total Payable to Admin -->
         <div class="form-group">
-            <label><i class="fas fa-calculator"></i> Total Target Budget (Calculated)</label>
-            <div class="total-budget-card">
-                <div class="formula-info">
-                    <div class="formula-calc" id="formulaCalcText">
-                        <span id="displayQty">100</span> <span id="displayUnit">KG</span> × BDT. <span id="displayRate">0.00</span>
+            <label><i class="fas fa-file-invoice-dollar"></i> Estimated Financial Breakdown & Grand Total</label>
+            <div class="financial-summary-card">
+                <!-- Base Manufacturing Amount -->
+                <div class="breakdown-line-item">
+                    <div class="item-label">
+                        <span class="item-icon">📦</span>
+                        <div>
+                            <strong>Manufacturing Base Budget</strong>
+                            <div class="item-subtext" id="formulaCalcText">
+                                <span id="displayQty">100</span> <span id="displayUnit">KG</span> × BDT. <span id="displayRate">0.00</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="formula-note">
-                        Automatically calculated from your specified quantity and unit target rate.
+                    <div class="item-amount">
+                        <span>BDT.</span> <strong id="displayTotalBudget">0.00</strong>
                     </div>
                 </div>
-                <div class="total-value-display">
-                    <span>BDT.</span>
-                    <strong id="displayTotalBudget">0.00</strong>
+
+                <!-- Total Admin Fee -->
+                <div class="breakdown-line-item fee-item">
+                    <div class="item-label">
+                        <span class="item-icon">🏛️</span>
+                        <div>
+                            <strong>Total Admin Fee (<span id="displayAdminFeePercent"><%= typeof totalAdminFeePercent !== 'undefined' ? totalAdminFeePercent : 5.0 %></span>%)</strong>
+                            <div class="item-subtext">
+                                Platform escrow guarantee, quality inspection & technical maintenance
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-amount fee-highlight">
+                        <span>+ BDT.</span> <strong id="displayAdminFeeAmount">0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Grand Total Divider -->
+                <div class="breakdown-divider"></div>
+
+                <!-- Grand Total Amount Payable to Admin -->
+                <div class="grand-total-highlight-row">
+                    <div class="grand-total-label">
+                        <span class="grand-icon">💳</span>
+                        <div>
+                            <span class="grand-title">Grand Total Amount</span>
+                            <span class="grand-badge">Payable to Admin</span>
+                        </div>
+                    </div>
+                    <div class="grand-total-value">
+                        <small>BDT.</small>
+                        <strong id="displayGrandTotal">0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Escrow Security Notice -->
+                <div class="escrow-notice-strip">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>
+                        <strong>100% Escrow Protection:</strong> The customer needs to pay this Grand Total amount to Admin upon bid confirmation. Funds remain secured in PackBang Escrow until you inspect and verify delivery.
+                    </span>
                 </div>
             </div>
-            <!-- Hidden input to submit total budget value -->
+
+            <!-- Hidden inputs to submit all calculated financial fields -->
             <input type="hidden" id="orderBudget" name="budget" value="0">
+            <input type="hidden" id="orderAdminFeePercent" name="adminFeePercent" value="<%= typeof totalAdminFeePercent !== 'undefined' ? totalAdminFeePercent : 5.0 %>">
+            <input type="hidden" id="orderAdminFeeAmount" name="adminFeeAmount" value="0">
+            <input type="hidden" id="orderGrandTotal" name="grandTotal" value="0">
         </div>
         
         <!-- 6. Deadline -->
@@ -721,7 +874,9 @@
         calculateTotalBudget();
     }
 
-    // Real-time calculation of total budget: Quantity * Unit Budget = Total Budget
+    const TOTAL_ADMIN_FEE_PCT = <%= typeof totalAdminFeePercent !== 'undefined' ? totalAdminFeePercent : 5.0 %>;
+
+    // Real-time calculation of total budget, Total Admin Fee, and Grand Total Payable to Admin
     function calculateTotalBudget() {
         const qtyVal = parseFloat(document.getElementById('orderQuantity').value) || 0;
         const rateVal = parseFloat(document.getElementById('unitBudget').value) || 0;
@@ -729,14 +884,30 @@
         const safeQty = Math.max(1, qtyVal);
         const safeRate = Math.max(0, rateVal);
 
-        const totalBudget = safeQty * safeRate;
+        const baseBudget = Math.round((safeQty * safeRate) * 100) / 100;
+        const adminFeePct = TOTAL_ADMIN_FEE_PCT;
+        const adminFeeAmt = Math.round((baseBudget * adminFeePct) / 100 * 100) / 100;
+        const grandTotalVal = Math.round((baseBudget + adminFeeAmt) * 100) / 100;
 
-        document.getElementById('orderBudget').value = totalBudget.toFixed(2);
-        document.getElementById('displayTotalBudget').textContent = totalBudget.toLocaleString('en-BD', {
+        document.getElementById('orderBudget').value = baseBudget.toFixed(2);
+        document.getElementById('orderAdminFeePercent').value = adminFeePct.toFixed(1);
+        document.getElementById('orderAdminFeeAmount').value = adminFeeAmt.toFixed(2);
+        document.getElementById('orderGrandTotal').value = grandTotalVal.toFixed(2);
+
+        document.getElementById('displayTotalBudget').textContent = baseBudget.toLocaleString('en-BD', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('displayQty').textContent = safeQty;
+        document.getElementById('displayAdminFeeAmount').textContent = adminFeeAmt.toLocaleString('en-BD', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('displayGrandTotal').textContent = grandTotalVal.toLocaleString('en-BD', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        document.getElementById('displayQty').textContent = safeQty.toLocaleString();
         document.getElementById('displayRate').textContent = safeRate.toFixed(2);
     }
 
@@ -883,8 +1054,15 @@
         formData.append('description', description);
         formData.append('quantity', quantity.toString());
         formData.append('unit', currentSelectedUnit);
+        const feePercentVal = parseFloat(document.getElementById('orderAdminFeePercent').value) || TOTAL_ADMIN_FEE_PCT;
+        const feeAmountVal = parseFloat(document.getElementById('orderAdminFeeAmount').value) || 0;
+        const grandTotalVal = parseFloat(document.getElementById('orderGrandTotal').value) || totalBudget;
+
         formData.append('unitPrice', unitBudget.toString());
         formData.append('budget', totalBudget.toString());
+        formData.append('adminFeePercent', feePercentVal.toString());
+        formData.append('adminFeeAmount', feeAmountVal.toString());
+        formData.append('grandTotal', grandTotalVal.toString());
         formData.append('deadline', deadline || '');
         formData.append('termsAccepted', 'true');
 

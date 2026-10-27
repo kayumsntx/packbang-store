@@ -737,14 +737,22 @@
                 <div class="escrow-body">
                     You have assigned supplier <strong><%= order.assignedSellerName || 'Packaging Supplier' %></strong>. Under PackBang Buyer Protection, you must deposit the order amount with Admin Escrow before the supplier begins manufacturing. Your funds remain 100% protected until you receive and verify the goods.
                 </div>
+                <%
+                    const productAmount = order.agreedPrice || order.budget || 0;
+                    const feePct = order.adminCommissionPercent || 5.0;
+                    const feeAmount = order.adminCommissionAmount || Math.round((productAmount * feePct) / 100 * 100) / 100;
+                    const grandTotal = order.grandTotal || Math.round((productAmount + feeAmount) * 100) / 100;
+                %>
                 <div class="escrow-breakdown">
-                    <span><strong>Total Agreed Amount:</strong> BDT <%= (order.agreedPrice || order.budget || 0).toFixed(2) %></span>
-                    <span><strong>Quantity:</strong> <%= (order.quantity || 1).toLocaleString() %> pcs</span>
+                    <span><strong>Product / Agreed Price:</strong> BDT <%= productAmount.toFixed(2) %></span>
+                    <span style="color:#ea580c;"><strong>Total Admin Fee (<%= feePct %>%):</strong> + BDT <%= feeAmount.toFixed(2) %></span>
+                    <span style="color:#059669; font-size:1.05rem;"><strong>Grand Total Payable to Admin:</strong> BDT <%= grandTotal.toFixed(2) %></span>
+                    <span><strong>Quantity:</strong> <%= (order.quantity || 1).toLocaleString() %> <%= order.unit || 'pcs' %></span>
                     <span><strong>Assigned Supplier:</strong> <%= order.assignedSellerName || 'Assigned' %></span>
                 </div>
                 <% if (isOwner) { %>
-                    <button type="button" class="btn-pay-now" onclick="openPaymentModal('<%= order.id %>', <%= order.agreedPrice || order.budget || 0 %>, '<%= (order.title || '').replace(/'/g, "\\'") %>')">
-                        <i class="fas fa-lock"></i> Pay BDT <%= (order.agreedPrice || order.budget || 0).toFixed(2) %> to Admin Escrow
+                    <button type="button" class="btn-pay-now" onclick="openPaymentModal('<%= order.id %>', <%= productAmount %>, <%= feeAmount %>, <%= grandTotal %>, <%= feePct %>, '<%= (order.title || '').replace(/'/g, "\\'") %>')">
+                        <i class="fas fa-lock"></i> Pay Grand Total (BDT <%= grandTotal.toFixed(2) %>) to Admin Escrow
                     </button>
                 <% } %>
             </div>
@@ -1162,12 +1170,39 @@
     // ===== ESCROW PAYMENT & CONFIRMATION FUNCTIONS =====
     let currentPaymentOrderId = null;
     let selectedPaymentMethod = 'bkash';
+    let currentProductAmount = 0;
+    let currentAdminFeeAmount = 0;
+    let currentGrandTotal = 0;
 
-    function openPaymentModal(orderId, amount, title) {
+    function openPaymentModal(orderId, productAmount, adminFeeAmount, grandTotal, feePct, title) {
         currentPaymentOrderId = orderId;
+        const pAmt = parseFloat(productAmount) || 0;
+        const fPct = parseFloat(feePct) || 5.0;
+        const fAmt = (adminFeeAmount !== undefined && adminFeeAmount !== null) ? parseFloat(adminFeeAmount) : Math.round((pAmt * fPct) / 100 * 100) / 100;
+        const gTotal = (grandTotal !== undefined && grandTotal !== null) ? parseFloat(grandTotal) : Math.round((pAmt + fAmt) * 100) / 100;
+
+        currentProductAmount = pAmt;
+        currentAdminFeeAmount = fAmt;
+        currentGrandTotal = gTotal;
+
         document.getElementById('modalOrderTitle').textContent = title || ('Order #' + orderId);
-        document.getElementById('modalOrderAmount').textContent = 'BDT ' + parseFloat(amount).toFixed(2);
-        document.getElementById('modalAmountInput').value = amount;
+        const prodEl = document.getElementById('modalProductAmount');
+        if (prodEl) prodEl.textContent = 'BDT ' + pAmt.toFixed(2);
+
+        const feePctEl = document.getElementById('modalFeePct');
+        if (feePctEl) feePctEl.textContent = fPct.toFixed(1);
+
+        const feeAmtEl = document.getElementById('modalAdminFeeAmount');
+        if (feeAmtEl) feeAmtEl.textContent = '+ BDT ' + fAmt.toFixed(2);
+
+        const grandEl = document.getElementById('modalGrandTotal');
+        if (grandEl) grandEl.textContent = 'BDT ' + gTotal.toFixed(2);
+
+        document.getElementById('modalAmountInput').value = gTotal;
+
+        const btnAmount = document.getElementById('btnPayAmount');
+        if (btnAmount) btnAmount.textContent = gTotal.toFixed(2);
+
         selectPaymentMethod('bkash');
         document.getElementById('escrowPaymentModal').style.display = 'flex';
     }
@@ -1210,7 +1245,11 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     paymentMethod: selectedPaymentMethod,
-                    accountNumber: accountNumber
+                    accountNumber: accountNumber,
+                    amount: currentGrandTotal,
+                    productAmount: currentProductAmount,
+                    adminFeeAmount: currentAdminFeeAmount,
+                    grandTotal: currentGrandTotal
                 })
             });
 
@@ -1269,9 +1308,24 @@
                 <span style="font-size: 0.85rem; color: #64748b;">Payment will be held in Admin Escrow until you confirm receipt.</span>
             </div>
 
-            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.9rem; color: #475569; font-weight: 700;">Deposit Amount:</span>
-                <span id="modalOrderAmount" style="font-size: 1.35rem; font-weight: 900; color: #059669;">BDT 0.00</span>
+            <!-- Financial Breakdown in Modal -->
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; color: #475569;">
+                    <span><i class="fas fa-box"></i> Product / Manufacturing Price:</span>
+                    <strong id="modalProductAmount" style="color: #0F172A;">BDT 0.00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; color: #EA580C;">
+                    <span><i class="fas fa-percentage"></i> Total Admin Fee (<span id="modalFeePct">5.0</span>%):</span>
+                    <strong id="modalAdminFeeAmount">+ BDT 0.00</strong>
+                </div>
+                <div style="height: 1px; border-top: 1.5px dashed #CBD5E1; margin: 2px 0;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-size: 0.95rem; font-weight: 800; color: #065F46; display: block;">Grand Total Amount:</span>
+                        <span style="font-size: 0.72rem; color: #059669; font-weight: 700; text-transform: uppercase;">Payable to Admin Escrow</span>
+                    </div>
+                    <span id="modalGrandTotal" style="font-size: 1.35rem; font-weight: 900; color: #059669;">BDT 0.00</span>
+                </div>
             </div>
 
             <div>
@@ -1307,7 +1361,7 @@
             </div>
 
             <button type="submit" id="submitPaymentBtn" class="payment-btn-submit">
-                <i class="fas fa-check-circle"></i> Confirm & Deposit to Admin Escrow
+                <i class="fas fa-lock"></i> Pay Grand Total BDT <span id="btnPayAmount">0.00</span> to Admin Escrow
             </button>
         </form>
     </div>
