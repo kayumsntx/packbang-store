@@ -25,6 +25,32 @@ const Seller = require("./models/Seller");
 const SELLER_BACKEND_URL = process.env.SELLER_BACKEND_URL || (process.env.NODE_ENV === "production" ? "https://packbang-seller-backend.onrender.com" : "http://localhost:5000");
 const Banner = require("./models/Banner");
 const Commission = require("./models/Commission");
+const SellerPostSetting = require("./models/SellerPostSetting");
+
+// Helper: Get or initialize Seller Post & Marketplace Settings
+async function getSellerPostConfig() {
+    try {
+        let config = await SellerPostSetting.findOne();
+        if (!config) {
+            config = await SellerPostSetting.create({
+                requireApproval: false,
+                itSupportPercent: 1.5,
+                adminCommissionPercent: 3.5,
+                totalFeePercent: 5.0,
+                updatedBy: 'System'
+            });
+        }
+        return config;
+    } catch (e) {
+        console.error("Error getting seller post config:", e);
+        return {
+            requireApproval: false,
+            itSupportPercent: 1.5,
+            adminCommissionPercent: 3.5,
+            totalFeePercent: 5.0
+        };
+    }
+}
 const PaymentTransaction = require("./models/PaymentTransaction");
 const Review = require("./models/Review");
 const paymentService = require("./services/paymentService");
@@ -152,6 +178,12 @@ const productSchema = new mongoose.Schema({
         default: 'approved'
     },
     isActive: { type: Boolean, default: true },
+    rejectionReason: { type: String, default: '' },
+    itSupportPercent: { type: Number, default: 1.5 },
+    adminCommissionPercent: { type: Number, default: 3.5 },
+    totalFeePercent: { type: Number, default: 5.0 },
+    approvedAt: { type: Date, default: null },
+    approvedBy: { type: String, default: '' },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -2217,6 +2249,11 @@ app.post('/api/seller/products/create', (req, res, next) => {
         const numericOrigPrice = (originalPrice && !isNaN(parseFloat(originalPrice))) ? parseFloat(originalPrice) : null;
         const numericMoq = Math.max(1, parseInt(moq) || 1);
 
+        const postConfig = await getSellerPostConfig();
+        const requireApproval = postConfig.requireApproval === true;
+        const initialStatus = requireApproval ? 'pending' : 'approved';
+        const initialActive = requireApproval ? false : true;
+
         const newProduct = new Product({
             id: "PROD-S-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
             name: productName,
@@ -2238,20 +2275,27 @@ app.post('/api/seller/products/create', (req, res, next) => {
             sellerPhone: sellerPhone || '',
             sellerBadge: sellerBadge || 'Factory Direct',
             sellerRating: 4.9,
-            isActive: true,
-            approvalStatus: 'approved'
+            isActive: initialActive,
+            approvalStatus: initialStatus,
+            itSupportPercent: postConfig.itSupportPercent || 1.5,
+            adminCommissionPercent: postConfig.adminCommissionPercent || 3.5,
+            totalFeePercent: postConfig.totalFeePercent || 5.0
         });
 
         await newProduct.save();
 
-        // Broadcast to live storefront clients
-        try {
-            broadcastRefresh({ action: "product_created", product: newProduct });
-        } catch (e) {}
+        // Broadcast to live storefront clients if active
+        if (initialActive) {
+            try {
+                broadcastRefresh({ action: "product_created", product: newProduct });
+            } catch (e) {}
+        }
 
         res.status(201).json({
             success: true,
-            message: "Product listed successfully on PackBang marketplace!",
+            message: requireApproval
+                ? "Product submitted for review! It will appear in the marketplace once approved by admin."
+                : "Product listed successfully on PackBang marketplace!",
             product: newProduct
         });
     } catch (err) {
@@ -3412,6 +3456,204 @@ app.get("/admin/custom-orders", requireAdmin, (req, res) => {
         user: req.session.user,
         isGuest: false
     });
+});
+
+// ==================== SELLER POST MANAGEMENT (ADMIN) ====================
+
+// 1. GET /admin/seller-posts - Render management page
+app.get("/admin/seller-posts", requireAdmin, async (req, res) => {
+    try {
+        const postConfig = await getSellerPostConfig();
+        const products = await Product.find({
+            sellerId: { $exists: true, $ne: null }
+        }).sort({ createdAt: -1 });
+
+        const totalPosts = products.length;
+        const pendingCount = products.filter(p => p.approvalStatus === 'pending').length;
+        const approvedCount = products.filter(p => p.approvalStatus === 'approved' && p.isActive !== false).length;
+        const rejectedCount = products.filter(p => p.approvalStatus === 'rejected' || (!p.isActive && p.approvalStatus !== 'pending')).length;
+
+        const categories = await Category.find().sort({ order: 1 });
+
+        res.render("admin-seller-posts", {
+            products,
+            postConfig,
+            stats: {
+                totalPosts,
+                pendingCount,
+                approvedCount,
+                rejectedCount,
+                activeFeeRate: postConfig.totalFeePercent
+            },
+            categories,
+            user: req.session.user || { name: 'Admin', role: 'admin' },
+            isGuest: false,
+            cartCount: 0
+        });
+    } catch (err) {
+        console.error("Admin seller posts render error:", err);
+        res.status(500).send("Error loading Seller Post Management: " + err.message);
+    }
+});
+
+// 2. GET /api/admin/seller-posts/config
+app.get("/api/admin/seller-posts/config", requireAdmin, async (req, res) => {
+    try {
+        const config = await getSellerPostConfig();
+        res.json({
+            success: true,
+            requireApproval: config.requireApproval,
+            itSupportPercent: config.itSupportPercent,
+            adminCommissionPercent: config.adminCommissionPercent,
+            totalFeePercent: config.totalFeePercent
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 3. POST /api/admin/seller-posts/config - Update Approval mode and/or Commission
+app.post("/api/admin/seller-posts/config", requireAdmin, async (req, res) => {
+    try {
+        const itSupport = 1.5; // Fixed 1.5% IT Support Charge
+        let { requireApproval, adminCommissionPercent } = req.body;
+
+        let config = await SellerPostSetting.findOne();
+        if (!config) {
+            config = new SellerPostSetting({
+                requireApproval: false,
+                itSupportPercent: itSupport,
+                adminCommissionPercent: 3.5,
+                totalFeePercent: 5.0
+            });
+        }
+
+        if (requireApproval !== undefined) {
+            config.requireApproval = (requireApproval === true || requireApproval === 'true');
+        }
+
+        if (adminCommissionPercent !== undefined && !isNaN(parseFloat(adminCommissionPercent))) {
+            const adminPct = Math.max(0, parseFloat(adminCommissionPercent));
+            config.adminCommissionPercent = adminPct;
+            config.totalFeePercent = Math.round((itSupport + adminPct) * 100) / 100;
+        }
+
+        config.itSupportPercent = itSupport;
+        config.updatedBy = req.session && req.session.user ? (req.session.user.name || 'Admin') : 'Admin';
+        config.updatedAt = new Date();
+
+        await config.save();
+
+        res.json({
+            success: true,
+            message: "Marketplace settings updated successfully!",
+            config: {
+                requireApproval: config.requireApproval,
+                itSupportPercent: config.itSupportPercent,
+                adminCommissionPercent: config.adminCommissionPercent,
+                totalFeePercent: config.totalFeePercent
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 4. POST /api/admin/seller-posts/:productId/approve
+app.post("/api/admin/seller-posts/:productId/approve", requireAdmin, async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const product = await Product.findOne({ id: productId });
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        product.approvalStatus = 'approved';
+        product.isActive = true;
+        product.approvedAt = new Date();
+        product.approvedBy = req.session && req.session.user ? (req.session.user.name || 'Admin') : 'Admin';
+        product.rejectionReason = '';
+        await product.save();
+
+        try {
+            broadcastRefresh({ action: "product_approved", productId: product.id });
+        } catch (e) {}
+
+        res.json({
+            success: true,
+            message: `Product "${product.name}" approved and is now live on PackBang marketplace!`,
+            product
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 5. POST /api/admin/seller-posts/:productId/reject
+app.post("/api/admin/seller-posts/:productId/reject", requireAdmin, async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const { reason } = req.body;
+        const product = await Product.findOne({ id: productId });
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        product.approvalStatus = 'rejected';
+        product.isActive = false;
+        product.rejectionReason = reason || 'Does not comply with marketplace catalog quality guidelines';
+        await product.save();
+
+        res.json({
+            success: true,
+            message: `Product "${product.name}" marked as rejected.`,
+            product
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 6. POST /api/admin/seller-posts/:productId/toggle-active
+app.post("/api/admin/seller-posts/:productId/toggle-active", requireAdmin, async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const product = await Product.findOne({ id: productId });
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        product.isActive = !product.isActive;
+        await product.save();
+
+        res.json({
+            success: true,
+            isActive: product.isActive,
+            message: product.isActive 
+                ? `Product "${product.name}" is now visible live in marketplace.`
+                : `Product "${product.name}" is now paused/hidden from marketplace.`
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 7. DELETE /api/admin/seller-posts/:productId
+app.delete("/api/admin/seller-posts/:productId", requireAdmin, async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const result = await Product.findOneAndDelete({ id: productId });
+        if (!result) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        res.json({
+            success: true,
+            message: `Product "${result.name}" deleted from catalog.`
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
 // ---------- SELLER DASHBOARD (Bid on orders) ----------

@@ -1,0 +1,1127 @@
+<%- include('partials/header') %>
+
+<style>
+    .admin-posts-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .admin-posts-container h2 {
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 12px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1e293b;
+        font-size: 1.45rem;
+    }
+    .admin-posts-container .header-subtitle {
+        font-size: 0.9rem;
+        color: #64748B;
+        margin-top: -16px;
+        margin-bottom: 24px;
+    }
+
+    /* ===== CONFIGURATION SETTINGS BAR ===== */
+    .commission-settings-card {
+        background: white;
+        border: 1.5px solid #fed7aa;
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin-bottom: 26px;
+        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .commission-info {
+        flex: 1;
+        min-width: 280px;
+    }
+    .commission-info h4 {
+        margin: 0 0 6px 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #9a3412;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .commission-info p {
+        margin: 0 0 12px 0;
+        font-size: 0.85rem;
+        color: #7c2d12;
+        line-height: 1.4;
+    }
+
+    /* Approval Mode Switcher */
+    .approval-mode-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .mode-switch-group {
+        display: inline-flex;
+        background: #F1F5F9;
+        border-radius: 10px;
+        padding: 4px;
+        border: 1px solid #CBD5E1;
+    }
+    .mode-switch-btn {
+        padding: 6px 14px;
+        border: none;
+        background: transparent;
+        border-radius: 7px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #64748B;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .mode-switch-btn.active-manual {
+        background: #EA580C;
+        color: white;
+        box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+    }
+    .mode-switch-btn.active-auto {
+        background: #10B981;
+        color: white;
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    }
+
+    .mode-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+    .mode-pill-manual {
+        background: #FFF7ED;
+        color: #C2410C;
+        border: 1px solid #FFEDD5;
+    }
+    .mode-pill-auto {
+        background: #ECFDF5;
+        color: #047857;
+        border: 1px solid #A7F3D0;
+    }
+
+    /* Commission Form Controls */
+    .commission-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .commission-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .commission-input-wrapper input {
+        width: 65px;
+        padding: 8px 10px;
+        border: none;
+        background: transparent;
+        font-weight: 800;
+        font-size: 1.05rem;
+        text-align: center;
+        outline: none;
+    }
+    .commission-input-wrapper span {
+        padding-right: 12px;
+        font-weight: 800;
+        color: #64748b;
+    }
+    .btn-save-commission {
+        background: #0F172A;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 38px;
+    }
+    .btn-save-commission:hover { background: #1e293b; }
+
+    /* ===== OVERVIEW METRICS BAR ===== */
+    .overview-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .stat-card .stat-label {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .stat-card .stat-val {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #0F172A;
+        margin-top: 4px;
+    }
+
+    /* ===== FILTER & SEARCH CONTROLS ===== */
+    .filter-bar {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 12px 18px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+    .status-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .tab-btn {
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: #F1F5F9;
+        color: #475569;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+    .tab-btn:hover { background: #E2E8F0; }
+    .tab-btn.active {
+        background: #0F172A;
+        color: white;
+    }
+    .tab-badge {
+        background: rgba(255,255,255,0.25);
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+    }
+    .tab-btn:not(.active) .tab-badge {
+        background: #CBD5E1;
+        color: #0F172A;
+    }
+    .search-inputs {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+        max-width: 480px;
+        min-width: 240px;
+    }
+    .search-input {
+        flex: 1;
+        padding: 8px 14px;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        outline: none;
+    }
+    .search-input:focus { border-color: #EA580C; }
+    .cat-select {
+        padding: 8px 12px;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        background: white;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    /* ===== POST CARD (like order-card) ===== */
+    .post-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 22px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .post-card:hover {
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+    }
+    .post-card .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    .post-card .title-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .post-card .title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+    .post-card .sku-tag {
+        font-size: 0.75rem;
+        background: #F1F5F9;
+        color: #475569;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-family: monospace;
+    }
+    .post-card .cat-pill {
+        background: #EFF6FF;
+        color: #1D4ED8;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 12px;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .status-pending { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .status-approved { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+    .status-rejected { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .status-paused { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
+
+    /* Post Main Content Grid */
+    .post-content-grid {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 18px;
+        margin: 12px 0;
+    }
+    .post-thumbnail {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1.5px solid #E2E8F0;
+        cursor: pointer;
+        transition: transform 0.2s;
+        background: #F8FAFC;
+    }
+    .post-thumbnail:hover {
+        transform: scale(1.04);
+    }
+    .post-details {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .post-meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 0.86rem;
+        color: #475569;
+    }
+    .post-meta-row strong { color: #0F172A; }
+
+    /* Financial Breakdown Box (exact escrow-summary-box style) */
+    .financial-summary-box {
+        background: #F8FAFC;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 12px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+        font-size: 0.86rem;
+    }
+    .financial-summary-box .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .financial-summary-box strong { color: #0f172a; }
+
+    /* Card Actions */
+    .post-card .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        align-items: center;
+    }
+    .post-card .actions button,
+    .post-card .actions a {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.84rem;
+        text-decoration: none;
+    }
+    .btn-approve { background: #27ae60; color: white; }
+    .btn-approve:hover { background: #219653; }
+    .btn-reject { background: #e53e3e; color: white; }
+    .btn-reject:hover { background: #c0392b; }
+    .btn-pause { background: #64748B; color: white; }
+    .btn-pause:hover { background: #475569; }
+    .btn-resume { background: #0284C7; color: white; }
+    .btn-resume:hover { background: #0369A1; }
+    .btn-view { background: #0F172A; color: white; }
+    .btn-view:hover { background: #1E293B; }
+    .btn-delete { background: #FFF; color: #DC2626; border: 1.5px solid #FCA5A5 !important; }
+    .btn-delete:hover { background: #FEF2F2; }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #a0aec0;
+        background: white;
+        border-radius: 12px;
+        border: 1px dashed #cbd5e1;
+    }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 12px; color: #cbd5e1; }
+
+    /* Modal for Image Preview & Rejection Reason */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .modal-box {
+        position: relative;
+        width: 100%;
+        max-width: 480px;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+    }
+    .modal-header {
+        background: #0F172A;
+        color: white;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h4 { margin: 0; font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .modal-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    /* ===== RESPONSIVE STYLES ===== */
+    @media (max-width: 768px) {
+        .admin-posts-container {
+            padding: 12px;
+            margin: 15px auto;
+        }
+        .admin-posts-container h2 {
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+        .commission-settings-card {
+            padding: 16px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+        }
+        .commission-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .commission-input-wrapper {
+            justify-content: center;
+        }
+        .commission-input-wrapper input {
+            width: 100%;
+            max-width: 100px;
+        }
+        .btn-save-commission {
+            justify-content: center;
+            width: 100%;
+        }
+        .post-content-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .post-thumbnail {
+            width: 100%;
+            height: 180px;
+        }
+        .financial-summary-box {
+            flex-direction: column;
+            gap: 8px;
+        }
+        .post-card .actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .post-card .actions button,
+        .post-card .actions a {
+            justify-content: center;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="admin-posts-container">
+    <h2><i class="fas fa-boxes-packing" style="color: #f39c12;"></i> Seller Post Management</h2>
+    <div class="header-subtitle">
+        Control seller product posts to the PackBang marketplace, configure platform marketplace fees, and manage live product listings.
+    </div>
+
+    <!-- ===== CONFIGURATION & COMMISSION SETTINGS BAR ===== -->
+    <div class="commission-settings-card">
+        <div class="commission-info">
+            <h4><i class="fas fa-sliders-h"></i> Marketplace Post & Fee Configuration</h4>
+            <p>
+                Choose whether new seller product submissions require administrative approval or go live automatically, and set the platform marketplace fee.
+            </p>
+            
+            <div class="approval-mode-box">
+                <span style="font-size: 0.8rem; font-weight: 800; color: #475569; text-transform: uppercase;">Approval Switch:</span>
+                <div class="mode-switch-group">
+                    <button type="button" 
+                            id="btnModeManual" 
+                            class="mode-switch-btn <%= postConfig.requireApproval ? 'active-manual' : '' %>"
+                            onclick="setApprovalMode(true)">
+                        <i class="fas fa-user-shield"></i> Require Admin Approval
+                    </button>
+                    <button type="button" 
+                            id="btnModeAuto" 
+                            class="mode-switch-btn <%= !postConfig.requireApproval ? 'active-auto' : '' %>"
+                            onclick="setApprovalMode(false)">
+                        <i class="fas fa-bolt"></i> Auto-Approve / Instant Live
+                    </button>
+                </div>
+
+                <div id="modeStatusBadge" class="mode-status-pill <%= postConfig.requireApproval ? 'mode-pill-manual' : 'mode-pill-auto' %>">
+                    <% if (postConfig.requireApproval) { %>
+                        <i class="fas fa-lock"></i> Manual Review Active: New posts hold in Pending
+                    <% } else { %>
+                        <i class="fas fa-check-circle"></i> Auto-Update Active: New posts live immediately
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <form id="marketplaceFeeForm" onsubmit="saveMarketplaceSettings(event)" class="commission-form">
+                <!-- Fixed IT Support Charge -->
+                <div style="background: #F1F5F9; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 6px 12px; text-align: center;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #475569; text-transform: uppercase;">IT Support Charge</div>
+                    <div style="font-size: 1.05rem; font-weight: 900; color: #0F172A;"><%= (postConfig.itSupportPercent || 1.5).toFixed(1) %>% <span style="font-size: 0.7rem; font-weight: 700; color: #059669;">Fixed</span></div>
+                </div>
+
+                <div style="font-size: 1.2rem; font-weight: 900; color: #94A3B8;">+</div>
+
+                <!-- Admin Commission Editable Input -->
+                <div>
+                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #C2410C; text-transform: uppercase; margin-bottom: 2px;">Admin Commission</label>
+                    <div class="commission-input-wrapper">
+                        <input type="number" 
+                               id="adminCommissionInput" 
+                               name="adminCommissionPercent" 
+                               value="<%= (postConfig.adminCommissionPercent !== undefined ? postConfig.adminCommissionPercent : 3.5).toFixed(1) %>" 
+                               step="0.1" 
+                               min="0" 
+                               max="98.5" 
+                               required 
+                               oninput="updateFeePreview()">
+                        <span>%</span>
+                    </div>
+                </div>
+
+                <div style="font-size: 1.2rem; font-weight: 900; color: #94A3B8;">=</div>
+
+                <!-- Total Admin Fee Live Preview -->
+                <div style="background: #FFF7ED; border: 1.5px solid #FDBA74; border-radius: 8px; padding: 6px 14px; text-align: center;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #C2410C; text-transform: uppercase;">Total Admin Fee</div>
+                    <div id="totalFeePreview" style="font-size: 1.05rem; font-weight: 900; color: #EA580C;">
+                        <%= (postConfig.totalFeePercent || 5.0).toFixed(1) %>%
+                    </div>
+                </div>
+
+                <button type="submit" id="saveSettingsBtn" class="btn-save-commission">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== OVERVIEW METRICS BAR ===== -->
+    <div class="overview-stats">
+        <div class="stat-card">
+            <div class="stat-label">Total Seller Posts</div>
+            <div id="statTotalPosts" class="stat-val"><%= stats.totalPosts %></div>
+        </div>
+        <div class="stat-card" style="background: #FFFBEB; border-color: #FDE68A;">
+            <div class="stat-label" style="color: #B45309;">Pending Approval</div>
+            <div id="statPendingCount" class="stat-val" style="color: #D97706;"><%= stats.pendingCount %></div>
+        </div>
+        <div class="stat-card" style="background: #F0FDF4; border-color: #BBF7D0;">
+            <div class="stat-label" style="color: #15803D;">Live in Marketplace</div>
+            <div id="statApprovedCount" class="stat-val" style="color: #16A34A;"><%= stats.approvedCount %></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Active Marketplace Total Fee</div>
+            <div id="statActiveFeeRate" class="stat-val" style="color: #3B82F6;">
+                <%= (postConfig.totalFeePercent || 5.0).toFixed(1) %>%
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FILTER & SEARCH CONTROLS ===== -->
+    <div class="filter-bar">
+        <div class="status-tabs">
+            <button type="button" class="tab-btn active" data-tab="all" onclick="filterByTab('all')">
+                All Posts <span class="tab-badge"><%= stats.totalPosts %></span>
+            </button>
+            <button type="button" class="tab-btn" data-tab="pending" onclick="filterByTab('pending')">
+                Pending Review <span class="tab-badge" style="background: #EA580C; color: white;"><%= stats.pendingCount %></span>
+            </button>
+            <button type="button" class="tab-btn" data-tab="approved" onclick="filterByTab('approved')">
+                Live / Approved <span class="tab-badge"><%= stats.approvedCount %></span>
+            </button>
+            <button type="button" class="tab-btn" data-tab="rejected" onclick="filterByTab('rejected')">
+                Rejected / Paused <span class="tab-badge"><%= stats.rejectedCount %></span>
+            </button>
+        </div>
+
+        <div class="search-inputs">
+            <input type="text" 
+                   id="searchQuery" 
+                   class="search-input" 
+                   placeholder="Search product title, SKU, seller..." 
+                   oninput="applyFilters()">
+            
+            <select id="categoryFilter" class="cat-select" onchange="applyFilters()">
+                <option value="all">All Categories</option>
+                <% if (categories && categories.length > 0) { %>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat.name %>"><%= cat.name %></option>
+                    <% }) %>
+                <% } %>
+            </select>
+        </div>
+    </div>
+
+    <!-- ===== SELLER POSTS LIST ===== -->
+    <div id="postsList">
+        <% if (!products || products.length === 0) { %>
+            <div class="empty-state">
+                <i class="fas fa-boxes-packing"></i>
+                <h3 style="margin: 0 0 6px 0; color: #475569;">No Seller Posts Found</h3>
+                <p style="margin: 0; font-size: 0.9rem;">No products have been submitted by sellers yet.</p>
+            </div>
+        <% } else { %>
+            <% products.forEach(p => { 
+                const itPct = postConfig.itSupportPercent || 1.5;
+                const adminPct = postConfig.adminCommissionPercent || 3.5;
+                const totalPct = postConfig.totalFeePercent || 5.0;
+
+                const price = p.price || 0;
+                const itAmount = Math.round((price * (itPct / 100)) * 100) / 100;
+                const adminAmount = Math.round((price * (adminPct / 100)) * 100) / 100;
+                const totalFeeAmount = Math.round((price * (totalPct / 100)) * 100) / 100;
+                const netSeller = Math.round((price - totalFeeAmount) * 100) / 100;
+
+                const status = p.approvalStatus || (p.isActive ? 'approved' : 'pending');
+            %>
+                <div class="post-card" 
+                     id="post-card-<%= p.id %>"
+                     data-id="<%= p.id %>"
+                     data-name="<%= (p.name || '').toLowerCase() %>"
+                     data-category="<%= (p.category || 'General').toLowerCase() %>"
+                     data-seller="<%= (p.sellerName || '').toLowerCase() %>"
+                     data-status="<%= status %>"
+                     data-active="<%= p.isActive ? 'true' : 'false' %>">
+                    
+                    <div class="header">
+                        <div class="title-group">
+                            <span class="title"><%= p.name %></span>
+                            <span class="sku-tag"><%= p.id %></span>
+                            <span class="cat-pill"><i class="fas fa-tag"></i> <%= p.category || 'Packaging' %></span>
+                        </div>
+
+                        <div>
+                            <% if (status === 'pending') { %>
+                                <span class="status-badge status-pending" id="badge-<%= p.id %>">
+                                    <i class="fas fa-clock"></i> Pending Approval
+                                </span>
+                            <% } else if (status === 'rejected') { %>
+                                <span class="status-badge status-rejected" id="badge-<%= p.id %>">
+                                    <i class="fas fa-times-circle"></i> Rejected
+                                </span>
+                            <% } else if (!p.isActive) { %>
+                                <span class="status-badge status-paused" id="badge-<%= p.id %>">
+                                    <i class="fas fa-pause-circle"></i> Paused / Hidden
+                                </span>
+                            <% } else { %>
+                                <span class="status-badge status-approved" id="badge-<%= p.id %>">
+                                    <i class="fas fa-check-circle"></i> Live on Marketplace
+                                </span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="post-content-grid">
+                        <div>
+                            <img src="<%= p.imagePath || (p.images && p.images[0]) || '/uploads/default.jpg' %>" 
+                                 alt="<%= p.name %>" 
+                                 class="post-thumbnail"
+                                 onclick="openImagePreview('<%= p.imagePath || (p.images && p.images[0]) || '/uploads/default.jpg' %>', '<%= (p.name || '').replace(/'/g, "\\'") %>')">
+                        </div>
+
+                        <div class="post-details">
+                            <div class="post-meta-row">
+                                <div><i class="fas fa-store" style="color: #EA580C;"></i> Seller: <strong><%= p.sellerName || 'Direct Factory' %></strong> <% if (p.sellerBadge) { %><span style="font-size: 0.72rem; background: #FEF3C7; color: #92400E; padding: 1px 6px; border-radius: 4px; font-weight: 700;"><%= p.sellerBadge %></span><% } %></div>
+                                <% if (p.sellerPhone) { %>
+                                    <div><i class="fas fa-phone"></i> Phone: <strong><%= p.sellerPhone %></strong></div>
+                                <% } %>
+                                <div><i class="fas fa-calendar"></i> Posted: <strong><%= p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recent' %></strong></div>
+                            </div>
+
+                            <div class="post-meta-row" style="margin-top: 4px;">
+                                <div>Stock: <strong><%= (p.stock || 0).toLocaleString() %> <%= p.unit || 'pcs' %></strong></div>
+                                <div>MOQ: <strong><%= p.moq || 1 %> <%= p.unit || 'pcs' %></strong></div>
+                                <div>Listing Unit: <strong><%= p.unit || 'pcs' %></strong></div>
+                            </div>
+
+                            <% if (p.description) { %>
+                                <div style="font-size: 0.82rem; color: #64748B; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    <%= p.description %>
+                                </div>
+                            <% } %>
+
+                            <% if (p.rejectionReason) { %>
+                                <div style="background: #FEF2F2; border-left: 3px solid #EF4444; padding: 6px 12px; border-radius: 4px; font-size: 0.82rem; color: #991B1B; margin-top: 4px;">
+                                    <strong>Rejection Reason:</strong> <%= p.rejectionReason %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Financial Breakdown Box -->
+                    <div class="financial-summary-box">
+                        <div class="summary-item">
+                            <span>Listing Price:</span>
+                            <strong style="font-size: 1rem; color: #0F172A;">BDT <%= price.toFixed(2) %></strong>
+                        </div>
+                        <div class="summary-item" style="color: #475569;">
+                            <span>├─ IT Support (1.5%):</span>
+                            <strong>BDT <%= itAmount.toFixed(2) %></strong>
+                        </div>
+                        <div class="summary-item" style="color: #475569;">
+                            <span>├─ Admin Commission (<%= adminPct %>%):</span>
+                            <strong>BDT <%= adminAmount.toFixed(2) %></strong>
+                        </div>
+                        <div class="summary-item" style="color: #EA580C;">
+                            <span>Total Admin Fee (<%= totalPct %>%):</span>
+                            <strong style="color: #EA580C;">BDT <%= totalFeeAmount.toFixed(2) %></strong>
+                        </div>
+                        <div class="summary-item" style="color: #059669; font-weight: 800;">
+                            <span>Net Seller Payout:</span>
+                            <strong style="color: #059669; font-size: 1rem;">BDT <%= netSeller.toFixed(2) %></strong>
+                        </div>
+                    </div>
+
+                    <!-- Actions Bar -->
+                    <div class="actions">
+                        <% if (status === 'pending') { %>
+                            <button type="button" class="btn-approve" onclick="approveProduct('<%= p.id %>')">
+                                <i class="fas fa-check-circle"></i> Approve & Publish to Marketplace
+                            </button>
+                            <button type="button" class="btn-reject" onclick="openRejectModal('<%= p.id %>', '<%= (p.name || '').replace(/'/g, "\\'") %>')">
+                                <i class="fas fa-times-circle"></i> Reject Post
+                            </button>
+                        <% } else if (status === 'rejected') { %>
+                            <button type="button" class="btn-approve" onclick="approveProduct('<%= p.id %>')">
+                                <i class="fas fa-redo"></i> Re-approve & Make Live
+                            </button>
+                        <% } else { %>
+                            <% if (p.isActive) { %>
+                                <button type="button" class="btn-pause" onclick="toggleProductActive('<%= p.id %>')">
+                                    <i class="fas fa-pause"></i> Pause / Hide from Marketplace
+                                </button>
+                            <% } else { %>
+                                <button type="button" class="btn-resume" onclick="toggleProductActive('<%= p.id %>')">
+                                    <i class="fas fa-play"></i> Resume / Show in Marketplace
+                                </button>
+                            <% } %>
+                        <% } %>
+
+                        <a href="/product/<%= p.id %>" target="_blank" class="btn-view">
+                            <i class="fas fa-external-link-alt"></i> View in Store
+                        </a>
+
+                        <button type="button" class="btn-delete" onclick="deleteProduct('<%= p.id %>')">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+</div>
+
+<!-- ===== REJECT MODAL ===== -->
+<div id="rejectModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h4><i class="fas fa-times-circle" style="color: #EF4444;"></i> Reject Seller Product Post</h4>
+            <button type="button" onclick="closeRejectModal()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        <form id="rejectForm" onsubmit="submitRejectPost(event)" class="modal-body">
+            <input type="hidden" id="rejectProductId" value="">
+            <div>
+                <strong id="rejectProductTitle" style="color: #0F172A; display: block; font-size: 0.95rem;">Product Title</strong>
+                <span style="font-size: 0.8rem; color: #64748B;">Please provide a reason to notify the seller for catalog compliance:</span>
+            </div>
+            <div>
+                <textarea id="rejectionReasonInput" 
+                          rows="3" 
+                          style="width: 100%; padding: 10px; border: 1.5px solid #CBD5E1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;" 
+                          placeholder="e.g. Inappropriate packaging imagery, incomplete product specifications, or pricing error..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeRejectModal()" style="padding: 8px 16px; border: 1px solid #CBD5E1; background: white; border-radius: 6px; font-weight: 700; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" id="btnConfirmReject" style="padding: 8px 18px; border: none; background: #DC2626; color: white; border-radius: 6px; font-weight: 800; cursor: pointer;">
+                    Confirm Rejection
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== IMAGE PREVIEW MODAL ===== -->
+<div id="imagePreviewModal" class="modal-overlay" style="display: none;" onclick="closeImagePreview()">
+    <div class="modal-box" style="max-width: 600px; background: transparent; box-shadow: none;" onclick="event.stopPropagation()">
+        <div style="position: relative; text-align: center;">
+            <img id="previewModalImg" src="" alt="Preview" style="max-width: 100%; max-height: 80vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div id="previewModalCaption" style="color: white; font-weight: 800; margin-top: 10px; font-size: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"></div>
+            <button type="button" onclick="closeImagePreview()" style="position: absolute; top: -14px; right: -14px; background: white; color: #0F172A; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">&times;</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live Fee Preview Calculation
+    let currentRequireApproval = <%= postConfig.requireApproval ? 'true' : 'false' %>;
+
+    function updateFeePreview() {
+        const adminInput = document.getElementById('adminCommissionInput');
+        const adminVal = parseFloat(adminInput.value) || 0;
+        const itVal = 1.5; // Fixed 1.5%
+        const total = (itVal + adminVal).toFixed(1);
+        document.getElementById('totalFeePreview').textContent = total + '%';
+    }
+
+    // Toggle Approval Mode
+    async function setApprovalMode(isManual) {
+        currentRequireApproval = isManual;
+        const btnManual = document.getElementById('btnModeManual');
+        const btnAuto = document.getElementById('btnModeAuto');
+        const badge = document.getElementById('modeStatusBadge');
+
+        if (isManual) {
+            btnManual.className = 'mode-switch-btn active-manual';
+            btnAuto.className = 'mode-switch-btn';
+            badge.className = 'mode-status-pill mode-pill-manual';
+            badge.innerHTML = '<i class="fas fa-lock"></i> Manual Review Active: New posts hold in Pending';
+        } else {
+            btnManual.className = 'mode-switch-btn';
+            btnAuto.className = 'mode-switch-btn active-auto';
+            badge.className = 'mode-status-pill mode-pill-auto';
+            badge.innerHTML = '<i class="fas fa-check-circle"></i> Auto-Update Active: New posts live immediately';
+        }
+
+        // Save immediately to backend
+        try {
+            const adminInput = document.getElementById('adminCommissionInput');
+            const adminVal = parseFloat(adminInput.value) || 3.5;
+            
+            const res = await fetch('/api/admin/seller-posts/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requireApproval: isManual,
+                    adminCommissionPercent: adminVal
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(isManual 
+                    ? '🔒 Approval Required mode activated. Future seller posts require admin approval.'
+                    : '⚡ Auto-Approve mode activated. Seller posts will go live automatically.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Failed to update approval mode. Check connection.');
+        }
+    }
+
+    // Save Commission & Approval Settings
+    async function saveMarketplaceSettings(e) {
+        e.preventDefault();
+        const btn = document.getElementById('saveSettingsBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            const adminVal = parseFloat(document.getElementById('adminCommissionInput').value);
+            const res = await fetch('/api/admin/seller-posts/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requireApproval: currentRequireApproval,
+                    adminCommissionPercent: adminVal
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('statActiveFeeRate').textContent = data.config.totalFeePercent.toFixed(1) + '%';
+                showToast('✅ Marketplace settings & commission saved successfully!');
+            } else {
+                alert(data.message || 'Error saving settings');
+            }
+        } catch (err) {
+            alert('Error saving settings. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
+        }
+    }
+
+    // Approve Product
+    async function approveProduct(productId) {
+        if (!confirm('Are you sure you want to approve this product post and make it live in the marketplace?')) return;
+        try {
+            const res = await fetch('/api/admin/seller-posts/' + encodeURIComponent(productId) + '/approve', {
+                method: 'POST'
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('🎉 ' + data.message);
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                alert(data.message || 'Error approving product');
+            }
+        } catch (err) {
+            alert('Request failed. Check network.');
+        }
+    }
+
+    // Reject Product Modal
+    function openRejectModal(productId, productName) {
+        document.getElementById('rejectProductId').value = productId;
+        document.getElementById('rejectProductTitle').textContent = productName;
+        document.getElementById('rejectionReasonInput').value = '';
+        document.getElementById('rejectModal').style.display = 'flex';
+    }
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+    }
+
+    async function submitRejectPost(e) {
+        e.preventDefault();
+        const productId = document.getElementById('rejectProductId').value;
+        const reason = document.getElementById('rejectionReasonInput').value.trim();
+        const btn = document.getElementById('btnConfirmReject');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        try {
+            const res = await fetch('/api/admin/seller-posts/' + encodeURIComponent(productId) + '/reject', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                closeRejectModal();
+                showToast('Product post rejected.');
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                alert(data.message || 'Error rejecting post');
+            }
+        } catch (err) {
+            alert('Request failed');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Confirm Rejection';
+        }
+    }
+
+    // Pause / Resume Product
+    async function toggleProductActive(productId) {
+        try {
+            const res = await fetch('/api/admin/seller-posts/' + encodeURIComponent(productId) + '/toggle-active', {
+                method: 'POST'
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message);
+                setTimeout(() => window.location.reload(), 700);
+            } else {
+                alert(data.message || 'Action failed');
+            }
+        } catch (err) {
+            alert('Request failed');
+        }
+    }
+
+    // Delete Product
+    async function deleteProduct(productId) {
+        if (!confirm('Are you sure you want to permanently delete this product post from the catalog? This cannot be undone.')) return;
+        try {
+            const res = await fetch('/api/admin/seller-posts/' + encodeURIComponent(productId), {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Product deleted from marketplace.');
+                const card = document.getElementById('post-card-' + productId);
+                if (card) card.remove();
+            } else {
+                alert(data.message || 'Delete failed');
+            }
+        } catch (err) {
+            alert('Request failed');
+        }
+    }
+
+    // Tab Filtering
+    let currentTab = 'all';
+    function filterByTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        applyFilters();
+    }
+
+    // Search and Category Filtering
+    function applyFilters() {
+        const query = document.getElementById('searchQuery').value.toLowerCase().trim();
+        const cat = document.getElementById('categoryFilter').value.toLowerCase();
+        const cards = document.querySelectorAll('.post-card');
+
+        cards.forEach(card => {
+            const name = card.dataset.name || '';
+            const id = (card.dataset.id || '').toLowerCase();
+            const seller = card.dataset.seller || '';
+            const category = card.dataset.category || '';
+            const status = card.dataset.status || '';
+            const isActive = card.dataset.active === 'true';
+
+            // Tab match
+            let tabMatch = true;
+            if (currentTab === 'pending') tabMatch = (status === 'pending');
+            else if (currentTab === 'approved') tabMatch = (status === 'approved' && isActive);
+            else if (currentTab === 'rejected') tabMatch = (status === 'rejected' || !isActive);
+
+            // Category match
+            const catMatch = (cat === 'all' || category.includes(cat));
+
+            // Search query match
+            const searchMatch = !query || name.includes(query) || id.includes(query) || seller.includes(query) || category.includes(query);
+
+            if (tabMatch && catMatch && searchMatch) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Image Preview Modal
+    function openImagePreview(src, title) {
+        document.getElementById('previewModalImg').src = src;
+        document.getElementById('previewModalCaption').textContent = title || 'Product Image';
+        document.getElementById('imagePreviewModal').style.display = 'flex';
+    }
+    function closeImagePreview() {
+        document.getElementById('imagePreviewModal').style.display = 'none';
+    }
+
+    // Toast Notification Utility
+    function showToast(msg) {
+        let toast = document.getElementById('adminToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'adminToast';
+            toast.style.cssText = 'position: fixed; bottom: 24px; right: 24px; background: #0F172A; color: #FFF; padding: 12px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; z-index: 999999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.3s; display: flex; align-items: center; gap: 8px;';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = msg;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+        }, 3500);
+    }
+</script>
+
+<%- include('partials/footer') %>
