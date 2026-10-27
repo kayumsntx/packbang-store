@@ -1,0 +1,821 @@
+<%- include('partials/header') %>
+
+<style>
+    .sales-page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 24px 20px 40px 20px;
+        box-sizing: border-box;
+    }
+
+    .sales-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 3px solid #f39c12;
+        padding-bottom: 18px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .sales-header .header-titles h2 {
+        margin: 0 0 6px 0;
+        color: #1a202c;
+        font-size: 1.65rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .sales-header .header-titles h2 i {
+        color: #f39c12;
+    }
+
+    .sales-header .header-titles p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #718096;
+        line-height: 1.4;
+    }
+
+    .sales-header .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .role-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .btn-switch-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .btn-switch-tab:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    /* Stats Overview Grid */
+    .sales-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card-box {
+        background: #FFFFFF;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .stat-card-box.total .stat-card-icon { background: #FEF3C7; color: #D97706; }
+    .stat-card-box.it .stat-card-icon { background: #E0F2FE; color: #0284C7; }
+    .stat-card-box.admin .stat-card-icon { background: #F3E8FF; color: #9333EA; }
+    .stat-card-box.count .stat-card-icon { background: #ECFDF5; color: #059669; }
+
+    .stat-card-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stat-card-info .stat-label {
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 4px;
+    }
+
+    .stat-card-info .stat-num {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: #1a202c;
+        line-height: 1.2;
+    }
+
+    .stat-card-info .stat-sub {
+        font-size: 0.75rem;
+        color: #a0aec0;
+        margin-top: 3px;
+    }
+
+    /* Toolbar & Filter Bar */
+    .sales-toolbar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        align-items: center;
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .sales-toolbar .search-box {
+        flex: 1.5;
+        min-width: 240px;
+        position: relative;
+    }
+
+    .sales-toolbar .search-box input {
+        width: 100%;
+        padding: 10px 16px 10px 38px;
+        border: 1.5px solid #cbd5e0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+
+    .sales-toolbar .search-box input:focus {
+        border-color: #f39c12;
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+    }
+
+    .sales-toolbar .search-box .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #a0aec0;
+        font-size: 0.9rem;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-group select {
+        padding: 10px 14px;
+        border: 1.5px solid #cbd5e0;
+        border-radius: 8px;
+        background: white;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #2d3748;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .filter-group select:focus {
+        border-color: #f39c12;
+    }
+
+    .btn-export {
+        background: #0f172a;
+        color: #ffffff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 0.86rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-export:hover {
+        background: #1e293b;
+        transform: translateY(-1px);
+    }
+
+    /* Table Styles */
+    .sales-table-wrapper {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sales-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.88rem;
+    }
+
+    .sales-table thead th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 800;
+        padding: 14px 14px;
+        border-bottom: 2px solid #e2e8f0;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+    }
+
+    .sales-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.15s;
+    }
+
+    .sales-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .sales-table tbody td {
+        padding: 14px 14px;
+        color: #1e293b;
+        vertical-align: middle;
+    }
+
+    /* Specific Column Badges & Pills */
+    .receipt-id-badge {
+        font-family: monospace;
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: #0f172a;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .receipt-id-badge:hover {
+        color: #ea580c;
+        text-decoration: underline;
+    }
+
+    .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+    .type-badge.customer {
+        background: #EDE9FE;
+        color: #6D28D9;
+        border: 1px solid #DDD6FE;
+    }
+    .type-badge.seller {
+        background: #FFEDD5;
+        color: #C2410C;
+        border: 1px solid #FED7AA;
+    }
+
+    .fee-pill-it {
+        font-weight: 800;
+        color: #0369A1;
+        font-size: 0.9rem;
+    }
+    .fee-pill-admin {
+        font-weight: 800;
+        color: #7E22CE;
+        font-size: 0.9rem;
+    }
+    .fee-rate-sub {
+        font-size: 0.72rem;
+        color: #64748B;
+        font-weight: 700;
+        display: block;
+    }
+
+    .fee-total-cell {
+        font-weight: 900;
+        color: #EA580C;
+        font-size: 0.95rem;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .status-pill.completed { background: #DCFCE7; color: #166534; }
+    .status-pill.escrow { background: #E0F2FE; color: #075985; }
+    .status-pill.pending { background: #FEF3C7; color: #92400E; }
+    .status-pill.processing { background: #F1F5F9; color: #475569; }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 12px;
+        color: #cbd5e1;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+        .sales-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .sales-page {
+            padding: 16px 12px;
+        }
+        .sales-stats-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .sales-header h2 {
+            font-size: 1.3rem;
+        }
+        .sales-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px;
+        }
+        .filter-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filter-group select,
+        .btn-export {
+            width: 100%;
+            justify-content: center;
+        }
+        .sales-table thead {
+            display: none;
+        }
+        .sales-table, .sales-table tbody, .sales-table tr, .sales-table td {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .sales-table tr {
+            margin-bottom: 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .sales-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #f1f5f9;
+            font-size: 0.85rem;
+        }
+        .sales-table td:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .sales-table td::before {
+            content: attr(data-label);
+            font-weight: 800;
+            font-size: 0.74rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+    }
+</style>
+
+<div class="sales-page">
+    <div class="sales-header">
+        <div class="header-titles">
+            <h2>
+                <i class="fas fa-file-invoice-dollar"></i>
+                IT Support & Admin Commission Report
+            </h2>
+            <p>
+                Platform fee and revenue ledger breaking down <strong>IT Support Charges</strong> and <strong>Admin Commission</strong> in two distinct columns according to type (Customer & Seller), linked with each Receipt / Order ID.
+            </p>
+        </div>
+        <div class="header-actions">
+            <span class="role-tag">
+                <i class="fas fa-user-shield"></i> Admin Platform Fee Ledger
+            </span>
+            <a href="/sales" class="btn-switch-tab" title="View Consolidated Platform Sales">
+                <i class="fas fa-chart-line"></i> Sales Report
+            </a>
+            <a href="/admin/custom-orders" class="btn-switch-tab" title="Manage Custom Orders Escrow">
+                <i class="fas fa-clipboard-list"></i> Custom Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Stats Cards Overview -->
+    <div class="sales-stats-grid">
+        <div class="stat-card-box total">
+            <div class="stat-card-icon"><i class="fas fa-coins"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">Total Admin Fee</div>
+                <div class="stat-num" id="statTotalAdminFee">BDT. <%= totalCombinedFee %></div>
+                <div class="stat-sub">IT Support + Admin Commission</div>
+            </div>
+        </div>
+
+        <div class="stat-card-box it">
+            <div class="stat-card-icon"><i class="fas fa-microchip"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">IT Support Charge</div>
+                <div class="stat-num" id="statTotalItFee">BDT. <%= totalItCharges %></div>
+                <div class="stat-sub">1.5% Seller + 2.5% Customer</div>
+            </div>
+        </div>
+
+        <div class="stat-card-box admin">
+            <div class="stat-card-icon"><i class="fas fa-percentage"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">Admin Commission</div>
+                <div class="stat-num" id="statTotalAdminCommission">BDT. <%= totalAdminCommission %></div>
+                <div class="stat-sub">Platform commission share</div>
+            </div>
+        </div>
+
+        <div class="stat-card-box count">
+            <div class="stat-card-icon"><i class="fas fa-receipt"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">Fee Transactions</div>
+                <div class="stat-num" id="statTotalOrders"><%= totalOrdersCount %></div>
+                <div class="stat-sub"><%= customerOrdersCount %> Customer • <%= sellerOrdersCount %> Seller</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar Filters -->
+    <div class="sales-toolbar">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input
+                type="text"
+                id="feeSearch"
+                placeholder="Search by Receipt / Order ID, buyer, seller, or product..."
+                autocomplete="off"
+                oninput="applyFeeFilters()"
+            />
+        </div>
+        <div class="filter-group">
+            <select id="typeFilter" onchange="applyFeeFilters()">
+                <option value="all">🏷️ All Types (Customer & Seller)</option>
+                <option value="customer">👤 Customer Fees (Custom Orders)</option>
+                <option value="seller">🏭 Seller Fees (Marketplace Sales)</option>
+            </select>
+            <select id="statusFilter" onchange="applyFeeFilters()">
+                <option value="all">📌 All Statuses</option>
+                <option value="completed">✅ Completed / Delivered</option>
+                <option value="escrow">🔒 Escrow Secured</option>
+                <option value="pending">🕒 Pending Escrow</option>
+            </select>
+            <select id="sortFilter" onchange="applyFeeFilters()">
+                <option value="newest">🔽 Newest First</option>
+                <option value="oldest">🔼 Oldest First</option>
+                <option value="highest_fee">💰 Highest Total Fee</option>
+                <option value="lowest_fee">💸 Lowest Total Fee</option>
+                <option value="highest_gross">📦 Highest Gross Amount</option>
+            </select>
+            <button class="btn-export" onclick="exportCommissionReport()">
+                <i class="fas fa-file-export"></i> Export CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="sales-table-wrapper">
+        <table class="sales-table" id="commissionTable">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> Receipt / Order ID</th>
+                    <th><i class="fas fa-tag"></i> Fee Type</th>
+                    <th><i class="fas fa-box"></i> Associated Order / Item</th>
+                    <th><i class="fas fa-users"></i> Buyer & Seller</th>
+                    <th><i class="fas fa-calculator"></i> Gross Amount</th>
+                    <th style="color: #0284C7;"><i class="fas fa-microchip"></i> IT Support Charge</th>
+                    <th style="color: #7E22CE;"><i class="fas fa-percentage"></i> Admin Commission</th>
+                    <th style="color: #EA580C;"><i class="fas fa-coins"></i> Total Admin Fee</th>
+                    <th><i class="fas fa-calendar"></i> Date</th>
+                    <th><i class="fas fa-info-circle"></i> Status</th>
+                </tr>
+            </thead>
+            <tbody id="commissionTableBody">
+                <% if (!records || records.length === 0) { %>
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                <h4 style="margin: 0 0 6px 0; color: #475569;">No Fee Records Found</h4>
+                                <p style="margin: 0; font-size: 0.85rem;">Platform fee transactions associated with orders will appear here.</p>
+                            </div>
+                        </td>
+                    </tr>
+                <% } else { %>
+                    <% records.forEach(r => { %>
+                        <tr class="fee-row"
+                            data-receipt="<%= (r.receiptId || '').toLowerCase() %>"
+                            data-type="<%= r.type %>"
+                            data-status="<%= (r.status || '').toLowerCase() %>"
+                            data-buyer="<%= (r.customerName || '').toLowerCase() %>"
+                            data-seller="<%= (r.sellerName || '').toLowerCase() %>"
+                            data-desc="<%= (r.description || '').toLowerCase() %>"
+                            data-gross="<%= r.grossAmount || 0 %>"
+                            data-it="<%= r.itSupportAmount || 0 %>"
+                            data-admin="<%= r.adminCommissionAmount || 0 %>"
+                            data-total="<%= r.totalFeeAmount || 0 %>"
+                            data-date="<%= new Date(r.date).getTime() || 0 %>">
+                            
+                            <td data-label="Receipt / Order ID">
+                                <a href="<%= r.orderRefUrl || '#' %>" target="_blank" class="receipt-id-badge" title="View order details">
+                                    <i class="fas fa-external-link-alt" style="font-size: 0.72rem; color: #94A3B8;"></i>
+                                    <%= r.receiptId %>
+                                </a>
+                            </td>
+
+                            <td data-label="Fee Type">
+                                <span class="type-badge <%= r.type %>">
+                                    <i class="fas <%= r.type === 'customer' ? 'fa-user' : 'fa-store' %>"></i>
+                                    <%= r.typeLabel %>
+                                </span>
+                            </td>
+
+                            <td data-label="Associated Item">
+                                <strong style="color: #0F172A; font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="<%= r.description %>">
+                                    <%= r.description %>
+                                </strong>
+                            </td>
+
+                            <td data-label="Buyer & Seller">
+                                <div style="font-size: 0.82rem;">
+                                    <div><i class="fas fa-user" style="color: #3B82F6; font-size: 0.7rem;"></i> <%= r.customerName %></div>
+                                    <div style="color: #64748B; font-size: 0.75rem;"><i class="fas fa-store" style="color: #EA580C; font-size: 0.7rem;"></i> <%= r.sellerName %></div>
+                                </div>
+                            </td>
+
+                            <td data-label="Gross Amount">
+                                <strong style="font-size: 0.88rem; color: #0F172A;">
+                                    BDT <%= (r.grossAmount || 0).toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                                </strong>
+                            </td>
+
+                            <!-- COLUMN 1: IT SUPPORT CHARGE -->
+                            <td data-label="IT Support Charge">
+                                <div class="fee-pill-it">
+                                    BDT <%= (r.itSupportAmount || 0).toFixed(2) %>
+                                </div>
+                                <span class="fee-rate-sub">
+                                    <%= (r.itSupportPercent || 0).toFixed(1) %>% Fixed
+                                </span>
+                            </td>
+
+                            <!-- COLUMN 2: ADMIN COMMISSION -->
+                            <td data-label="Admin Commission">
+                                <div class="fee-pill-admin">
+                                    BDT <%= (r.adminCommissionAmount || 0).toFixed(2) %>
+                                </div>
+                                <span class="fee-rate-sub">
+                                    <%= (r.adminCommissionPercent || 0).toFixed(1) %>%
+                                </span>
+                            </td>
+
+                            <td data-label="Total Admin Fee">
+                                <div class="fee-total-cell">
+                                    BDT <%= (r.totalFeeAmount || 0).toFixed(2) %>
+                                </div>
+                                <span class="fee-rate-sub" style="color: #EA580C;">
+                                    <%= (r.totalFeePercent || 0).toFixed(1) %>% Total
+                                </span>
+                            </td>
+
+                            <td data-label="Date">
+                                <span style="font-size: 0.8rem; color: #475569; white-space: nowrap;">
+                                    <%= r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A' %>
+                                </span>
+                            </td>
+
+                            <td data-label="Status">
+                                <% 
+                                    const st = (r.status || '').toLowerCase();
+                                    let pillClass = 'processing';
+                                    if (st.includes('completed') || st.includes('delivered')) pillClass = 'completed';
+                                    else if (st.includes('escrow') || st.includes('paid')) pillClass = 'escrow';
+                                    else if (st.includes('pending')) pillClass = 'pending';
+                                %>
+                                <span class="status-pill <%= pillClass %>">
+                                    <%= r.status %>
+                                </span>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Table Footer / Counter Summary -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; color: #64748b;">
+        <div id="counterSummary">
+            Showing <%= records ? records.length : 0 %> transactions
+        </div>
+        <div id="filteredFeeTotal" style="font-weight: 800; color: #0f172a;">
+            Total Filtered Admin Fee: BDT <%= totalCombinedFee %>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live Filter & Sort Handler
+    function applyFeeFilters() {
+        const query = document.getElementById('feeSearch').value.toLowerCase().trim();
+        const typeFilter = document.getElementById('typeFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const sortFilter = document.getElementById('sortFilter').value;
+
+        const rows = Array.from(document.querySelectorAll('.fee-row'));
+        let visibleRows = [];
+        let runningTotalFee = 0;
+        let runningItFee = 0;
+        let runningAdminFee = 0;
+
+        rows.forEach(row => {
+            const receipt = row.dataset.receipt || '';
+            const type = row.dataset.type || '';
+            const status = row.dataset.status || '';
+            const buyer = row.dataset.buyer || '';
+            const seller = row.dataset.seller || '';
+            const desc = row.dataset.desc || '';
+
+            const gross = parseFloat(row.dataset.gross) || 0;
+            const itVal = parseFloat(row.dataset.it) || 0;
+            const adminVal = parseFloat(row.dataset.admin) || 0;
+            const totalVal = parseFloat(row.dataset.total) || 0;
+
+            // Type filter
+            let matchType = (typeFilter === 'all' || type === typeFilter);
+
+            // Status filter
+            let matchStatus = true;
+            if (statusFilter === 'completed') matchStatus = status.includes('completed') || status.includes('delivered');
+            else if (statusFilter === 'escrow') matchStatus = status.includes('escrow') || status.includes('paid');
+            else if (statusFilter === 'pending') matchStatus = status.includes('pending');
+
+            // Search query filter
+            let matchQuery = !query || 
+                receipt.includes(query) || 
+                buyer.includes(query) || 
+                seller.includes(query) || 
+                desc.includes(query);
+
+            if (matchType && matchStatus && matchQuery) {
+                row.style.display = '';
+                visibleRows.push(row);
+                runningTotalFee += totalVal;
+                runningItFee += itVal;
+                runningAdminFee += adminVal;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Sorting
+        visibleRows.sort((a, b) => {
+            if (sortFilter === 'newest') return (parseFloat(b.dataset.date) || 0) - (parseFloat(a.dataset.date) || 0);
+            if (sortFilter === 'oldest') return (parseFloat(a.dataset.date) || 0) - (parseFloat(b.dataset.date) || 0);
+            if (sortFilter === 'highest_fee') return (parseFloat(b.dataset.total) || 0) - (parseFloat(a.dataset.total) || 0);
+            if (sortFilter === 'lowest_fee') return (parseFloat(a.dataset.total) || 0) - (parseFloat(b.dataset.total) || 0);
+            if (sortFilter === 'highest_gross') return (parseFloat(b.dataset.gross) || 0) - (parseFloat(a.dataset.gross) || 0);
+            return 0;
+        });
+
+        const tbody = document.getElementById('commissionTableBody');
+        visibleRows.forEach(row => tbody.appendChild(row));
+
+        // Update counter & running totals
+        const counter = document.getElementById('counterSummary');
+        if (counter) counter.textContent = `Showing ${visibleRows.length} of ${rows.length} transactions`;
+
+        const totalEl = document.getElementById('filteredFeeTotal');
+        if (totalEl) totalEl.textContent = `Total Filtered Admin Fee: BDT ${runningTotalFee.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // Export Commission Report to CSV
+    function exportCommissionReport() {
+        const rows = Array.from(document.querySelectorAll('.fee-row')).filter(r => r.style.display !== 'none');
+        if (rows.length === 0) {
+            alert('No data currently visible to export!');
+            return;
+        }
+
+        const headers = [
+            'Receipt / Order ID',
+            'Fee Type',
+            'Description',
+            'Buyer Name',
+            'Seller Name',
+            'Gross Amount (BDT)',
+            'IT Support Charge (BDT)',
+            'Admin Commission (BDT)',
+            'Total Admin Fee (BDT)',
+            'Date',
+            'Status'
+        ];
+
+        const csvRows = [headers.join(',')];
+
+        rows.forEach(r => {
+            const receipt = (r.querySelector('[data-label="Receipt / Order ID"]')?.innerText || '').trim().replace(/"/g, '""');
+            const type = (r.dataset.type || '').toUpperCase();
+            const desc = (r.querySelector('[data-label="Associated Item"]')?.innerText || '').trim().replace(/"/g, '""');
+            const buyer = (r.dataset.buyer || '').replace(/"/g, '""');
+            const seller = (r.dataset.seller || '').replace(/"/g, '""');
+            const gross = parseFloat(r.dataset.gross) || 0;
+            const itFee = parseFloat(r.dataset.it) || 0;
+            const adminFee = parseFloat(r.dataset.admin) || 0;
+            const totalFee = parseFloat(r.dataset.total) || 0;
+            const date = (r.querySelector('[data-label="Date"]')?.innerText || '').trim();
+            const status = (r.querySelector('[data-label="Status"]')?.innerText || '').trim();
+
+            csvRows.push([
+                `"${receipt}"`,
+                `"${type}"`,
+                `"${desc}"`,
+                `"${buyer}"`,
+                `"${seller}"`,
+                gross.toFixed(2),
+                itFee.toFixed(2),
+                adminFee.toFixed(2),
+                totalFee.toFixed(2),
+                `"${date}"`,
+                `"${status}"`
+            ].join(','));
+        });
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `IT_Support_and_Admin_Commission_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+<%- include('partials/footer') %>

@@ -3656,6 +3656,115 @@ app.delete("/api/admin/seller-posts/:productId", requireAdmin, async (req, res) 
     }
 });
 
+// ==================== IT SUPPORT & ADMIN COMMISSION REPORT ====================
+app.get("/admin/commission-report", requireAdmin, async (req, res) => {
+    try {
+        const user = req.session.user;
+        const [customCommConfig, sellerPostConfig, customOrders, regularSales] = await Promise.all([
+            getAdminCommissionConfig(),
+            getSellerPostConfig(),
+            CustomOrder.find({ status: { $nin: ['rejected', 'cancelled'] } }).sort({ createdAt: -1 }),
+            Sale.find({ saleId: { $regex: /^SALE-/ }, isActiveCart: { $ne: true } }).sort({ saleDate: -1 })
+        ]);
+
+        const unifiedFeeRecords = [];
+
+        // 1. Customer Type (Custom Packaging Orders)
+        customOrders.forEach(co => {
+            const gross = co.agreedPrice || co.budget || 0;
+            const totalPct = co.adminCommissionPercent || co.adminFeePercent || customCommConfig.percent || 5.0;
+            const itPct = customCommConfig.itMaintenancePercent || 2.5; // Fixed 2.5% IT Support
+            const adminPct = Math.max(0, Math.round((totalPct - itPct) * 10) / 10);
+
+            const itAmount = Math.round(gross * (itPct / 100) * 100) / 100;
+            const adminAmount = Math.round(gross * (adminPct / 100) * 100) / 100;
+            const totalFee = co.adminFeeAmount || co.adminCommissionAmount || Math.round((itAmount + adminAmount) * 100) / 100;
+
+            let statusLabel = 'Pending Escrow';
+            if (co.paymentStatus === 'paid_to_admin') statusLabel = 'Escrow Secured';
+            if (co.status === 'completed' || co.status === 'received') statusLabel = 'Completed';
+
+            unifiedFeeRecords.push({
+                receiptId: co.id,
+                orderRefUrl: `/custom-order/${co.id}`,
+                type: 'customer',
+                typeLabel: 'Customer',
+                description: co.title || 'Custom Packaging Order',
+                customerName: co.customerName || 'Corporate Client',
+                sellerName: co.assignedSellerName || (co.assignedSellerId ? 'Assigned Factory' : 'Open for Bids'),
+                grossAmount: gross,
+                itSupportPercent: itPct,
+                itSupportAmount: itAmount,
+                adminCommissionPercent: adminPct,
+                adminCommissionAmount: adminAmount,
+                totalFeePercent: totalPct,
+                totalFeeAmount: totalFee,
+                date: co.paidAt || co.createdAt || new Date(),
+                status: statusLabel
+            });
+        });
+
+        // 2. Seller Type (Marketplace Sales)
+        regularSales.forEach(s => {
+            const gross = s.totalAmount || 0;
+            const itPct = sellerPostConfig.itSupportPercent || 1.5; // Fixed 1.5% IT Support
+            const adminPct = sellerPostConfig.adminCommissionPercent || 3.5;
+            const totalPct = sellerPostConfig.totalFeePercent || (itPct + adminPct);
+
+            const itAmount = Math.round(gross * (itPct / 100) * 100) / 100;
+            const adminAmount = Math.round(gross * (adminPct / 100) * 100) / 100;
+            const totalFee = Math.round((itAmount + adminAmount) * 100) / 100;
+
+            unifiedFeeRecords.push({
+                receiptId: s.saleId,
+                orderRefUrl: `/track-order?orderId=${encodeURIComponent(s.saleId)}`,
+                type: 'seller',
+                typeLabel: 'Seller',
+                description: (s.products && s.products.length > 0)
+                    ? s.products.map(p => `${p.quantity || 1}x ${p.name || 'Packaging'}`).join(', ')
+                    : (s.productName || 'Marketplace Item'),
+                customerName: s.customerName || 'Retail Customer',
+                sellerName: s.sellerName || 'Verified Supplier',
+                grossAmount: gross,
+                itSupportPercent: itPct,
+                itSupportAmount: itAmount,
+                adminCommissionPercent: adminPct,
+                adminCommissionAmount: adminAmount,
+                totalFeePercent: totalPct,
+                totalFeeAmount: totalFee,
+                date: s.saleDate || s.createdAt || new Date(),
+                status: s.status || 'Completed'
+            });
+        });
+
+        // Sort newest first
+        unifiedFeeRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Aggregates
+        const totalCombinedFee = unifiedFeeRecords.reduce((sum, r) => sum + r.totalFeeAmount, 0).toFixed(2);
+        const totalItCharges = unifiedFeeRecords.reduce((sum, r) => sum + r.itSupportAmount, 0).toFixed(2);
+        const totalAdminCommission = unifiedFeeRecords.reduce((sum, r) => sum + r.adminCommissionAmount, 0).toFixed(2);
+        const customerOrdersCount = unifiedFeeRecords.filter(r => r.type === 'customer').length;
+        const sellerOrdersCount = unifiedFeeRecords.filter(r => r.type === 'seller').length;
+
+        res.render("admin-commission-report", {
+            user: user,
+            records: unifiedFeeRecords,
+            totalCombinedFee,
+            totalItCharges,
+            totalAdminCommission,
+            totalOrdersCount: unifiedFeeRecords.length,
+            customerOrdersCount,
+            sellerOrdersCount,
+            isGuest: false,
+            cartCount: 0
+        });
+    } catch (err) {
+        console.error("Admin commission report error:", err);
+        res.status(500).send("Error loading IT Support & Commission Report: " + err.message);
+    }
+});
+
 // ---------- SELLER DASHBOARD (Bid on orders) ----------
 app.get("/seller/my-custom-orders", requireSellerOrAdmin, (req, res) => {
     res.render("seller-custom-orders", {

@@ -598,7 +598,12 @@
                     : 'Consolidated platform ledger showing regular direct store sales and wholesale custom packaging orders.' %>
             </p>
         </div>
-        <div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                <a href="/admin/commission-report" style="background: #FFF7ED; color: #EA580C; border: 1.5px solid #FDBA74; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#FFEDD5'" onmouseout="this.style.background='#FFF7ED'">
+                    <i class="fas fa-file-invoice-dollar"></i> IT Support & Commission Report →
+                </a>
+            <% } %>
             <span class="role-tag">
                 <i class="fas <%= (typeof isSeller !== 'undefined' && isSeller) ? 'fa-store' : 'fa-user-shield' %>"></i>
                 <%= (typeof isSeller !== 'undefined' && isSeller) ? 'Seller Portal' : 'Admin Consolidated' %>
