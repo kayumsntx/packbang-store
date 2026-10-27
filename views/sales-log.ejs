@@ -1,11 +1,10 @@
 <%- include('partials/header') %>
 
 <style>
-
     .sales-page {
-        max-width: 1200px;
+        max-width: 1240px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 24px 20px 40px 20px;
     }
 
     .sales-header {
@@ -13,91 +12,151 @@
         justify-content: space-between;
         align-items: center;
         border-bottom: 3px solid #f39c12;
-        padding-bottom: 16px;
+        padding-bottom: 18px;
         margin-bottom: 24px;
         flex-wrap: wrap;
         gap: 16px;
     }
 
-    .sales-header h2 {
-        margin: 0;
+    .sales-header .header-titles h2 {
+        margin: 0 0 6px 0;
         color: #1a202c;
-        font-size: 1.6rem;
+        font-size: 1.65rem;
+        font-weight: 800;
         display: flex;
         align-items: center;
         gap: 12px;
     }
 
-    .sales-header h2 i {
+    .sales-header .header-titles h2 i {
         color: #f39c12;
     }
 
-    .sales-header .sales-stats {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
+    .sales-header .header-titles p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #718096;
     }
 
-    .sales-header .sales-stats .stat-item {
-        background: #f7fafc;
-        padding: 8px 18px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #4a5568;
-        display: flex;
+    .sales-header .role-tag {
+        display: inline-flex;
         align-items: center;
         gap: 6px;
+        background: #edf2f7;
+        color: #2d3748;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 700;
     }
 
-    .sales-header .sales-stats .stat-item i {
-        color: #f39c12;
+    /* Stats Overview Grid */
+    .sales-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
     }
 
-    .sales-header .sales-stats .stat-item .stat-value {
-        color: #2b6cb0;
-        font-size: 1rem;
+    .stat-card-box {
+        background: #FFFFFF;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
 
-  
+    .stat-card-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .stat-card-box.total .stat-card-icon { background: #ebf8ff; color: #3182ce; }
+    .stat-card-box.count .stat-card-icon { background: #fefcbf; color: #b7791f; }
+    .stat-card-box.regular .stat-card-icon { background: #feebc8; color: #dd6b20; }
+    .stat-card-box.custom .stat-card-icon { background: #e9d8fd; color: #805ad5; }
+
+    .stat-card-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stat-card-info .stat-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 4px;
+    }
+
+    .stat-card-info .stat-num {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1a202c;
+        line-height: 1.2;
+    }
+
+    .stat-card-info .stat-sub {
+        font-size: 0.75rem;
+        color: #a0aec0;
+        margin-top: 3px;
+    }
+
+    /* Toolbar & Filter Bar */
     .sales-toolbar {
         display: flex;
-        gap: 14px;
-        margin-bottom: 24px;
+        gap: 12px;
+        margin-bottom: 16px;
         flex-wrap: wrap;
         align-items: center;
         background: #f7fafc;
-        padding: 16px 20px;
+        padding: 16px;
         border-radius: 12px;
         border: 1px solid #e2e8f0;
     }
 
     .sales-toolbar .search-box {
-        flex: 1;
-        min-width: 200px;
-        display: flex;
+        flex: 1.5;
+        min-width: 220px;
         position: relative;
     }
 
     .sales-toolbar .search-box input {
         width: 100%;
-        padding: 10px 16px 10px 40px;
-        border: 2px solid #e2e8f0;
+        padding: 10px 16px 10px 38px;
+        border: 1.5px solid #cbd5e0;
         border-radius: 8px;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         outline: none;
-        transition: all 0.3s ease;
-        background: white;
+        transition: all 0.2s;
+        background: #FFFFFF;
+        box-sizing: border-box;
     }
 
     .sales-toolbar .search-box input:focus {
         border-color: #3182ce;
-        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
     }
 
     .sales-toolbar .search-box .search-icon {
         position: absolute;
-        left: 14px;
+        left: 12px;
         top: 50%;
         transform: translateY(-50%);
         color: #a0aec0;
@@ -107,52 +166,75 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .sales-toolbar .filter-group select {
         padding: 10px 14px;
-        border: 2px solid #e2e8f0;
+        border: 1.5px solid #cbd5e0;
         border-radius: 8px;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #2d3748;
         outline: none;
-        background: white;
+        background: #FFFFFF;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s;
+        box-sizing: border-box;
     }
 
     .sales-toolbar .filter-group select:focus {
         border-color: #3182ce;
-        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
     }
 
     .sales-toolbar .btn-export {
-        padding: 10px 20px;
-        background: linear-gradient(45deg, #27ae60, #2ecc71);
+        padding: 10px 18px;
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
         color: white;
         border: none;
         border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.9rem;
+        font-weight: 700;
+        font-size: 0.88rem;
         cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
+        transition: all 0.2s;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
+        box-shadow: 0 2px 6px rgba(46, 204, 113, 0.25);
     }
 
     .sales-toolbar .btn-export:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(46, 204, 113, 0.35);
     }
 
-  
+    /* Live Summary Pill */
+    .filter-summary-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #4a5568;
+        margin-bottom: 16px;
+        padding: 6px 14px;
+        background: #edf2f7;
+        border-radius: 20px;
+        width: fit-content;
+        font-weight: 500;
+    }
+
+    .filter-summary-pill strong {
+        color: #1a202c;
+    }
+
+    /* Main Table Container */
     .log-container {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-        padding: 0;
-        overflow: hidden;
+        background: #FFFFFF;
         border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
     }
 
     .log-container .table-wrapper {
@@ -168,33 +250,27 @@
     }
 
     .log-container table thead {
-        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        background: #f8fafc;
         border-bottom: 2px solid #e2e8f0;
     }
 
     .log-container table thead th {
-        padding: 14px 18px;
+        padding: 14px 16px;
         font-weight: 700;
         color: #4a5568;
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         white-space: nowrap;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .log-container table thead th i {
-        margin-right: 6px;
-        color: #718096;
     }
 
     .log-container table tbody tr {
-        transition: background 0.2s ease;
+        transition: background 0.15s ease;
         border-bottom: 1px solid #edf2f7;
     }
 
     .log-container table tbody tr:hover {
-        background: #f7fafc;
+        background: #f8fafc;
     }
 
     .log-container table tbody tr:last-child {
@@ -202,69 +278,142 @@
     }
 
     .log-container table tbody td {
-        padding: 14px 18px;
+        padding: 14px 16px;
         vertical-align: middle;
         color: #2d3748;
     }
 
-    .log-container .badge-receipt {
-        background: #e6fffa;
-        color: #234e52;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-family: 'Courier New', monospace;
-        font-size: 0.8rem;
-        font-weight: 600;
+    .badge-receipt {
+        background: #f1f5f9;
+        color: #334155;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
         display: inline-block;
+        white-space: nowrap;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Sale Type Badges */
+    .badge-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
         white-space: nowrap;
     }
 
-    .log-container .img-thumb {
-        width: 45px;
-        height: 45px;
+    .badge-type.badge-type-regular {
+        background: #feebc8;
+        color: #c05621;
+        border: 1px solid #fbd38d;
+    }
+
+    .badge-type.badge-type-custom {
+        background: #e9d8fd;
+        color: #6b46c1;
+        border: 1px solid #d6bcfa;
+    }
+
+    /* Status Badges */
+    .status-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: capitalize;
+        white-space: nowrap;
+    }
+
+    .status-pill.delivered, .status-pill.completed { background: #c6f6d5; color: #22543d; }
+    .status-pill.processing, .status-pill.manufacturing, .status-pill.in_progress { background: #bee3f8; color: #2a69ac; }
+    .status-pill.shipped { background: #feebc8; color: #c05621; }
+    .status-pill.pending, .status-pill.assigned { background: #fefcbf; color: #975a16; }
+    .status-pill.cancelled { background: #fed7d7; color: #9b2c2c; }
+
+    .img-thumb {
+        width: 44px;
+        height: 44px;
         object-fit: cover;
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         background: #f7fafc;
+        flex-shrink: 0;
     }
 
-    .log-container .product-name {
+    .product-cell-flex {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .product-cell-flex .prod-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .product-cell-flex .product-name {
         font-weight: 600;
         color: #1a202c;
+        font-size: 0.88rem;
     }
 
-    .log-container .price-amount {
+    .product-cell-flex .qty-pill {
+        font-size: 0.74rem;
+        color: #718096;
         font-weight: 600;
-        color: #2b6cb0;
     }
 
-    .log-container .total-amount {
+    .customer-cell-flex {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .customer-cell-flex .buyer-name {
         font-weight: 700;
+        color: #2d3748;
+        font-size: 0.88rem;
+    }
+
+    .customer-cell-flex .seller-name {
+        font-size: 0.75rem;
+        color: #718096;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .total-amount {
+        font-weight: 800;
         color: #27ae60;
-        font-size: 1rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
     }
 
-    .log-container .qty-badge {
-        background: #edf2f7;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: #4a5568;
-        display: inline-block;
-    }
-
-    .log-container .timestamp {
+    .timestamp {
         color: #718096;
         font-size: 0.8rem;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
     }
 
     .mobile-col-label {
         display: none;
     }
 
-
+    /* Empty State */
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -272,108 +421,81 @@
     }
 
     .empty-state i {
-        font-size: 4rem;
-        color: #e2e8f0;
+        font-size: 3.5rem;
+        color: #cbd5e0;
         display: block;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
 
     .empty-state h3 {
         color: #4a5568;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         font-size: 1.2rem;
     }
 
     .empty-state p {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        margin: 0;
     }
 
-    .empty-state .btn-primary {
-        display: inline-block;
-        margin-top: 16px;
-        padding: 12px 28px;
-        background: linear-gradient(45deg, #3182ce, #2b6cb0);
-        color: white;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .empty-state .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
-    }
-
-    /* =========================================================
-       COMPREHENSIVE MOBILE RESPONSIVE STYLES
-       ========================================================= */
+    /* Mobile Responsive Styles */
     @media (max-width: 768px) {
         .sales-page {
+            padding: 14px 10px 40px 10px !important;
             margin: 0 auto !important;
-            padding: 14px 12px 40px 12px !important;
             width: 100% !important;
             max-width: 100vw !important;
-            overflow-x: hidden !important;
             box-sizing: border-box !important;
         }
 
         .sales-header {
             flex-direction: column !important;
-            align-items: stretch !important;
-            text-align: left !important;
-            gap: 12px !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
             margin-bottom: 16px !important;
-            padding-bottom: 14px !important;
         }
 
-        .sales-header h2 {
+        .sales-header .header-titles h2 {
             font-size: 1.3rem !important;
-            margin: 0 !important;
-            line-height: 1.3 !important;
         }
 
-        .sales-header .sales-stats {
-            display: flex !important;
+        .sales-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
             gap: 8px !important;
-            width: 100% !important;
+            margin-bottom: 16px !important;
         }
 
-        .sales-header .sales-stats .stat-item {
-            flex: 1 !important;
-            justify-content: center !important;
-            text-align: center !important;
-            padding: 10px 8px !important;
-            font-size: 0.78rem !important;
-            border-radius: 10px !important;
-            background: #FFFFFF !important;
-            border: 1px solid #E2E8F0 !important;
-            box-sizing: border-box !important;
+        .stat-card-box {
+            padding: 12px 10px !important;
+            gap: 10px !important;
+        }
+
+        .stat-card-icon {
+            width: 38px !important;
+            height: 38px !important;
+            font-size: 1.1rem !important;
+        }
+
+        .stat-card-info .stat-num {
+            font-size: 1.05rem !important;
         }
 
         .sales-toolbar {
             flex-direction: column !important;
             align-items: stretch !important;
-            padding: 14px 12px !important;
+            padding: 12px 10px !important;
             gap: 10px !important;
-            border-radius: 12px !important;
-            margin-bottom: 16px !important;
-            background: #F8FAFC !important;
-            box-sizing: border-box !important;
+            margin-bottom: 14px !important;
         }
 
         .sales-toolbar .search-box {
             width: 100% !important;
             min-width: 0 !important;
-            box-sizing: border-box !important;
         }
 
         .sales-toolbar .search-box input {
-            width: 100% !important;
             font-size: 16px !important;
-            padding: 11px 14px 11px 38px !important;
-            border-radius: 8px !important;
-            box-sizing: border-box !important;
+            padding: 10px 12px 10px 36px !important;
         }
 
         .sales-toolbar .filter-group {
@@ -386,33 +508,25 @@
         .sales-toolbar .filter-group select {
             width: 100% !important;
             font-size: 16px !important;
-            padding: 11px 12px !important;
-            border-radius: 8px !important;
-            box-sizing: border-box !important;
+            padding: 10px 12px !important;
         }
 
         .sales-toolbar .btn-export {
             width: 100% !important;
             justify-content: center !important;
-            text-align: center !important;
             padding: 12px !important;
-            font-size: 0.92rem !important;
-            border-radius: 8px !important;
-            box-sizing: border-box !important;
+            font-size: 0.9rem !important;
         }
 
-        /* Mobile Sales Cards */
         .log-container {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             overflow: visible !important;
-            padding: 0 !important;
         }
 
         .log-container .table-wrapper {
             overflow: visible !important;
-            padding: 0 !important;
         }
 
         .log-container table {
@@ -433,136 +547,125 @@
         .log-container table tbody tr {
             display: block !important;
             background: #FFFFFF !important;
-            border: 1.5px solid #E2E8F0 !important;
+            border: 1.5px solid #e2e8f0 !important;
             border-radius: 14px !important;
-            padding: 16px 14px !important;
+            padding: 14px 12px !important;
             margin-bottom: 12px !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
             box-sizing: border-box !important;
             width: 100% !important;
         }
 
-        .log-container table tbody tr:hover td {
-            background: transparent !important;
-        }
-
         .log-container table tbody td {
-            display: block !important;
-            width: 100% !important;
-            padding: 6px 0 !important;
-            border-bottom: 1px solid #F1F5F9 !important;
-            box-sizing: border-box !important;
-            text-align: left !important;
-        }
-
-        .log-container td.col-receipt {
-            padding-top: 0 !important;
-            padding-bottom: 8px !important;
-            border-bottom: 1px solid #E2E8F0 !important;
-        }
-
-        .log-container td.col-thumb {
-            padding: 10px 0 6px 0 !important;
-            border-bottom: none !important;
-        }
-
-        .log-container td.col-name {
-            padding: 2px 0 8px 0 !important;
-            border-bottom: 1px solid #F1F5F9 !important;
-        }
-
-        .log-container .product-name {
-            font-size: 0.95rem !important;
-            font-weight: 700 !important;
-            color: #0F172A !important;
-        }
-
-        .log-container td.col-price,
-        .log-container td.col-qty,
-        .log-container td.col-total {
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
             padding: 6px 0 !important;
+            border: none !important;
+            font-size: 0.85rem !important;
         }
 
-        .log-container td.col-time {
-            border-bottom: none !important;
-            padding-top: 10px !important;
-            padding-bottom: 0 !important;
+        .log-container table tbody td.col-head-mobile {
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
-        }
-
-        .log-container .img-thumb {
-            width: 48px !important;
-            height: 48px !important;
-            border-radius: 8px !important;
+            border-bottom: 1px dashed #e2e8f0 !important;
+            padding-bottom: 10px !important;
+            margin-bottom: 8px !important;
         }
 
         .mobile-col-label {
             display: inline-block !important;
-            font-size: 0.75rem !important;
+            font-size: 0.74rem !important;
             font-weight: 700 !important;
-            color: #64748B !important;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .sales-page {
-            padding: 10px 8px 30px 8px !important;
-        }
-
-        .sales-header h2 {
-            font-size: 1.2rem !important;
-        }
-
-        .sales-header .sales-stats .stat-item {
-            font-size: 0.72rem !important;
-            padding: 8px 6px !important;
+            color: #718096 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
         }
     }
 </style>
 
-
 <div class="sales-page">
-
- 
     <div class="sales-header">
-        <h2>
-            <i class="fas fa-history"></i> Sales Journal Archive
-        </h2>
-
-        <div class="sales-stats">
-            <div class="stat-item">
-                <i class="fas fa-receipt"></i>
-                Total Sales: <span class="stat-value"><%= sales.length %></span>
-            </div>
-            <% if (sales.length > 0) { 
-                var totalRevenue = 0;
-                sales.forEach(function(sale) { totalRevenue += sale.totalAmount; });
-            %>
-                <div class="stat-item">
-                    <i class="fas fa-money-bill-wave"></i>
-                    Revenue: <span class="stat-value">BDT. <%= totalRevenue.toFixed(2) %></span>
-                </div>
-            <% } %>
+        <div class="header-titles">
+            <h2>
+                <i class="fas fa-chart-line"></i>
+                <%= (typeof isSeller !== 'undefined' && isSeller) ? 'Seller Sales Report' : 'Platform Sales Report' %>
+            </h2>
+            <p>
+                <%= (typeof isSeller !== 'undefined' && isSeller) 
+                    ? 'Individual performance ledger for your direct packaging sales and custom order manufacturing.' 
+                    : 'Consolidated platform ledger showing regular direct store sales and wholesale custom packaging orders.' %>
+            </p>
+        </div>
+        <div>
+            <span class="role-tag">
+                <i class="fas <%= (typeof isSeller !== 'undefined' && isSeller) ? 'fa-store' : 'fa-user-shield' %>"></i>
+                <%= (typeof isSeller !== 'undefined' && isSeller) ? 'Seller Portal' : 'Admin Consolidated' %>
+            </span>
         </div>
     </div>
 
+    <!-- 4 Stats Cards Overview -->
+    <div class="sales-stats-grid">
+        <div class="stat-card-box total">
+            <div class="stat-card-icon"><i class="fas fa-coins"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-num" id="statTotalRev">BDT. <%= totalRevenue %></div>
+                <div class="stat-sub">Combined sales</div>
+            </div>
+        </div>
+        <div class="stat-card-box count">
+            <div class="stat-card-icon"><i class="fas fa-receipt"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-num" id="statTotalCount"><%= totalCount %></div>
+                <div class="stat-sub">Ledger records</div>
+            </div>
+        </div>
+        <div class="stat-card-box regular">
+            <div class="stat-card-icon"><i class="fas fa-shopping-bag"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">Regular Sales</div>
+                <div class="stat-num">BDT. <%= regularRevenue %></div>
+                <div class="stat-sub"><%= regularCount %> Direct items</div>
+            </div>
+        </div>
+        <div class="stat-card-box custom">
+            <div class="stat-card-icon"><i class="fas fa-pencil-ruler"></i></div>
+            <div class="stat-card-info">
+                <div class="stat-label">Custom Orders</div>
+                <div class="stat-num">BDT. <%= customRevenue %></div>
+                <div class="stat-sub"><%= customCount %> Custom orders</div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Toolbar Filters -->
     <div class="sales-toolbar">
         <div class="search-box">
             <i class="fas fa-search search-icon"></i>
             <input
                 type="text"
                 id="salesSearch"
-                placeholder="Search by product, receipt, or customer..."
+                placeholder="Search by receipt ID, product, buyer, or seller..."
                 autocomplete="off"
             />
         </div>
         <div class="filter-group">
+            <select id="typeFilter">
+                <option value="all">🏷️ All Sale Types</option>
+                <option value="regular">🛍️ Regular Sales</option>
+                <option value="custom">🎨 Custom Orders</option>
+            </select>
+            <select id="statusFilter">
+                <option value="all">📌 All Statuses</option>
+                <option value="delivered">✅ Delivered / Completed</option>
+                <option value="processing">⏳ Processing / In Progress</option>
+                <option value="shipped">🚚 Shipped</option>
+                <option value="pending">🕒 Pending</option>
+            </select>
             <select id="sortFilter">
                 <option value="newest">🔽 Newest First</option>
                 <option value="oldest">🔼 Oldest First</option>
@@ -575,74 +678,98 @@
         </div>
     </div>
 
+    <!-- Dynamic Visible Count Indicator -->
+    <div class="filter-summary-pill" id="filterSummaryPill">
+        <i class="fas fa-filter"></i>
+        <span>Showing <strong id="visibleCount"><%= totalCount %></strong> of <%= totalCount %> sales (Visible: <strong id="visibleRevenue">BDT. <%= totalRevenue %></strong>)</span>
+    </div>
 
+    <!-- Table Container -->
     <div class="log-container">
         <% if (sales.length === 0) { %>
             <div class="empty-state">
                 <i class="fas fa-receipt"></i>
-                <h3>No Sales Transactions Yet</h3>
-                <p>Sales records will appear here once you complete your first transaction.</p>
-                <a href="/terminal" class="btn-primary">
-                    <i class="fas fa-cash-register"></i> Start Selling
-                </a>
+                <h3>No Sales Transactions Found</h3>
+                <p>Transactions will appear here once orders are placed or processed.</p>
             </div>
         <% } else { %>
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th><i class="fas fa-hashtag"></i> Receipt</th>
-                            <th><i class="fas fa-image"></i> Image</th>
-                            <th><i class="fas fa-tag"></i> Product</th>
-                            <th><i class="fas fa-money-bill"></i> Price</th>
-                            <th><i class="fas fa-times"></i> Qty</th>
-                            <th><i class="fas fa-calculator"></i> Total</th>
+                            <th><i class="fas fa-hashtag"></i> Receipt / Order ID</th>
+                            <th><i class="fas fa-tag"></i> Sale Type</th>
+                            <th><i class="fas fa-box"></i> Product / Item</th>
+                            <th><i class="fas fa-users"></i> Buyer & Seller</th>
+                            <th><i class="fas fa-calculator"></i> Total Amount</th>
                             <th><i class="fas fa-clock"></i> Date</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
                         </tr>
                     </thead>
                     <tbody id="salesTableBody">
                         <% sales.forEach(function(sale, index) { %>
-                            <tr data-index="<%= index %>">
-                                <td class="col-receipt">
-                                    <span class="badge-receipt">
-                                        #<%= sale.saleId ? sale.saleId.substring(0, 10) : 'N/A' %>
+                            <tr
+                                data-index="<%= index %>"
+                                data-type="<%= sale.type %>"
+                                data-status="<%= (sale.status || '').toLowerCase() %>"
+                                data-total="<%= sale.totalAmount || 0 %>"
+                                data-date="<%= new Date(sale.saleDate).getTime() %>"
+                            >
+                                <td class="col-head-mobile">
+                                    <span class="badge-receipt">#<%= sale.saleId %></span>
+                                    <span class="badge-type <%= sale.type === 'custom' ? 'badge-type-custom' : 'badge-type-regular' %>">
+                                        <i class="fas <%= sale.type === 'custom' ? 'fa-pencil-ruler' : 'fa-shopping-bag' %>"></i>
+                                        <%= sale.typeLabel %>
                                     </span>
-                                    <span class="mobile-col-label" style="font-size: 0.75rem; color: #64748B;">Receipt Log</span>
                                 </td>
-                                <td class="col-thumb">
-                                    <img
-                                        src="<%= sale.imagePath || '/uploads/default.jpg' %>"
-                                        class="img-thumb"
-                                        alt="<%= sale.productName %>"
-                                        onerror="this.onerror=null; this.src='/uploads/default.jpg';"
-                                    />
+                                <td class="desktop-type-cell" style="display: table-cell;">
+                                    <span class="badge-type <%= sale.type === 'custom' ? 'badge-type-custom' : 'badge-type-regular' %>">
+                                        <i class="fas <%= sale.type === 'custom' ? 'fa-pencil-ruler' : 'fa-shopping-bag' %>"></i>
+                                        <%= sale.typeLabel %>
+                                    </span>
                                 </td>
-                                <td class="col-name">
-                                    <span class="product-name"><%= sale.productName || 'Unknown Product' %></span>
+                                <td>
+                                    <span class="mobile-col-label">📦 Item:</span>
+                                    <div class="product-cell-flex">
+                                        <img
+                                            src="<%= sale.imagePath %>"
+                                            class="img-thumb"
+                                            alt="<%= sale.productName %>"
+                                            onerror="this.onerror=null; this.src='/uploads/default.jpg';"
+                                        />
+                                        <div class="prod-details">
+                                            <span class="product-name"><%= sale.productName %></span>
+                                            <span class="qty-pill">Qty: <%= sale.quantity %> <%= sale.price ? '(BDT. ' + Number(sale.price).toFixed(2) + ' ea)' : '' %></span>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="col-price">
-                                    <span class="mobile-col-label">Unit Price:</span>
-                                    <span class="price-amount">BDT. <%= (sale.price || 0).toFixed(2) %></span>
+                                <td>
+                                    <span class="mobile-col-label">👥 Buyer/Seller:</span>
+                                    <div class="customer-cell-flex">
+                                        <span class="buyer-name"><i class="fas fa-user-circle" style="color:#718096; font-size:0.75rem;"></i> <%= sale.customerName %></span>
+                                        <span class="seller-name"><i class="fas fa-store" style="color:#f39c12; font-size:0.75rem;"></i> <%= sale.sellerName %></span>
+                                    </div>
                                 </td>
-                                <td class="col-qty">
-                                    <span class="mobile-col-label">Quantity:</span>
-                                    <span class="qty-badge">× <%= sale.quantity || 0 %></span>
+                                <td>
+                                    <span class="mobile-col-label">💰 Total:</span>
+                                    <span class="total-amount">BDT. <%= Number(sale.totalAmount || 0).toFixed(2) %></span>
                                 </td>
-                                <td class="col-total">
-                                    <span class="mobile-col-label">Total Revenue:</span>
-                                    <span class="total-amount">BDT. <%= (sale.totalAmount || 0).toFixed(2) %></span>
-                                </td>
-                                <td class="col-time">
-                                    <span class="mobile-col-label">Sale Timestamp:</span>
+                                <td>
+                                    <span class="mobile-col-label">📅 Date:</span>
                                     <span class="timestamp">
                                         <i class="far fa-calendar-alt"></i>
-                                        <%= new Date(sale.saleDate || Date.now()).toLocaleString('en-BD', {
+                                        <%= new Date(sale.saleDate).toLocaleDateString('en-BD', {
                                             day: '2-digit',
                                             month: 'short',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
+                                            year: 'numeric'
                                         }) %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="mobile-col-label">📌 Status:</span>
+                                    <% const stLower = (sale.status || 'pending').toLowerCase(); %>
+                                    <span class="status-pill <%= stLower %>">
+                                        <%= sale.status %>
                                     </span>
                                 </td>
                             </tr>
@@ -656,32 +783,64 @@
 
 <script>
 $(document).ready(function() {
+    // Hide duplicate desktop type cell in mobile view via CSS
+    function adjustView() {
+        if ($(window).width() <= 768) {
+            $('.desktop-type-cell').hide();
+        } else {
+            $('.desktop-type-cell').show();
+        }
+    }
+    adjustView();
+    $(window).resize(adjustView);
 
-    $('#salesSearch').on('keyup', function() {
-        var searchText = $(this).val().toLowerCase().trim();
+    // Filter Trigger
+    function applySalesFilters() {
+        var searchText = $('#salesSearch').val().toLowerCase().trim();
+        var selectedType = $('#typeFilter').val();
+        var selectedStatus = $('#statusFilter').val();
+
+        var visibleCount = 0;
+        var visibleRevenue = 0;
 
         $('#salesTableBody tr').each(function() {
-            var productName = $(this).find('.product-name').text().toLowerCase();
-            var receipt = $(this).find('.badge-receipt').text().toLowerCase();
+            var $row = $(this);
+            var rowType = $row.data('type') || '';
+            var rowStatus = ($row.data('status') || '').toLowerCase();
+            var rowText = $row.text().toLowerCase();
+            var totalAmount = parseFloat($row.data('total')) || 0;
 
-            if (productName.indexOf(searchText) > -1 || receipt.indexOf(searchText) > -1) {
-                $(this).show();
+            var matchSearch = !searchText || rowText.indexOf(searchText) > -1;
+            var matchType = selectedType === 'all' || rowType === selectedType;
+            var matchStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
+
+            if (matchSearch && matchType && matchStatus) {
+                $row.show();
+                visibleCount++;
+                visibleRevenue += totalAmount;
             } else {
-                $(this).hide();
+                $row.hide();
             }
         });
-    });
 
+        $('#visibleCount').text(visibleCount);
+        $('#visibleRevenue').text('BDT. ' + visibleRevenue.toFixed(2));
+    }
 
+    $('#salesSearch').on('keyup', applySalesFilters);
+    $('#typeFilter').on('change', applySalesFilters);
+    $('#statusFilter').on('change', applySalesFilters);
+
+    // Sorting
     $('#sortFilter').on('change', function() {
         var sortBy = $(this).val();
         var rows = $('#salesTableBody tr').get();
 
         rows.sort(function(a, b) {
-            var aTotal = parseFloat($(a).find('.total-amount').text().replace('BDT. ', ''));
-            var bTotal = parseFloat($(b).find('.total-amount').text().replace('BDT. ', ''));
-            var aDate = new Date($(a).find('.timestamp').text().trim());
-            var bDate = new Date($(b).find('.timestamp').text().trim());
+            var aTotal = parseFloat($(a).data('total')) || 0;
+            var bTotal = parseFloat($(b).data('total')) || 0;
+            var aDate = parseInt($(a).data('date')) || 0;
+            var bDate = parseInt($(b).data('date')) || 0;
 
             switch(sortBy) {
                 case 'newest':
@@ -702,53 +861,46 @@ $(document).ready(function() {
         });
     });
 
-    console.log('📊 Sales Log Page Loaded');
+    console.log('📊 Sales Report Page Initialized');
 });
 
-
+// CSV Export
 function exportSales() {
-    var rows = $('#salesTableBody tr:visible');
-    if (rows.length === 0) {
-        alert('No sales data to export!');
+    var $rows = $('#salesTableBody tr:visible');
+    if ($rows.length === 0) {
+        alert('No sales data currently visible to export!');
         return;
     }
 
- 
-    var headers = [];
-    $('#salesTableBody').closest('table').find('thead th').each(function() {
-        var text = $(this).text().trim().replace(/[^a-zA-Z\s]/g, '').trim();
-        if (text) headers.push(text);
+    var csvRows = [];
+    csvRows.push(['Receipt ID', 'Sale Type', 'Product Item', 'Buyer', 'Seller', 'Total Amount (BDT)', 'Date', 'Status'].join(','));
+
+    $rows.each(function() {
+        var $r = $(this);
+        var receipt = $r.find('.badge-receipt').text().replace('#', '').trim();
+        var type = $r.data('type') === 'custom' ? 'Custom Order' : 'Regular Sale';
+        var product = '"' + $r.find('.product-name').text().replace(/"/g, '""').trim() + '"';
+        var buyer = '"' + $r.find('.buyer-name').text().replace(/"/g, '""').trim() + '"';
+        var seller = '"' + $r.find('.seller-name').text().replace(/"/g, '""').trim() + '"';
+        var amount = $r.data('total');
+        var date = '"' + $r.find('.timestamp').text().trim() + '"';
+        var status = $r.find('.status-pill').text().trim();
+
+        csvRows.push([receipt, type, product, buyer, seller, amount, date, status].join(','));
     });
 
-    
-    var data = [];
-    rows.each(function() {
-        var rowData = [];
-        $(this).find('td').each(function(index) {
-          
-            if (index === 1) return;
-            var text = $(this).text().trim().replace(/,/g, '');
-            if (text) rowData.push(text);
-        });
-        if (rowData.length) data.push(rowData);
-    });
-
-
-    var csv = headers.join(',') + '\n';
-    data.forEach(function(row) {
-        csv += row.join(',') + '\n';
-    });
-
-  
-    var blob = new Blob([csv], { type: 'text/csv' });
+    var csvString = csvRows.join('\n');
+    var blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
     var link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'sales_journal_' + new Date().toISOString().slice(0, 10) + '.csv';
+    link.download = 'sales_report_' + new Date().toISOString().slice(0, 10) + '.csv';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    showNotification('📊 Sales data exported successfully!', 'success');
+    if (typeof window.showNotification === 'function') {
+        window.showNotification('📊 Sales report exported successfully!', 'success');
+    }
 }
 </script>
 

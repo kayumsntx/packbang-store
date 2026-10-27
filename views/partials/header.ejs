@@ -1055,11 +1055,18 @@
                             <a href="/profile"><i class="fas fa-user-circle"></i> Profile</a>
                             <a href="/my-orders"><i class="fas fa-box"></i> My Orders</a>
                             <a href="/my-custom-orders"><i class="fas fa-list-ul"></i> My Custom Orders</a>
+            <% if (user.role === 'seller' || user.role === 'authorized_cashier') { %>
+                <div class="drawer-divider"></div>
+                <div class="drawer-section-heading">Seller Tools</div>
+                <a href="/seller/custom-orders"><i class="fas fa-gavel"></i> Bid on Orders</a>
+                <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
+            <% } %>
 
                             <% if (user.role === 'seller' || user.role === 'authorized_cashier' || user.isSuperAdmin === true) { %>
                                 <div class="menu-divider"></div>
                                 <div class="menu-section-label">Seller tools</div>
                                 <a href="/seller/custom-orders"><i class="fas fa-gavel"></i> Bid on Orders</a>
+                                <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
                             <% } %>
 
                             <% if (user.role === 'admin' || user.role === 'authorized_cashier' || user.username.toLowerCase() === 'admin' || user.isSuperAdmin === true) { %>
@@ -1075,7 +1082,7 @@
                                 <a href="/admin/custom-orders"><i class="fas fa-clipboard-list"></i> Review Custom Orders</a>
                                 <a href="/admin/orders"><i class="fas fa-clipboard-list"></i> Order Management</a>
                                 <a href="/admin/inventory"><i class="fas fa-warehouse"></i> Inventory</a>
-                                <a href="/sales"><i class="fas fa-chart-bar"></i> Sales</a>
+                                <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
                                 <a href="/admin/categories"><i class="fas fa-tags"></i> Categories</a>
                                 <a href="/admin/stock-report"><i class="fas fa-boxes"></i> Stock Report</a>
                                 <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
@@ -1186,7 +1193,7 @@
                     <a href="/admin/custom-orders"><i class="fas fa-clipboard-list"></i> Review Custom Orders</a>
                     <a href="/admin/orders"><i class="fas fa-shopping-bag"></i> Orders</a>
                     <a href="/admin/inventory"><i class="fas fa-warehouse"></i> Inventory</a>
-                    <a href="/sales"><i class="fas fa-chart-bar"></i> Sales Report</a>
+                    <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
                 <% } %>
 
                 <div class="drawer-divider"></div>

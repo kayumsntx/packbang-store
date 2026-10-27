@@ -2284,6 +2284,10 @@ app.get('/api/seller/orders', async (req, res) => {
         const totalRevenue = mappedOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
         const pendingShipments = mappedOrders.filter(o => o.status === 'Processing' || o.status === 'Pending').length;
         const deliveredOrders = mappedOrders.filter(o => o.status === 'Delivered').length;
+        const regularRevenue = mappedOrders.filter(o => o.type === 'direct_sale').reduce((sum, o) => sum + (o.amount || 0), 0);
+        const customRevenue = mappedOrders.filter(o => o.type === 'custom_order').reduce((sum, o) => sum + (o.amount || 0), 0);
+        const regularCount = mappedOrders.filter(o => o.type === 'direct_sale').length;
+        const customCount = mappedOrders.filter(o => o.type === 'custom_order').length;
 
         res.json({
             success: true,
@@ -2292,7 +2296,11 @@ app.get('/api/seller/orders', async (req, res) => {
                 totalRevenue,
                 totalOrders: mappedOrders.length,
                 pendingShipments,
-                deliveredOrders
+                deliveredOrders,
+                regularRevenue,
+                customRevenue,
+                regularCount,
+                customCount
             },
             orders: mappedOrders
         });
@@ -4514,23 +4522,121 @@ app.post("/product/delete", requireAdmin, async (req, res) => {
   }
 });
 
-// ---------- SALES LOG ----------
-app.get("/sales", requireAdmin, async (req, res) => {
+// ---------- SALES REPORT (Admins see platform-wide, Sellers see own sales) ----------
+app.get("/sales", requireSellerOrAdmin, async (req, res) => {
   try {
-    const sales = await Sale.find({ 
-      saleId: { $regex: /^SALE-/ }
-    }).sort({ saleDate: -1 });
+    const user = req.session.user;
+    const isSuperAdmin = user.username === 'superadmin' || user.profile?.isSuperAdmin === true;
+    const isAdmin = user.role === 'admin' || user.username?.toLowerCase() === 'admin' || isSuperAdmin;
+    const isSeller = user.role === 'seller';
     
-    const totalRevenue = sales.reduce((sum, sale) => sum + (sale.totalAmount || 0), 0);
-    
-    res.render("sales-log", { 
-      sales: sales,
-      totalRevenue: totalRevenue.toFixed(2)
+    let regularSalesQuery = { 
+      saleId: { $regex: /^SALE-/ },
+      isActiveCart: { $ne: true }
+    };
+    let customOrdersQuery = {
+      status: { $nin: ['rejected', 'cancelled'] }
+    };
+
+    if (isSeller && !isAdmin) {
+      const sellerIdStr = user._id ? user._id.toString() : (user.id || '');
+      const sellerPhoneStr = user.phone || user.username || '';
+
+      const sellerProducts = await Product.find({
+        $or: [
+          { sellerId: sellerIdStr },
+          { sellerPhone: sellerPhoneStr }
+        ]
+      }).select('id name price');
+      const sellerProductIds = sellerProducts.map(p => p.id);
+
+      regularSalesQuery.$or = [
+        { 'products.productId': { $in: sellerProductIds } },
+        { sellerId: sellerIdStr }
+      ];
+
+      customOrdersQuery.$or = [
+        { assignedSellerId: sellerIdStr },
+        { 'bids.sellerId': sellerIdStr }
+      ];
+    }
+
+    const [regularSales, customOrders] = await Promise.all([
+      Sale.find(regularSalesQuery).sort({ saleDate: -1 }),
+      CustomOrder.find(customOrdersQuery).sort({ createdAt: -1 })
+    ]);
+
+    const unifiedSales = [];
+
+    regularSales.forEach(s => {
+      unifiedSales.push({
+        saleId: s.saleId,
+        type: 'regular',
+        typeLabel: 'Regular Sale',
+        customerName: s.customerName || 'Retail Customer',
+        sellerName: s.sellerName || 'Direct Store',
+        productName: (s.products && s.products.length > 0)
+          ? s.products.map(p => `${p.quantity || 1}x ${p.name || 'Packaging'}`).join(', ')
+          : (s.productName || 'Packaging Item'),
+        imagePath: s.imagePath || (s.products && s.products[0]?.imagePath) || '/uploads/default.jpg',
+        price: s.price || (s.totalAmount && s.quantity ? s.totalAmount / s.quantity : 0),
+        quantity: s.quantity || (s.products ? s.products.reduce((acc, p) => acc + (p.quantity || 1), 0) : 1),
+        totalAmount: s.totalAmount || 0,
+        saleDate: s.saleDate || s.createdAt || new Date(),
+        status: s.status || 'Pending'
+      });
+    });
+
+    customOrders.forEach(co => {
+      const coAmount = co.agreedPrice || co.budget || 0;
+      unifiedSales.push({
+        saleId: co.id,
+        type: 'custom',
+        typeLabel: 'Custom Order',
+        customerName: co.customerName || 'Corporate Client',
+        sellerName: co.assignedSellerName || (co.assignedSellerId ? 'Assigned Factory' : 'Open for Bids'),
+        productName: co.title || 'Custom Packaging Order',
+        imagePath: (co.images && co.images.length > 0) ? co.images[0] : '/uploads/default.jpg',
+        price: co.quantity ? (coAmount / co.quantity) : coAmount,
+        quantity: co.quantity || 1,
+        totalAmount: coAmount,
+        saleDate: co.createdAt || new Date(),
+        status: co.status === 'completed' ? 'Delivered' : (co.status === 'in_progress' || co.status === 'manufacturing' ? 'Processing' : (co.status === 'assigned' ? 'Processing' : 'Pending'))
+      });
+    });
+
+    unifiedSales.sort((a, b) => new Date(b.saleDate) - new Date(a.saleDate));
+
+    const totalRevenue = unifiedSales.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
+    const regularRevenue = unifiedSales.filter(s => s.type === 'regular').reduce((sum, s) => sum + (s.totalAmount || 0), 0);
+    const customRevenue = unifiedSales.filter(s => s.type === 'custom').reduce((sum, s) => sum + (s.totalAmount || 0), 0);
+    const regularCount = unifiedSales.filter(s => s.type === 'regular').length;
+    const customCount = unifiedSales.filter(s => s.type === 'custom').length;
+
+    res.render("sales-log", {
+      user: user,
+      isAdmin: isAdmin,
+      isSeller: isSeller && !isAdmin,
+      sales: unifiedSales,
+      totalRevenue: totalRevenue.toFixed(2),
+      regularRevenue: regularRevenue.toFixed(2),
+      customRevenue: customRevenue.toFixed(2),
+      regularCount: regularCount,
+      customCount: customCount,
+      totalCount: unifiedSales.length
     });
   } catch (err) {
-    console.error("Sales log error:", err);
-    res.status(500).send("Could not retrieve sales receipts logs ledger.");
+    console.error("Sales report error:", err);
+    res.status(500).send("Could not retrieve sales report.");
   }
+});
+
+// Alias: navbar links for seller sales report
+app.get("/seller/sales", requireSellerOrAdmin, (req, res) => {
+  res.redirect("/sales");
+});
+app.get("/seller/sales-report", requireSellerOrAdmin, (req, res) => {
+  res.redirect("/sales");
 });
 
 
