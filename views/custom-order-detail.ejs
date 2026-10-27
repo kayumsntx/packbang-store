@@ -695,33 +695,6 @@
                         </span>
                     </div>
                 </div>
-            <% } else if (order.status === 'approved') { %>
-                <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-top: 10px;">
-                    <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
-                        ⚡ Place Factory Quotation / Bid
-                    </h4>
-                    <form id="sellerDirectBidForm" onsubmit="handleSellerDetailBid(event, '<%= order.id %>')" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                        <input type="hidden" name="sellerId" value="<%= mySellerId %>">
-                        <input type="hidden" name="sellerName" value="<%= (currentSeller && currentSeller.shopName) || (user && user.profile && user.profile.name) || (user && user.username) || 'Supplier' %>">
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 4px;">Unit Quotation (BDT) *</label>
-                            <input type="number" name="amount" placeholder="e.g. 45.00" required step="0.01" min="0.1" style="width: 100%; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; box-sizing: border-box;">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 4px;">Delivery Timeline</label>
-                            <input type="text" name="deliveryTime" placeholder="e.g. 3-5 Business Days" style="width: 100%; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; box-sizing: border-box;">
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 4px;">Production Note & Specifications</label>
-                            <textarea name="note" placeholder="Paper GSM, coating, lamination, packaging details..." rows="2" style="width: 100%; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; box-sizing: border-box; resize: vertical;"></textarea>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <button type="submit" id="sellerBidSubmitBtn" style="background: #FF5A1F; color: #FFFFFF; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
-                                ⚡ Submit Factory Quotation
-                            </button>
-                        </div>
-                    </form>
-                </div>
             <% } %>
         </div>
     <% } %>
