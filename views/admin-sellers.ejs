@@ -270,6 +270,15 @@
         cursor: not-allowed;
     }
 
+    .mobile-col-label {
+        display: none;
+    }
+
+    .page-header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
     /* ACTION BUTTONS */
     .action-group {
         display: flex;
@@ -391,105 +400,294 @@
     }
 
     /* =========================================================
-       MOBILE & TABLET RESPONSIVE STYLES
+       COMPREHENSIVE MOBILE & TABLET RESPONSIVE STYLES
        ========================================================= */
     @media (max-width: 768px) {
         .seller-admin-wrapper {
-            margin: 16px auto 40px auto;
-            padding: 0 12px;
+            margin: 14px auto 40px auto !important;
+            padding: 0 12px !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+            box-sizing: border-box !important;
         }
 
         .page-header-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 16px;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+            margin-bottom: 16px !important;
+            padding-bottom: 14px !important;
         }
 
         .page-header-row h1 {
-            font-size: 1.3rem;
+            font-size: 1.25rem !important;
+            flex-wrap: wrap !important;
+            line-height: 1.3 !important;
+        }
+
+        .page-header-actions {
+            display: flex !important;
+            gap: 8px !important;
+            width: 100% !important;
+        }
+
+        .page-header-actions .tab-btn {
+            flex: 1 !important;
+            text-align: center !important;
+            justify-content: center !important;
+            padding: 9px 8px !important;
+            font-size: 0.8rem !important;
         }
 
         .kpi-stats-grid {
             grid-template-columns: repeat(2, 1fr) !important;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 10px !important;
+            margin-bottom: 16px !important;
         }
 
         .kpi-card {
-            padding: 12px 14px;
-            gap: 12px;
+            padding: 12px 12px !important;
+            gap: 10px !important;
+            border-radius: 12px !important;
+            box-sizing: border-box !important;
         }
 
         .kpi-icon {
-            width: 38px;
-            height: 38px;
-            font-size: 1.15rem;
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 1.15rem !important;
+            border-radius: 8px !important;
         }
 
         .kpi-info .kpi-num {
-            font-size: 1.3rem;
+            font-size: 1.25rem !important;
         }
 
         .kpi-info .kpi-label {
-            font-size: 0.72rem;
+            font-size: 0.68rem !important;
+            line-height: 1.2 !important;
+            word-break: break-word !important;
         }
 
         .controls-card {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 12px;
-            padding: 12px 14px;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+            padding: 12px 14px !important;
+            border-radius: 12px !important;
         }
 
         .filter-tabs {
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            display: flex;
-            gap: 6px;
-            padding-bottom: 4px;
+            overflow-x: auto !important;
+            white-space: nowrap !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+            display: flex !important;
+            gap: 6px !important;
+            padding-bottom: 4px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         .filter-tabs::-webkit-scrollbar {
-            display: none;
+            display: none !important;
         }
 
         .tab-btn {
-            flex-shrink: 0;
-            padding: 7px 12px;
-            font-size: 0.78rem;
+            flex-shrink: 0 !important;
+            padding: 8px 12px !important;
+            font-size: 0.8rem !important;
+            border-radius: 8px !important;
         }
 
-        .search-box {
-            width: 100%;
+        .search-input-box {
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
         }
 
-        .search-box input {
-            width: 100%;
-            font-size: 16px !important; /* Prevents auto-zoom on iOS */
+        .search-input-box input {
+            width: 100% !important;
+            font-size: 16px !important;
+            padding: 10px 14px 10px 36px !important;
+            box-sizing: border-box !important;
         }
 
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+        /* Responsive Mobile Table to Card Transformation */
+        .table-container {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+
+        .seller-table {
+            display: block !important;
+            width: 100% !important;
+            border: none !important;
+        }
+
+        .seller-table thead {
+            display: none !important;
+        }
+
+        .seller-table tbody {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        .seller-table tr {
+            display: block !important;
+            background: #FFFFFF !important;
+            border: 1.5px solid #E2E8F0 !important;
+            border-radius: 14px !important;
+            padding: 16px 14px !important;
+            margin-bottom: 14px !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .seller-table tr:hover {
+            background: #FFFFFF !important;
+        }
+
+        .seller-table td {
+            display: block !important;
+            width: 100% !important;
+            padding: 10px 0 !important;
+            border-bottom: 1px solid #F1F5F9 !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+        }
+
+        .seller-table td.col-shop {
+            padding-top: 0 !important;
+            padding-bottom: 12px !important;
+            border-bottom: 2px solid #E2E8F0 !important;
+        }
+
+        .seller-table td.col-actions {
+            border-bottom: none !important;
+            padding-top: 14px !important;
+            padding-bottom: 0 !important;
+        }
+
+        .mobile-col-label {
+            display: block !important;
+            font-size: 0.72rem !important;
+            font-weight: 800 !important;
+            color: #64748B !important;
+            text-transform: uppercase !important;
+            margin-bottom: 4px !important;
+            letter-spacing: 0.4px !important;
+        }
+
+        .action-group {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+            width: 100% !important;
+            justify-content: stretch !important;
+        }
+
+        .btn-act {
+            width: 100% !important;
+            padding: 10px 10px !important;
+            justify-content: center !important;
+            text-align: center !important;
+            font-size: 0.82rem !important;
+            border-radius: 8px !important;
+            box-sizing: border-box !important;
+        }
+
+        .doc-pill {
+            padding: 7px 12px !important;
+            font-size: 0.82rem !important;
+            border-radius: 8px !important;
+            display: inline-flex !important;
+            margin-bottom: 6px !important;
         }
 
         /* Modal Dialogs on Mobile */
-        .modal-card,
-        .modal-card-kyc {
+        .modal-overlay {
+            padding: 12px !important;
+        }
+
+        .modal-box {
             width: 95vw !important;
             max-width: 95vw !important;
             max-height: 90vh !important;
-            padding: 18px 14px !important;
+            overflow-y: auto !important;
+            padding: 20px 16px !important;
             border-radius: 14px !important;
+            box-sizing: border-box !important;
+        }
+
+        .modal-box form input,
+        .modal-box form select,
+        .modal-box form textarea {
+            font-size: 16px !important;
+        }
+
+        .modal-box form > div:last-child {
+            display: flex !important;
+            flex-direction: column-reverse !important;
+            gap: 8px !important;
+        }
+
+        .modal-box form > div:last-child button {
+            width: 100% !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 12px !important;
+            font-size: 0.9rem !important;
+            border-radius: 8px !important;
+            margin: 0 !important;
+        }
+
+        .modal-doc-viewer {
+            padding: 16px 12px !important;
+        }
+
+        .modal-doc-viewer img {
+            max-height: 56vh !important;
+            width: auto !important;
+            max-width: 100% !important;
+        }
+
+        .modal-doc-viewer a {
+            display: flex !important;
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 11px !important;
+            box-sizing: border-box !important;
         }
     }
 
     @media (max-width: 480px) {
         .seller-admin-wrapper {
-            padding: 0 8px;
+            padding: 0 8px !important;
+        }
+        .kpi-stats-grid {
+            gap: 8px !important;
+        }
+        .kpi-card {
+            padding: 10px 10px !important;
+            gap: 8px !important;
+        }
+        .kpi-icon {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 1rem !important;
+        }
+        .action-group {
+            grid-template-columns: 1fr !important;
         }
     }
 
@@ -509,7 +707,7 @@
                 Review submitted trade licenses, verify national ID documents, and manage supplier operational permissions.
             </p>
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div class="page-header-actions">
             <a href="/admin/custom-orders" class="tab-btn" style="background: #FFFFFF;">
                 ⚡ Custom Orders Review
             </a>
@@ -621,7 +819,7 @@
                     %>
                         <tr id="seller-row-<%= s._id || s.id %>">
                             <!-- SHOP & PHONE -->
-                            <td>
+                            <td class="col-shop">
                                 <div style="font-weight: 800; color: #0F172A; font-size: 0.95rem;">
                                     <%= s.shopName || 'Packaging Store' %>
                                 </div>
@@ -639,7 +837,8 @@
                             </td>
 
                             <!-- OWNER NAME & ADDRESS -->
-                            <td>
+                            <td class="col-owner">
+                                <div class="mobile-col-label">👤 Owner & Warehouse</div>
                                 <div style="font-weight: 700; color: #1E293B;">
                                     <%= s.ownerName || '—' %>
                                 </div>
@@ -649,7 +848,8 @@
                             </td>
 
                             <!-- TRADE LICENSE -->
-                            <td>
+                            <td class="col-license">
+                                <div class="mobile-col-label">📜 Trade License</div>
                                 <div style="font-weight: 700; color: #334155; font-size: 0.82rem; margin-bottom: 4px;">
                                     <%= s.tradeLicenseNumber || 'Not entered' %>
                                 </div>
@@ -665,7 +865,8 @@
                             </td>
 
                             <!-- NATIONAL ID (NID) -->
-                            <td>
+                            <td class="col-nid">
+                                <div class="mobile-col-label">🪪 National ID (NID)</div>
                                 <div style="font-weight: 700; color: #334155; font-size: 0.82rem; margin-bottom: 4px;">
                                     <%= s.nidNumber || 'Not entered' %>
                                 </div>
@@ -689,7 +890,8 @@
                             </td>
 
                             <!-- BANK DETAILS -->
-                            <td>
+                            <td class="col-bank">
+                                <div class="mobile-col-label">🏦 Settlement Payout Bank</div>
                                 <% if (s.bankDetails && s.bankDetails.bankName) { %>
                                     <div style="font-weight: 700; color: #0F172A; font-size: 0.82rem;">
                                         <%= s.bankDetails.bankName %>
@@ -710,7 +912,8 @@
                             </td>
 
                             <!-- STATUS BADGE -->
-                            <td>
+                            <td class="col-status">
+                                <div class="mobile-col-label">📌 Current Status</div>
                                 <% if (isPending) { %>
                                     <span class="status-badge badge-pending">
                                         ● Pending Review
