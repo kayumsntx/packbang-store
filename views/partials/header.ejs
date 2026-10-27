@@ -426,6 +426,124 @@
             color: #EF4444 !important;
         }
 
+        /* Terms & Conditions Menu Group and Submenus */
+        .admin-menu-group {
+            margin: 3px 0;
+            border-top: 1px solid #F1F5F9;
+            padding-top: 2px;
+        }
+        .admin-menu-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            color: #374151;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.15s, color 0.15s;
+            user-select: none;
+        }
+        .admin-menu-group-header:hover {
+            background: #F9FAFB;
+            color: var(--temu-orange);
+        }
+        .admin-menu-group-header .group-title-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .terms-caret {
+            font-size: 0.72rem;
+            transition: transform 0.2s ease;
+            color: #94A3B8;
+        }
+        .terms-caret.rotated {
+            transform: rotate(180deg);
+        }
+        .admin-submenu {
+            display: flex;
+            flex-direction: column;
+            background: #F8FAFC;
+            border-left: 3px solid var(--temu-orange);
+            margin: 2px 8px 4px 16px;
+            border-radius: 6px;
+            padding: 3px 0;
+            transition: all 0.2s ease;
+        }
+        .admin-submenu.collapsed {
+            display: none;
+        }
+        .admin-submenu-link {
+            padding: 6px 12px 6px 14px !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .admin-submenu-link:hover {
+            background: #EDF2F7 !important;
+            color: var(--temu-orange) !important;
+            padding-left: 17px !important;
+        }
+
+        /* Mobile Drawer Terms Group */
+        .drawer-menu-group {
+            margin: 4px 0;
+        }
+        .drawer-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            color: #374151;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        .drawer-group-header:hover {
+            background: #F3F4F6;
+            color: var(--temu-orange);
+        }
+        .drawer-group-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .drawer-submenu {
+            display: flex;
+            flex-direction: column;
+            border-left: 3px solid var(--temu-orange);
+            margin: 2px 4px 6px 14px;
+            padding: 2px 0 2px 6px;
+            background: #F8FAFC;
+            border-radius: 6px;
+        }
+        .drawer-submenu.collapsed {
+            display: none;
+        }
+        .drawer-submenu-link {
+            padding: 8px 12px !important;
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .drawer-submenu-link:hover {
+            color: var(--temu-orange) !important;
+        }
+
         /* Row 2: Category Pills & Navigation */
         .nav-links {
             display: flex;
@@ -1087,7 +1205,16 @@
                                 <a href="/admin/stock-report"><i class="fas fa-boxes"></i> Stock Report</a>
                                 <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
                                 <a href="/admin/banners"><i class="fas fa-images"></i> Banners</a>
-                                <a href="/admin/terms"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+                                <div class="admin-menu-group">
+                                    <div class="admin-menu-group-header" onclick="toggleTermsMenu(event, 'desktopTermsSubmenu', 'desktopTermsCaret')">
+                                        <span class="group-title-text"><i class="fas fa-file-contract"></i> Terms & Conditions</span>
+                                        <i class="fas fa-chevron-down terms-caret" id="desktopTermsCaret"></i>
+                                    </div>
+                                    <div class="admin-submenu" id="desktopTermsSubmenu">
+                                        <a href="/admin/terms?tab=customer" class="admin-submenu-link"><i class="fas fa-user-check"></i> Customer Terms & Condition</a>
+                                        <a href="/admin/terms?tab=seller" class="admin-submenu-link"><i class="fas fa-store-alt"></i> Seller Terms & Condition</a>
+                                    </div>
+                                </div>
                             <% } %>
 
                             <% if (user.username === 'superadmin' || user.isSuperAdmin === true) { %>
@@ -1195,7 +1322,16 @@
                     <a href="/admin/orders"><i class="fas fa-shopping-bag"></i> Orders</a>
                     <a href="/admin/inventory"><i class="fas fa-warehouse"></i> Inventory</a>
                     <a href="/sales"><i class="fas fa-chart-line"></i> Sales Report</a>
-                    <a href="/admin/terms"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+                    <div class="drawer-menu-group">
+                        <div class="drawer-group-header" onclick="toggleTermsMenu(event, 'drawerTermsSubmenu', 'drawerTermsCaret')">
+                            <span class="drawer-group-title"><i class="fas fa-file-contract"></i> Terms & Conditions</span>
+                            <i class="fas fa-chevron-down terms-caret" id="drawerTermsCaret"></i>
+                        </div>
+                        <div class="drawer-submenu" id="drawerTermsSubmenu">
+                            <a href="/admin/terms?tab=customer" class="drawer-submenu-link"><i class="fas fa-user-check"></i> Customer Terms & Condition</a>
+                            <a href="/admin/terms?tab=seller" class="drawer-submenu-link"><i class="fas fa-store-alt"></i> Seller Terms & Condition</a>
+                        </div>
+                    </div>
                 <% } %>
 
                 <div class="drawer-divider"></div>
@@ -1214,6 +1350,23 @@
     <% } %>
 
     <div id="notificationContainer"></div>
+
+    <script>
+        window.toggleTermsMenu = function(e, submenuId, caretId) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            var sub = document.getElementById(submenuId);
+            var caret = document.getElementById(caretId);
+            if (sub) {
+                sub.classList.toggle('collapsed');
+                if (caret) {
+                    caret.classList.toggle('rotated', !sub.classList.contains('collapsed'));
+                }
+            }
+        };
+    </script>
 
     <script>
         $(document).ready(function() {

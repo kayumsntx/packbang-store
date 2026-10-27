@@ -1283,10 +1283,14 @@ const customOrderSchema = new mongoose.Schema({
     payoutAt: { type: Date, default: null },
     bids: [{
         sellerId: { type: String, required: true },
+        sellerPhone: { type: String, default: '' },
         sellerName: { type: String, required: true },
         amount: { type: Number, required: true },
+        unitPrice: { type: Number, default: 0 },
+        totalAmount: { type: Number, default: 0 },
         deliveryTime: { type: String, default: '' },
         note: { type: String, default: '' },
+        termsAccepted: { type: Boolean, default: true },
         status: { 
             type: String, 
             enum: ['pending', 'accepted', 'rejected'], 
@@ -1321,10 +1325,44 @@ const termsSchema = new mongoose.Schema({
 });
 const TermsCondition = mongoose.model("TermsCondition", termsSchema);
 
-async function getOrCreateTerms() {
-    let terms = await TermsCondition.findOne({ key: 'custom_order_terms' });
+async function getOrCreateTerms(type = 'customer') {
+    const isSeller = type === 'seller' || type === 'seller_terms';
+    const key = isSeller ? 'seller_terms' : 'custom_order_terms';
+    let terms = await TermsCondition.findOne({ key: key });
+
     if (!terms) {
-        const defaultTerms = `1. Custom Specifications & Proof Approval:
+        if (isSeller) {
+            const defaultSellerTerms = `1. Binding Quotations & Manufacturing Commitments:
+All wholesale bids, factory unit rates, and delivery lead times submitted on the PackBang Seller Portal are legally binding once accepted by the buyer or approved by platform administration. Sellers may not retroactively increase quoted rates, scale back agreed quantities, or revoke bids following acceptance.
+
+2. Material Specifications & Industrial Quality Standards:
+The seller guarantees that all packaging materials (paper grammage/GSM, plastic microns, corrugated flute type, ply count, printing plates/cylinders, ink adhesion, and tensile resistance) strictly conform to the approved buyer specifications and pre-production proofs. Substituting inferior or substandard raw materials without prior written consent constitutes a material breach and grounds for contract cancellation.
+
+3. Production Tolerances & Defect Allowances:
+Standard packaging manufacturing tolerances apply across production runs (dimensions +/- 3mm to 5mm; GSM / thickness +/- 5%; finished batch count variation strictly within +/- 5%). Consignments with defects or dimensional variations exceeding allowable tolerance thresholds require prompt factory replacement at the manufacturer's expense.
+
+4. Turnaround Timelines & Dispatch Deadlines:
+Sellers must manufacture, quality-inspect, and hand over consignments to logistics within the agreed delivery schedule (e.g. 3-7 business days from proof approval). In the event of unforeseen machine breakdowns or force majeure, the seller must formally notify platform support in writing within 24 hours. Unexcused production delays exceeding 72 hours may incur late delivery penalty deductions.
+
+5. Strict Anti-Disintermediation & Platform Integrity:
+PackBang provides secure escrow payment protection and buyer matching. Sellers are strictly prohibited from soliciting buyers for off-platform communication (sharing personal phone numbers, WhatsApp, email addresses) or transacting outside the platform. Any attempt to bypass platform escrow will trigger immediate account suspension, permanent blacklist, and forfeiture of pending payouts.
+
+6. Inspection, Escrow Clearance & Payout Terms:
+Buyer payments are securely held in PackBang Escrow. Payouts (net of standard platform marketplace commission) are released directly to the seller's verified payout account within 24 to 48 hours of successful shipment delivery and buyer/QC inspection clearance.
+
+7. Defective Batches & Dispute Resolution:
+If delivered goods fail quality inspection due to printing defects, incorrect sizing, or material flaws, PackBang dispute arbitration will investigate. The seller agrees to either produce a replacement batch within 5 business days or allow an escrow refund deduction corresponding to the defective percentage.`;
+
+            terms = new TermsCondition({
+                key: 'seller_terms',
+                title: 'Seller & Packaging Manufacturer Terms and Conditions',
+                content: defaultSellerTerms,
+                lastUpdatedBy: 'System Default',
+                updatedAt: new Date()
+            });
+            await terms.save();
+        } else {
+            const defaultCustomerTerms = `1. Custom Specifications & Proof Approval:
 All customized packaging orders (dimensions, GSM, printing plates, cylinder engravings, color codes) require digital proof confirmation before mass manufacturing commences. Once digital proof or pre-production sample is approved by the client, production will proceed strictly according to approved specifications.
 
 2. Manufacturing Tolerance & Wastage:
@@ -1342,14 +1380,15 @@ Estimated manufacturing lead times (typically 7 to 21 working days depending on 
 6. Quality Inspection & Dispute Resolution:
 Merchants and buyers must inspect shipments upon arrival. Any defect reports or manufacturing discrepancies must be submitted within 48 hours of delivery accompanied by photographic proof for arbitration.`;
 
-        terms = new TermsCondition({
-            key: 'custom_order_terms',
-            title: 'Custom Packaging Order Terms and Conditions',
-            content: defaultTerms,
-            lastUpdatedBy: 'System Default',
-            updatedAt: new Date()
-        });
-        await terms.save();
+            terms = new TermsCondition({
+                key: 'custom_order_terms',
+                title: 'Customer Packaging Order Terms and Conditions',
+                content: defaultCustomerTerms,
+                lastUpdatedBy: 'System Default',
+                updatedAt: new Date()
+            });
+            await terms.save();
+        }
     }
     return terms;
 }
@@ -1671,22 +1710,34 @@ app.get("/api/public/approved-custom-orders", async (req, res) => {
 });
 
 app.post("/api/public/custom-order/:id/bid", async (req, res) => {
-    const { sellerId, sellerName, amount, deliveryTime, note } = req.body;
+    const { sellerId, sellerPhone, sellerName, amount, unitPrice, deliveryTime, note, termsAccepted } = req.body;
     try {
         // Custom order bidding requires Trade License and NID (KYC updated)
-        const kycCheck = await verifySellerCanBidCustomOrder(sellerId);
+        const kycCheck = await verifySellerCanBidCustomOrder(sellerId, sellerPhone);
         if (!kycCheck.allowed) {
             return res.status(403).json({ success: false, requiresKyc: kycCheck.requiresKyc || false, message: kycCheck.reason });
+        }
+        if (termsAccepted !== undefined && termsAccepted !== true && termsAccepted !== 'true') {
+            return res.status(400).json({ success: false, message: "You must accept the Seller Manufacturing Terms & Conditions to submit a quotation." });
         }
         const order = await CustomOrder.findOne({ id: req.params.id });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
         if (order.status !== 'approved') return res.status(400).json({ success: false, message: "Order is not open for bidding" });
+        
+        const parsedAmount = parseFloat(amount);
+        const parsedUnitPrice = unitPrice ? parseFloat(unitPrice) : parsedAmount;
+        const totalCalculated = (order.quantity && order.quantity > 0) ? Math.round(parsedUnitPrice * order.quantity * 100) / 100 : parsedAmount;
+        
         const bid = {
             sellerId: sellerId || ('SELLER-' + Date.now()),
+            sellerPhone: sellerPhone || '',
             sellerName: sellerName || 'Verified Packaging Supplier',
-            amount: parseFloat(amount),
+            amount: parsedUnitPrice,
+            unitPrice: parsedUnitPrice,
+            totalAmount: totalCalculated,
             deliveryTime: deliveryTime || '3-5 Days',
             note: note || '',
+            termsAccepted: true,
             status: 'pending',
             createdAt: new Date()
         };
@@ -3365,10 +3416,15 @@ app.get("/custom-orders", requireAuth, async (req, res) => {
 // ---------- TERMS AND CONDITIONS (Admin Management & Public) ----------
 app.get("/admin/terms", requireAdmin, async (req, res) => {
     try {
-        const terms = await getOrCreateTerms();
+        const customerTerms = await getOrCreateTerms('customer');
+        const sellerTerms = await getOrCreateTerms('seller');
+        const activeTab = req.query.tab === 'seller' ? 'seller' : 'customer';
         res.render("admin-terms", {
             user: req.session.user,
-            terms: terms
+            customerTerms,
+            sellerTerms,
+            activeTab,
+            terms: activeTab === 'seller' ? sellerTerms : customerTerms
         });
     } catch (err) {
         console.error("Admin terms view error:", err);
@@ -3378,14 +3434,17 @@ app.get("/admin/terms", requireAdmin, async (req, res) => {
 
 app.post("/admin/terms", requireAdmin, async (req, res) => {
     try {
-        const { title, content } = req.body;
+        const { type, title, content } = req.body;
         if (!title || !content) {
             return res.status(400).json({ success: false, message: "Title and content cannot be blank." });
         }
 
-        let terms = await TermsCondition.findOne({ key: 'custom_order_terms' });
+        const isSeller = type === 'seller' || type === 'seller_terms';
+        const key = isSeller ? 'seller_terms' : 'custom_order_terms';
+
+        let terms = await TermsCondition.findOne({ key: key });
         if (!terms) {
-            terms = new TermsCondition({ key: 'custom_order_terms' });
+            terms = new TermsCondition({ key: key });
         }
 
         terms.title = title.trim();
@@ -3394,7 +3453,11 @@ app.post("/admin/terms", requireAdmin, async (req, res) => {
         terms.updatedAt = new Date();
         await terms.save();
 
-        res.json({ success: true, message: "Terms and conditions updated and published successfully!" });
+        res.json({ 
+            success: true, 
+            message: `${isSeller ? 'Seller' : 'Customer'} terms and conditions updated and published successfully!`,
+            terms 
+        });
     } catch (err) {
         console.error("Admin terms save error:", err);
         res.status(500).json({ success: false, message: "Failed to save terms." });
@@ -3403,8 +3466,9 @@ app.post("/admin/terms", requireAdmin, async (req, res) => {
 
 app.get("/api/terms", async (req, res) => {
     try {
-        const terms = await getOrCreateTerms();
-        res.json({ success: true, terms });
+        const type = req.query.type === 'seller' ? 'seller' : 'customer';
+        const terms = await getOrCreateTerms(type);
+        res.json({ success: true, type, terms });
     } catch (err) {
         res.status(500).json({ success: false, message: "Error fetching terms." });
     }
@@ -3412,10 +3476,15 @@ app.get("/api/terms", async (req, res) => {
 
 app.get("/terms", async (req, res) => {
     try {
-        const terms = await getOrCreateTerms();
+        const customerTerms = await getOrCreateTerms('customer');
+        const sellerTerms = await getOrCreateTerms('seller');
+        const activeTab = req.query.tab === 'seller' ? 'seller' : 'customer';
         res.render("terms", {
             user: req.session ? req.session.user : null,
-            terms: terms
+            customerTerms,
+            sellerTerms,
+            activeTab,
+            terms: activeTab === 'seller' ? sellerTerms : customerTerms
         });
     } catch (err) {
         console.error("Public terms view error:", err);

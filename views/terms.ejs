@@ -2,8 +2,8 @@
 
 <style>
     .public-terms-page {
-        max-width: 900px;
-        margin: 40px auto 70px auto;
+        max-width: 960px;
+        margin: 36px auto 70px auto;
         padding: 20px;
     }
 
@@ -13,6 +13,38 @@
         border-radius: 16px;
         padding: 36px 32px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Public Tab Switcher */
+    .terms-tabs-public {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #EDF2F7;
+        padding-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    .terms-tab-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        text-decoration: none;
+        color: #4A5568;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        transition: all 0.2s;
+    }
+
+    .terms-tab-link.active {
+        background: linear-gradient(135deg, #FF5A1F 0%, #E04810 100%);
+        color: #FFFFFF !important;
+        border-color: #FF5A1F;
+        box-shadow: 0 4px 12px rgba(255, 90, 31, 0.25);
     }
 
     .terms-header {
@@ -68,7 +100,7 @@
         align-items: center;
         gap: 8px;
         padding: 12px 24px;
-        background: linear-gradient(135deg, #F39C12 0%, #D97706 100%);
+        background: linear-gradient(135deg, #FF5A1F 0%, #E04810 100%);
         color: white;
         border-radius: 8px;
         font-weight: 700;
@@ -78,7 +110,7 @@
 
     .btn-create-order:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+        box-shadow: 0 4px 15px rgba(255, 90, 31, 0.4);
     }
 
     @media (max-width: 768px) {
@@ -104,6 +136,16 @@
 
 <div class="public-terms-page">
     <div class="terms-card-main">
+        <!-- Public Tabs -->
+        <div class="terms-tabs-public">
+            <a href="/terms?tab=customer" class="terms-tab-link <%= activeTab === 'customer' ? 'active' : '' %>">
+                <i class="fas fa-user-check"></i> Customer Terms & Conditions
+            </a>
+            <a href="/terms?tab=seller" class="terms-tab-link <%= activeTab === 'seller' ? 'active' : '' %>">
+                <i class="fas fa-store-alt"></i> Seller & Manufacturer Terms
+            </a>
+        </div>
+
         <div class="terms-header">
             <div>
                 <h1><i class="fas fa-file-contract"></i> <%= terms.title %></h1>
@@ -111,9 +153,15 @@
                     <i class="fas fa-history"></i> Last Updated: <%= new Date(terms.updatedAt).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) %>
                 </div>
             </div>
-            <a href="/custom-orders" class="btn-create-order">
-                <i class="fas fa-pencil-ruler"></i> Create Custom Order
-            </a>
+            <% if (activeTab === 'seller') { %>
+                <a href="https://seller.packbang.com/" class="btn-create-order">
+                    <i class="fas fa-store"></i> Seller Hub Portal
+                </a>
+            <% } else { %>
+                <a href="/custom-orders" class="btn-create-order">
+                    <i class="fas fa-pencil-ruler"></i> Create Custom Order
+                </a>
+            <% } %>
         </div>
 
         <div class="terms-body">
@@ -122,11 +170,17 @@
 
         <div class="terms-footer-action">
             <span style="font-size: 0.85rem; color: #718096;">
-                <i class="fas fa-check-shield"></i> Verified terms apply to all custom manufacturing bids and orders on Packbang.
+                <i class="fas fa-shield-alt"></i> Verified legal terms protecting all packaging transactions, escrow deposits, and manufacturers on PackBang.
             </span>
-            <a href="/custom-orders" class="btn-create-order">
-                <i class="fas fa-arrow-right"></i> Proceed to Custom Order
-            </a>
+            <% if (activeTab === 'seller') { %>
+                <a href="https://seller.packbang.com/" class="btn-create-order">
+                    <i class="fas fa-arrow-right"></i> Go to Seller Portal
+                </a>
+            <% } else { %>
+                <a href="/custom-orders" class="btn-create-order">
+                    <i class="fas fa-arrow-right"></i> Proceed to Custom Order
+                </a>
+            <% } %>
         </div>
     </div>
 </div>

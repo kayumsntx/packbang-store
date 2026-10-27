@@ -64,180 +64,235 @@
         color: #1A202C;
     }
 
+    /* Tab Switcher Bar */
+    .terms-tab-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #E2E8F0;
+        padding-bottom: 8px;
+        flex-wrap: wrap;
+    }
+
+    .terms-tab-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+    }
+
+    .terms-tab-btn.customer {
+        background: #F1F5F9;
+        color: #475569;
+        border-color: #CBD5E1;
+    }
+
+    .terms-tab-btn.seller {
+        background: #F1F5F9;
+        color: #475569;
+        border-color: #CBD5E1;
+    }
+
+    .terms-tab-btn.active {
+        background: linear-gradient(135deg, #FF5A1F 0%, #E04810 100%);
+        color: #FFFFFF !important;
+        border-color: #FF5A1F;
+        box-shadow: 0 4px 14px rgba(255, 90, 31, 0.3);
+    }
+
+    .terms-tab-badge {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .terms-tab-btn:not(.active) .terms-tab-badge {
+        background: #E2E8F0;
+        color: #475569;
+    }
+
     /* Meta Info Card */
     .terms-meta-strip {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
         border-radius: 12px;
         padding: 14px 20px;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
         flex-wrap: wrap;
-        gap: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        gap: 16px;
+        font-size: 0.88rem;
+        color: #4A5568;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
 
     .terms-meta-item {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 0.85rem;
-        color: #4A5568;
     }
 
     .terms-meta-item i {
-        color: #F39C12;
-        font-size: 1rem;
+        color: #f39c12;
     }
 
-    .terms-meta-item strong {
-        color: #1A202C;
-    }
-
-    /* Main Editor Form Card */
+    /* Editor Card */
     .editor-card {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
-        border-radius: 16px;
-        padding: 28px 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        margin-bottom: 24px;
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        margin-bottom: 30px;
     }
 
-    .editor-card .form-group {
+    .form-group {
         margin-bottom: 22px;
     }
 
-    .editor-card .form-group label {
+    .form-group label {
         display: block;
         font-weight: 700;
-        font-size: 0.92rem;
         color: #2D3748;
         margin-bottom: 8px;
+        font-size: 0.95rem;
     }
 
-    .editor-card .form-group input[type="text"] {
+    .form-group input[type="text"] {
         width: 100%;
         padding: 12px 16px;
-        border: 2px solid #E2E8F0;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #1A202C;
-        transition: all 0.2s;
+        border: 1.5px solid #CBD5E0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
         box-sizing: border-box;
-        outline: none;
     }
 
-    .editor-card .form-group input[type="text"]:focus {
-        border-color: #F39C12;
+    .form-group input[type="text"]:focus {
+        outline: none;
+        border-color: #f39c12;
         box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
     }
 
-    /* Textarea with Toolbar */
     .textarea-toolbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #F8FAFC;
-        border: 2px solid #E2E8F0;
-        border-bottom: none;
-        border-radius: 10px 10px 0 0;
-        padding: 10px 14px;
-        font-size: 0.82rem;
-        color: #718096;
-        font-weight: 600;
+        margin-bottom: 8px;
         flex-wrap: wrap;
         gap: 8px;
     }
 
-    .textarea-toolbar .tool-actions {
+    .textarea-toolbar span {
+        font-size: 0.82rem;
+        color: #718096;
+        font-weight: 600;
+    }
+
+    .tool-actions {
         display: flex;
         gap: 8px;
     }
 
     .btn-tool {
-        background: #FFFFFF;
+        background: #EDF2F7;
         border: 1px solid #CBD5E0;
-        padding: 5px 12px;
         border-radius: 6px;
-        font-size: 0.78rem;
-        font-weight: 700;
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
         color: #4A5568;
         cursor: pointer;
-        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
     }
 
     .btn-tool:hover {
-        background: #EDF2F7;
+        background: #E2E8F0;
         color: #1A202C;
     }
 
     .editor-card textarea {
         width: 100%;
-        min-height: 400px;
+        min-height: 380px;
         padding: 16px;
-        border: 2px solid #E2E8F0;
-        border-radius: 0 0 10px 10px;
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        font-size: 0.95rem;
+        border: 1.5px solid #CBD5E0;
+        border-radius: 8px;
+        font-size: 0.92rem;
         line-height: 1.6;
-        color: #2D3748;
+        font-family: inherit;
         box-sizing: border-box;
-        outline: none;
         resize: vertical;
-        transition: border-color 0.2s;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .editor-card textarea:focus {
-        border-color: #F39C12;
+        outline: none;
+        border-color: #f39c12;
         box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
     }
 
-    /* Save Action Button */
     .form-actions-bar {
         display: flex;
         justify-content: flex-end;
-        gap: 14px;
-        margin-top: 10px;
         align-items: center;
+        gap: 12px;
+        margin-top: 10px;
     }
 
     .btn-save-terms {
-        background: linear-gradient(135deg, #F39C12 0%, #D97706 100%);
-        color: #FFFFFF;
-        border: none;
-        padding: 12px 32px;
-        border-radius: 10px;
-        font-weight: 800;
-        font-size: 1rem;
-        cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        box-shadow: 0 4px 14px rgba(243, 156, 18, 0.35);
-        transition: all 0.2s;
+        gap: 10px;
+        background: linear-gradient(135deg, #FF5A1F 0%, #E04810 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 8px;
+        padding: 13px 28px;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 4px 14px rgba(255, 90, 31, 0.35);
     }
 
     .btn-save-terms:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(243, 156, 18, 0.45);
+        box-shadow: 0 6px 18px rgba(255, 90, 31, 0.45);
+    }
+
+    .btn-save-terms:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
     }
 
     /* Live Preview Section */
     .preview-section-card {
-        background: #F8FAFC;
+        background: #FFFFFF;
         border: 1px solid #E2E8F0;
         border-radius: 14px;
         padding: 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
 
     .preview-section-card h3 {
-        margin: 0 0 14px 0;
+        margin: 0 0 8px 0;
         font-size: 1.15rem;
-        font-weight: 700;
+        font-weight: 800;
         color: #1A202C;
         display: flex;
         align-items: center;
@@ -245,47 +300,56 @@
     }
 
     .preview-section-card h3 i {
-        color: #3182CE;
+        color: #f39c12;
+    }
+
+    .preview-badge-row {
+        margin-bottom: 12px;
+    }
+
+    .preview-target-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .pill-customer {
+        background: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid #BFDBFE;
+    }
+
+    .pill-seller {
+        background: #FFF7ED;
+        color: #C2410C;
+        border: 1px solid #FFEDD5;
     }
 
     .preview-content-box {
-        background: #FFFFFF;
-        border: 1px solid #CBD5E0;
-        border-radius: 10px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
         padding: 20px;
-        max-height: 280px;
-        overflow-y: auto;
         font-size: 0.9rem;
-        line-height: 1.6;
+        line-height: 1.7;
         color: #334155;
         white-space: pre-line;
+        max-height: 380px;
+        overflow-y: auto;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .terms-dashboard {
-            padding: 14px 10px 40px 10px;
+            padding: 12px 10px 40px 10px;
             margin: 16px auto;
         }
 
-        .dashboard-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .dashboard-header .header-actions {
-            width: 100%;
-        }
-
-        .btn-view-public {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .terms-meta-strip {
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 12px 14px;
+        .dashboard-header h2 {
+            font-size: 1.3rem;
         }
 
         .editor-card {
@@ -293,8 +357,8 @@
         }
 
         .editor-card textarea {
-            min-height: 300px;
-            font-size: 16px;
+            min-height: 280px;
+            font-size: 15px;
         }
 
         .form-actions-bar {
@@ -315,13 +379,25 @@
             <h2>
                 <i class="fas fa-file-contract"></i> Terms & Conditions Management
             </h2>
-            <p>Write, update, and manage the official legal terms displayed to buyers on the Custom Packaging Order page.</p>
+            <p>Control legal agreements, production policies, and warranties for Buyers and Sellers across PackBang.</p>
         </div>
         <div class="header-actions">
-            <a href="/terms" target="_blank" class="btn-view-public">
+            <a href="/terms?tab=<%= activeTab %>" target="_blank" class="btn-view-public">
                 <i class="fas fa-external-link-alt"></i> View Public Terms
             </a>
         </div>
+    </div>
+
+    <!-- Submenu Tab Switcher (Customer vs Seller) -->
+    <div class="terms-tab-bar">
+        <a href="/admin/terms?tab=customer" class="terms-tab-btn customer <%= activeTab === 'customer' ? 'active' : '' %>">
+            <i class="fas fa-user-check"></i> Customer Terms & Condition
+            <span class="terms-tab-badge">Make Custom Order</span>
+        </a>
+        <a href="/admin/terms?tab=seller" class="terms-tab-btn seller <%= activeTab === 'seller' ? 'active' : '' %>">
+            <i class="fas fa-store-alt"></i> Seller Terms & Condition
+            <span class="terms-tab-badge">Seller Portal Quotations</span>
+        </a>
     </div>
 
     <!-- Meta Information Strip -->
@@ -336,22 +412,28 @@
         </div>
         <div class="terms-meta-item">
             <i class="fas fa-shield-alt"></i>
-            <span>Status: <strong style="color: #10B981;">Active on Custom Orders</strong></span>
+            <% if (activeTab === 'seller') { %>
+                <span>Target: <strong style="color: #FF5A1F;">Seller Hub & Wholesale Quotation Form</strong></span>
+            <% } else { %>
+                <span>Target: <strong style="color: #10B981;">Custom Order Form & Buyer Checkout</strong></span>
+            <% } %>
         </div>
     </div>
 
     <!-- Editor Form -->
     <div class="editor-card">
         <form id="termsForm">
+            <input type="hidden" id="termsType" name="type" value="<%= activeTab %>" />
+
             <div class="form-group">
                 <label for="termsTitle"><i class="fas fa-heading"></i> Document Title *</label>
                 <input
                     type="text"
                     id="termsTitle"
                     name="title"
-                    value="<%= terms.title || 'Custom Packaging Order Terms and Conditions' %>"
+                    value="<%= terms.title %>"
                     required
-                    placeholder="e.g. Custom Packaging Order Terms and Conditions"
+                    placeholder="<%= activeTab === 'seller' ? 'e.g. Seller & Packaging Manufacturer Terms and Conditions' : 'e.g. Customer Packaging Order Terms and Conditions' %>"
                 />
             </div>
 
@@ -369,13 +451,13 @@
                     id="termsContent"
                     name="content"
                     required
-                    placeholder="Write your custom order terms, production tolerance, lead time, proof approval, advance payment, and return policy..."
+                    placeholder="<%= activeTab === 'seller' ? 'Write seller quotation rules, binding prices, material standards, lead times, anti-disintermediation, escrow payout terms...' : 'Write custom order terms, proof approval, production tolerance, lead time, advance deposit, and quality dispute arbitration...' %>"
                 ><%= terms.content %></textarea>
             </div>
 
             <div class="form-actions-bar">
                 <button type="submit" class="btn-save-terms" id="saveTermsBtn">
-                    <i class="fas fa-save"></i> Save & Publish Terms
+                    <i class="fas fa-save"></i> Save & Publish <%= activeTab === 'seller' ? 'Seller' : 'Customer' %> Terms
                 </button>
             </div>
         </form>
@@ -383,8 +465,18 @@
 
     <!-- Live Preview Card -->
     <div class="preview-section-card">
-        <h3><i class="fas fa-eye"></i> Live Client Preview</h3>
-        <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #64748B;">This is how your terms appear inside the modal on the Make a Custom Order page:</p>
+        <h3><i class="fas fa-eye"></i> Live Preview (<%= activeTab === 'seller' ? 'Seller Portal' : 'Customer Portal' %>)</h3>
+        <div class="preview-badge-row">
+            <% if (activeTab === 'seller') { %>
+                <span class="preview-target-pill pill-seller">
+                    <i class="fas fa-store"></i> Displayed in Seller Portal Wholesale Quotation Modal & Supplier Agreement
+                </span>
+            <% } else { %>
+                <span class="preview-target-pill pill-customer">
+                    <i class="fas fa-user-check"></i> Displayed in Make a Custom Order Modal & Buyer Terms Agreement
+                </span>
+            <% } %>
+        </div>
         <div class="preview-content-box" id="previewBox">
             <%= terms.content %>
         </div>
@@ -392,7 +484,9 @@
 </div>
 
 <script>
-    const defaultRecommendedTemplate = `1. Custom Specifications & Proof Approval:
+    const currentActiveTab = "<%= activeTab %>";
+
+    const defaultCustomerTemplate = `1. Custom Specifications & Proof Approval:
 All customized packaging orders (dimensions, GSM, printing plates, cylinder engravings, color codes) require digital proof confirmation before mass manufacturing commences. Once digital proof or pre-production sample is approved by the client, production will proceed strictly according to approved specifications.
 
 2. Manufacturing Tolerance & Wastage:
@@ -410,10 +504,31 @@ Estimated manufacturing lead times (typically 7 to 21 working days depending on 
 6. Quality Inspection & Dispute Resolution:
 Merchants and buyers must inspect shipments upon arrival. Any defect reports or manufacturing discrepancies must be submitted within 48 hours of delivery accompanied by photographic proof for arbitration.`;
 
+    const defaultSellerTemplate = `1. Binding Quotations & Manufacturing Commitments:
+All wholesale bids, factory unit rates, and delivery lead times submitted on the PackBang Seller Portal are legally binding once accepted by the buyer or approved by platform administration. Sellers may not retroactively increase quoted rates, scale back agreed quantities, or revoke bids following acceptance.
+
+2. Material Specifications & Industrial Quality Standards:
+The seller guarantees that all packaging materials (paper grammage/GSM, plastic microns, corrugated flute type, ply count, printing plates/cylinders, ink adhesion, and tensile resistance) strictly conform to the approved buyer specifications and pre-production proofs. Substituting inferior or substandard raw materials without prior written consent constitutes a material breach and grounds for contract cancellation.
+
+3. Production Tolerances & Defect Allowances:
+Standard packaging manufacturing tolerances apply across production runs (dimensions +/- 3mm to 5mm; GSM / thickness +/- 5%; finished batch count variation strictly within +/- 5%). Consignments with defects or dimensional variations exceeding allowable tolerance thresholds require prompt factory replacement at the manufacturer's expense.
+
+4. Turnaround Timelines & Dispatch Deadlines:
+Sellers must manufacture, quality-inspect, and hand over consignments to logistics within the agreed delivery schedule (e.g. 3-7 business days from proof approval). In the event of unforeseen machine breakdowns or force majeure, the seller must formally notify platform support in writing within 24 hours. Unexcused production delays exceeding 72 hours may incur late delivery penalty deductions.
+
+5. Strict Anti-Disintermediation & Platform Integrity:
+PackBang provides secure escrow payment protection and buyer matching. Sellers are strictly prohibited from soliciting buyers for off-platform communication (sharing personal phone numbers, WhatsApp, email addresses) or transacting outside the platform. Any attempt to bypass platform escrow will trigger immediate account suspension, permanent blacklist, and forfeiture of pending payouts.
+
+6. Inspection, Escrow Clearance & Payout Terms:
+Buyer payments are securely held in PackBang Escrow. Payouts (net of standard platform marketplace commission) are released directly to the seller's verified payout account within 24 to 48 hours of successful shipment delivery and buyer/QC inspection clearance.
+
+7. Defective Batches & Dispute Resolution:
+If delivered goods fail quality inspection due to printing defects, incorrect sizing, or material flaws, PackBang dispute arbitration will investigate. The seller agrees to either produce a replacement batch within 5 business days or allow an escrow refund deduction corresponding to the defective percentage.`;
+
     function updateStats() {
         const text = document.getElementById('termsContent').value;
         const chars = text.length;
-        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const words = text.trim() ? text.trim().split(/\\s+/).length : 0;
         document.getElementById('charCounter').textContent = chars + ' characters | ' + words + ' words';
         document.getElementById('previewBox').textContent = text;
     }
@@ -422,14 +537,18 @@ Merchants and buyers must inspect shipments upon arrival. Any defect reports or 
     updateStats();
 
     function resetToTemplate() {
-        if (confirm('Are you sure you want to load the recommended packaging manufacturing terms template? Your current edits will be replaced.')) {
-            document.getElementById('termsContent').value = defaultRecommendedTemplate;
+        const isSeller = currentActiveTab === 'seller';
+        const templateName = isSeller ? 'Seller & Manufacturer Terms' : 'Customer Packaging Terms';
+        if (confirm('Are you sure you want to load the recommended ' + templateName + ' template? Your current edits will be replaced.')) {
+            document.getElementById('termsContent').value = isSeller ? defaultSellerTemplate : defaultCustomerTemplate;
+            document.getElementById('termsTitle').value = isSeller ? 'Seller & Packaging Manufacturer Terms and Conditions' : 'Customer Packaging Order Terms and Conditions';
             updateStats();
         }
     }
 
     document.getElementById('termsForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        const type = document.getElementById('termsType').value;
         const title = document.getElementById('termsTitle').value.trim();
         const content = document.getElementById('termsContent').value.trim();
 
@@ -447,7 +566,7 @@ Merchants and buyers must inspect shipments upon arrival. Any defect reports or 
             const res = await fetch('/admin/terms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, content })
+                body: JSON.stringify({ type, title, content })
             });
             const data = await res.json();
             if (data.success) {
