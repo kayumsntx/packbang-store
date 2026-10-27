@@ -1246,6 +1246,9 @@ const customOrderSchema = new mongoose.Schema({
     images: [{ type: String, default: [] }],
     budget: { type: Number, default: 0 },
     quantity: { type: Number, default: 1 },
+    unit: { type: String, default: 'KG' },
+    unitPrice: { type: Number, default: 0 },
+    termsAccepted: { type: Boolean, default: true },
     deadline: { type: Date, default: null },
     status: { 
         type: String, 
@@ -1307,6 +1310,49 @@ const customOrderSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 const CustomOrder = mongoose.model("CustomOrder", customOrderSchema);
+
+// ---------- TERMS & CONDITIONS SCHEMA ----------
+const termsSchema = new mongoose.Schema({
+    key: { type: String, default: 'custom_order_terms', unique: true },
+    title: { type: String, default: 'Custom Packaging Order Terms and Conditions' },
+    content: { type: String, required: true },
+    lastUpdatedBy: { type: String, default: 'Admin' },
+    updatedAt: { type: Date, default: Date.now }
+});
+const TermsCondition = mongoose.model("TermsCondition", termsSchema);
+
+async function getOrCreateTerms() {
+    let terms = await TermsCondition.findOne({ key: 'custom_order_terms' });
+    if (!terms) {
+        const defaultTerms = `1. Custom Specifications & Proof Approval:
+All customized packaging orders (dimensions, GSM, printing plates, cylinder engravings, color codes) require digital proof confirmation before mass manufacturing commences. Once digital proof or pre-production sample is approved by the client, production will proceed strictly according to approved specifications.
+
+2. Manufacturing Tolerance & Wastage:
+In industrial packaging production, standard manufacturing tolerances apply (dimensions +/- 3mm to 5mm; thickness/GSM +/- 5%; quantity variation +/- 5% to 10% depending on raw material roll runs). Final invoice and delivery will reflect verified delivered count.
+
+3. Pricing & Budget Estimates:
+Unit budgets (per KG, per Meter, per Pcs) submitted by buyers serve as initial benchmark targets for bidding suppliers. The final agreed price is finalized upon bid acceptance and binding contract confirmation.
+
+4. Payment, Escrow & Advance Deposit:
+Custom manufacturing requires committed raw materials. Work begins following standard platform advance deposit or verified escrow clearance. Remaining balance is due prior to factory dispatch or COD as contractually agreed.
+
+5. Lead Times & Dispatch:
+Estimated manufacturing lead times (typically 7 to 21 working days depending on quantity and printing complexity) commence only after proof approval and advance deposit verification. Factory dispatch delays caused by natural force majeure or client specification revisions will be notified in writing.
+
+6. Quality Inspection & Dispute Resolution:
+Merchants and buyers must inspect shipments upon arrival. Any defect reports or manufacturing discrepancies must be submitted within 48 hours of delivery accompanied by photographic proof for arbitration.`;
+
+        terms = new TermsCondition({
+            key: 'custom_order_terms',
+            title: 'Custom Packaging Order Terms and Conditions',
+            content: defaultTerms,
+            lastUpdatedBy: 'System Default',
+            updatedAt: new Date()
+        });
+        await terms.save();
+    }
+    return terms;
+}
 // ==========================================
 // ANTI-DISINTERMEDIATION MESSAGE FILTER (SECURE IN-APP MESSAGING)
 // Strictly blocks personal phone numbers, emails, external chat, and off-site deals
@@ -1558,27 +1604,50 @@ const uploadOrderImages = multer({
 }).array('orderImages', 5); // Max 5 images
 
 app.post("/api/custom-order/create", requireAuth, uploadOrderImages, async (req, res) => {
-    const { title, description, budget, quantity, deadline } = req.body;
+    const { title, description, budget, quantity, unit, unitPrice, deadline, termsAccepted } = req.body;
     
     try {
-        // ছবির URL সংগ্রহ করুন
+        if (!title || !description) {
+            return res.status(400).json({ success: false, message: "Title and description are required." });
+        }
+
+        const qtyNum = parseInt(quantity) || 1;
+        const unitPriceNum = parseFloat(unitPrice) || 0;
+        const budgetNum = parseFloat(budget) || (qtyNum * unitPriceNum);
+
+        // Validation: Amount and quantity cannot be minus/negative
+        if (qtyNum < 1) {
+            return res.status(400).json({ success: false, message: "Quantity must be at least 1." });
+        }
+        if (unitPriceNum < 0 || budgetNum < 0) {
+            return res.status(400).json({ success: false, message: "Budget amounts cannot be negative figures." });
+        }
+
+        // Validation: Terms and conditions checkbox
+        if (termsAccepted !== 'true' && termsAccepted !== true) {
+            return res.status(400).json({ success: false, message: "You must accept the Terms and Conditions to submit a custom order." });
+        }
+
         let imageUrls = [];
         if (req.files && req.files.length > 0) {
-            imageUrls = req.files.map(file => file.path); // Cloudinary URL
+            imageUrls = req.files.map(file => file.path);
         }
         
         const order = new CustomOrder({
             id: "CO-" + Date.now(),
-            customerId: req.session.user.id,
+            customerId: req.session.user.id || req.session.user._id,
             customerName: req.session.user.profile?.name || req.session.user.username,
             customerEmail: req.session.user.profile?.email || req.session.user.username,
             customerPhone: req.session.user.profile?.phone || '',
             title: title.trim(),
             description: description.trim(),
-            budget: parseFloat(budget) || 0,
-            quantity: parseInt(quantity) || 1,
+            quantity: qtyNum,
+            unit: (unit || 'KG').trim(),
+            unitPrice: unitPriceNum,
+            budget: budgetNum,
             deadline: deadline ? new Date(deadline) : null,
-            images: imageUrls, // ✅ ছবি সেভ
+            images: imageUrls,
+            termsAccepted: true,
             status: 'pending'
         });
         
@@ -3278,15 +3347,79 @@ app.get("/make-custom-order", (req, res) => {
 app.get("/custom-orders", requireAuth, async (req, res) => {
     try {
         const categories = await Category.find().sort({ order: 1 });
+        const terms = await getOrCreateTerms();
         res.render("make-custom-order", {
             user: req.session.user,
             isGuest: false,
             categories: categories,
-            currentCategory: null
+            currentCategory: null,
+            termsTitle: terms.title,
+            termsContent: terms.content
         });
     } catch (err) {
         console.error("Custom order page error:", err);
         res.status(500).send("Internal server error");
+    }
+});
+
+// ---------- TERMS AND CONDITIONS (Admin Management & Public) ----------
+app.get("/admin/terms", requireAdmin, async (req, res) => {
+    try {
+        const terms = await getOrCreateTerms();
+        res.render("admin-terms", {
+            user: req.session.user,
+            terms: terms
+        });
+    } catch (err) {
+        console.error("Admin terms view error:", err);
+        res.status(500).send("Could not load terms management.");
+    }
+});
+
+app.post("/admin/terms", requireAdmin, async (req, res) => {
+    try {
+        const { title, content } = req.body;
+        if (!title || !content) {
+            return res.status(400).json({ success: false, message: "Title and content cannot be blank." });
+        }
+
+        let terms = await TermsCondition.findOne({ key: 'custom_order_terms' });
+        if (!terms) {
+            terms = new TermsCondition({ key: 'custom_order_terms' });
+        }
+
+        terms.title = title.trim();
+        terms.content = content.trim();
+        terms.lastUpdatedBy = req.session.user.username || 'Admin';
+        terms.updatedAt = new Date();
+        await terms.save();
+
+        res.json({ success: true, message: "Terms and conditions updated and published successfully!" });
+    } catch (err) {
+        console.error("Admin terms save error:", err);
+        res.status(500).json({ success: false, message: "Failed to save terms." });
+    }
+});
+
+app.get("/api/terms", async (req, res) => {
+    try {
+        const terms = await getOrCreateTerms();
+        res.json({ success: true, terms });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Error fetching terms." });
+    }
+});
+
+app.get("/terms", async (req, res) => {
+    try {
+        const terms = await getOrCreateTerms();
+        res.render("terms", {
+            user: req.session ? req.session.user : null,
+            terms: terms
+        });
+    } catch (err) {
+        console.error("Public terms view error:", err);
+        res.status(500).send("Could not display terms.");
     }
 });
 

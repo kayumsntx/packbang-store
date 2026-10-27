@@ -1,0 +1,134 @@
+<%- include('partials/header') %>
+
+<style>
+    .public-terms-page {
+        max-width: 900px;
+        margin: 40px auto 70px auto;
+        padding: 20px;
+    }
+
+    .terms-card-main {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 36px 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .terms-header {
+        border-bottom: 2px solid #F39C12;
+        padding-bottom: 18px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .terms-header h1 {
+        margin: 0 0 6px 0;
+        color: #1A202C;
+        font-size: 1.8rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .terms-header h1 i {
+        color: #F39C12;
+    }
+
+    .terms-header .updated-tag {
+        font-size: 0.82rem;
+        color: #718096;
+    }
+
+    .terms-body {
+        font-size: 0.95rem;
+        line-height: 1.8;
+        color: #334155;
+        white-space: pre-line;
+    }
+
+    .terms-footer-action {
+        margin-top: 36px;
+        padding-top: 20px;
+        border-top: 1px solid #EDF2F7;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .btn-create-order {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #F39C12 0%, #D97706 100%);
+        color: white;
+        border-radius: 8px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-create-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .public-terms-page {
+            padding: 14px 12px 40px 12px;
+            margin: 16px auto;
+        }
+
+        .terms-card-main {
+            padding: 20px 16px;
+        }
+
+        .terms-header h1 {
+            font-size: 1.4rem;
+        }
+
+        .terms-body {
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+    }
+</style>
+
+<div class="public-terms-page">
+    <div class="terms-card-main">
+        <div class="terms-header">
+            <div>
+                <h1><i class="fas fa-file-contract"></i> <%= terms.title %></h1>
+                <div class="updated-tag">
+                    <i class="fas fa-history"></i> Last Updated: <%= new Date(terms.updatedAt).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                </div>
+            </div>
+            <a href="/custom-orders" class="btn-create-order">
+                <i class="fas fa-pencil-ruler"></i> Create Custom Order
+            </a>
+        </div>
+
+        <div class="terms-body">
+            <%= terms.content %>
+        </div>
+
+        <div class="terms-footer-action">
+            <span style="font-size: 0.85rem; color: #718096;">
+                <i class="fas fa-check-shield"></i> Verified terms apply to all custom manufacturing bids and orders on Packbang.
+            </span>
+            <a href="/custom-orders" class="btn-create-order">
+                <i class="fas fa-arrow-right"></i> Proceed to Custom Order
+            </a>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

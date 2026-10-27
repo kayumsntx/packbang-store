@@ -2,241 +2,781 @@
 
 <style>
     .custom-order-page {
-        max-width: 800px;
-        margin: 40px auto;
-        padding: 20px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        max-width: 840px;
+        margin: 36px auto 60px auto;
+        padding: 28px 24px;
+        background: #FFFFFF;
+        border-radius: 16px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+        border: 1px solid #E2E8F0;
     }
-    .custom-order-page h2 {
-        border-bottom: 2px solid #f39c12;
-        padding-bottom: 12px;
+
+    .custom-order-header {
+        border-bottom: 2px solid #F39C12;
+        padding-bottom: 16px;
         margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .custom-order-header h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #1A202C;
         display: flex;
         align-items: center;
         gap: 12px;
     }
-    .form-group {
-        margin-bottom: 20px;
-    }
-    .form-group label {
-        font-weight: 600;
-        display: block;
-        margin-bottom: 4px;
-        color: #4a5568;
-    }
-    .form-group input, .form-group textarea, .form-group select {
-        width: 100%;
-        padding: 10px 14px;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-        font-family: inherit;
-    }
-    .form-group input:focus, .form-group textarea:focus {
-        border-color: #f39c12;
-        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
-        outline: none;
-    }
-    .form-group textarea {
-        resize: vertical;
-        min-height: 120px;
-    }
-    .btn-submit {
-        background: linear-gradient(45deg, #f39c12, #e67e22);
-        color: white;
-        border: none;
-        padding: 12px 32px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
-    }
-    .help-text {
-        font-size: 0.8rem;
-        color: #a0aec0;
-        margin-top: 4px;
+
+    .custom-order-header h2 i {
+        color: #F39C12;
     }
 
+    .custom-order-header .order-badge-pill {
+        background: #FEF3C7;
+        color: #B45309;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 6px;
+        color: #334155;
+        font-size: 0.92rem;
+    }
+
+    .form-group label i {
+        color: #F39C12;
+        margin-right: 4px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="date"],
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 11px 14px;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        box-sizing: border-box;
+        outline: none;
+        background: #FFFFFF;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: #F39C12;
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.18);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 110px;
+        line-height: 1.5;
+    }
+
+    /* Grid for Quantity and Measurement Unit (Row placed BEFORE Budget) */
+    .qty-unit-row {
+        display: grid;
+        grid-template-columns: 1fr 1.6fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .badge-mandatory {
+        background: #FEE2E2;
+        color: #DC2626;
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 800;
+        margin-left: 6px;
+        text-transform: uppercase;
+    }
+
+    /* Modern Radio Group for Measurement Units */
+    .unit-radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 2px;
+    }
+
+    .unit-radio-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #F8FAFC;
+        border: 2px solid #E2E8F0;
+        padding: 8px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: #475569;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .unit-radio-pill:hover {
+        border-color: #CBD5E1;
+        background: #F1F5F9;
+    }
+
+    .unit-radio-pill input[type="radio"] {
+        margin: 0;
+        accent-color: #F39C12;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .unit-radio-pill.selected {
+        background: #FFFBEB;
+        border-color: #F39C12;
+        color: #B45309;
+        box-shadow: 0 2px 6px rgba(243, 156, 18, 0.15);
+    }
+
+    /* Input with Currency Prefix */
+    .input-prefix-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-prefix-box .prefix-tag {
+        position: absolute;
+        left: 12px;
+        font-weight: 700;
+        color: #64748B;
+        font-size: 0.9rem;
+        pointer-events: none;
+    }
+
+    .input-prefix-box input {
+        padding-left: 54px !important;
+    }
+
+    .field-hint-text {
+        font-size: 0.78rem;
+        color: #64748B;
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* Total Budget Next Row Display Card */
+    .total-budget-card {
+        background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        border: 2px solid #86EFAC;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-shadow: 0 2px 10px rgba(16, 185, 129, 0.08);
+    }
+
+    .total-budget-card .formula-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .total-budget-card .formula-calc {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #166534;
+    }
+
+    .total-budget-card .formula-note {
+        font-size: 0.78rem;
+        color: #15803D;
+    }
+
+    .total-budget-card .total-value-display {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: #15803D;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .total-budget-card .total-value-display span {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #166534;
+        margin-right: 4px;
+    }
+
+    /* Image Upload Preview */
+    .help-text {
+        font-size: 0.8rem;
+        color: #718096;
+        margin-top: 6px;
+    }
 
     .image-preview-container {
         display: flex;
-        gap: 10px;
         flex-wrap: wrap;
+        gap: 10px;
         margin-top: 10px;
     }
-    .image-preview-container .preview-thumb {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 2px solid #e2e8f0;
-        transition: all 0.3s ease;
-    }
-    .image-preview-container .preview-thumb:hover {
-        border-color: #f39c12;
-        transform: scale(1.05);
-    }
-    .image-preview-container .preview-count {
-        font-size: 0.85rem;
-        color: #2b6cb0;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: #ebf8ff;
-        padding: 4px 14px;
-        border-radius: 20px;
-    }
-
 
     .preview-thumb-wrapper {
         position: relative;
         display: inline-block;
     }
-    .preview-thumb-wrapper .preview-remove {
+
+    .preview-thumb {
+        width: 75px;
+        height: 75px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #E2E8F0;
+    }
+
+    .preview-remove {
         position: absolute;
         top: -6px;
         right: -6px;
+        background: #EF4444;
+        color: white;
+        border-radius: 50%;
         width: 20px;
         height: 20px;
-        line-height: 20px;
-        text-align: center;
-        background: #e53e3e;
-        color: #fff;
-        border-radius: 50%;
-        font-size: 14px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .preview-count {
+        font-size: 0.82rem;
+        color: #10B981;
+        font-weight: 700;
+        display: block;
+        width: 100%;
+        margin-bottom: 6px;
+    }
+
+    /* Terms & Conditions Checkbox Row */
+    .terms-box-card {
+        background: #F8FAFC;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .terms-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #334155;
+        user-select: none;
+    }
+
+    .terms-checkbox-label input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #F39C12;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .terms-link-btn {
+        color: #2563EB;
+        text-decoration: underline;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
-    .preview-thumb-wrapper .preview-remove:hover {
-        background: #c53030;
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: inherit;
+        font-family: inherit;
     }
 
-        /* =========================================================
-       MOBILE & TABLET RESPONSIVE STYLES
-       ========================================================= */
+    .terms-link-btn:hover {
+        color: #1D4ED8;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        background: linear-gradient(135deg, #F39C12 0%, #D97706 100%);
+        color: white;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%;
+        box-shadow: 0 4px 14px rgba(243, 156, 18, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(243, 156, 18, 0.45);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Terms Modal Overlay */
+    .terms-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 999999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        box-sizing: border-box;
+    }
+
+    .terms-modal-window {
+        background: #FFFFFF;
+        border-radius: 16px;
+        max-width: 680px;
+        width: 100%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.96); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .terms-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 22px;
+        border-bottom: 2px solid #F39C12;
+        background: #FFFFFF;
+    }
+
+    .terms-modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1A202C;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .terms-modal-header .close-terms-btn {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #718096;
+        line-height: 1;
+        padding: 4px;
+        border-radius: 6px;
+    }
+
+    .terms-modal-header .close-terms-btn:hover {
+        color: #EF4444;
+    }
+
+    .terms-modal-body {
+        padding: 22px;
+        overflow-y: auto;
+        font-size: 0.92rem;
+        line-height: 1.7;
+        color: #334155;
+        white-space: pre-line;
+    }
+
+    .terms-modal-footer {
+        padding: 14px 22px;
+        border-top: 1px solid #E2E8F0;
+        background: #F8FAFC;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-agree-modal {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        cursor: pointer;
+    }
+
+    /* Mobile Responsive Styles */
     @media (max-width: 768px) {
         .custom-order-page {
-            margin: 16px 10px 40px 10px;
-            padding: 16px 14px;
-            border-radius: 12px;
+            margin: 16px auto 40px auto;
+            padding: 18px 14px;
         }
 
-        .custom-order-page h2 {
-            font-size: 1.25rem;
-            margin-bottom: 18px;
+        .custom-order-header h2 {
+            font-size: 1.3rem;
         }
 
-        .form-group input, 
-        .form-group textarea, 
-        .form-group select {
-            font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
-            padding: 10px 12px;
+        .qty-unit-row {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .unit-radio-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .unit-radio-pill {
+            padding: 8px 6px;
+            font-size: 0.8rem;
+            justify-content: center;
+        }
+
+        .total-budget-card {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 14px;
+        }
+
+        .total-budget-card .total-value-display {
+            text-align: left;
+            font-size: 1.3rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            font-size: 16px !important;
         }
 
         .btn-submit {
-            width: 100%;
             padding: 14px 20px;
             font-size: 1rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .custom-order-page {
-            margin: 10px 6px 36px 6px;
-            padding: 14px 10px;
-        }
-
-        .preview-thumb-wrapper .preview-remove {
-            width: 26px;
-            height: 26px;
-            line-height: 26px;
-            font-size: 16px;
-            top: -8px;
-            right: -8px;
-        }
-        .image-preview-container .preview-thumb {
-            width: 65px;
-            height: 65px;
         }
     }
 </style>
 
 <div class="custom-order-page">
-    <h2><i class="fas fa-pencil-alt"></i> Make a Custom Order</h2>
+    <div class="custom-order-header">
+        <h2>
+            <i class="fas fa-pencil-ruler"></i> Make a Custom Packaging Order
+        </h2>
+        <span class="order-badge-pill">
+            <i class="fas fa-industry"></i> Wholesale Factory Bids
+        </span>
+    </div>
     
     <form id="customOrderForm" enctype="multipart/form-data">
+        <!-- 1. Order Title -->
         <div class="form-group">
-            <label>Order Title *</label>
-            <input type="text" id="orderTitle" placeholder="e.g. Customized Gift Box" required>
+            <label for="orderTitle"><i class="fas fa-heading"></i> Order Title *</label>
+            <input type="text" id="orderTitle" placeholder="e.g. 3-Ply Corrugated Delivery Box / Custom Printed Bags" required>
         </div>
         
+        <!-- 2. Description -->
         <div class="form-group">
-            <label>Description *</label>
-            <textarea id="orderDescription" placeholder="Describe your custom order in detail..." required></textarea>
+            <label for="orderDescription"><i class="fas fa-align-left"></i> Specifications & Details *</label>
+            <textarea id="orderDescription" placeholder="Detail your exact requirements: dimensions (L x W x H), material thickness / GSM, color codes, printing plate requirements, lamination, and delivery expectations..." required></textarea>
         </div>
         
+        <!-- 3. Quantity & Measurement Unit Row (Placed BEFORE Budget) -->
         <div class="form-group">
-            <label>Budget (BDT)</label>
-            <input type="number" id="orderBudget" placeholder="e.g. 5000" step="0.01">
-        </div>
-        
-        <div class="form-group">
-            <label>Quantity</label>
-            <input type="number" id="orderQuantity" value="1" min="1">
-        </div>
-        
-        <div class="form-group">
-            <label>Deadline</label>
-            <input type="date" id="orderDeadline">
-        </div>
-        
+            <div class="qty-unit-row">
+                <!-- Quantity Input (No Minus / Positive only) -->
+                <div>
+                    <label for="orderQuantity">
+                        <i class="fas fa-boxes"></i> Quantity *
+                    </label>
+                    <input
+                        type="number"
+                        id="orderQuantity"
+                        value="100"
+                        min="1"
+                        step="1"
+                        required
+                        placeholder="e.g. 500"
+                        oninput="validatePositiveQuantity(this); calculateTotalBudget();"
+                    >
+                    <span class="field-hint-text">Minimum quantity is 1. Negative amounts are disallowed.</span>
+                </div>
 
+                <!-- Measurement Unit Radio Buttons (Mandatory) -->
+                <div>
+                    <label>
+                        <i class="fas fa-ruler-combined"></i> Measurement Unit *
+                        <span class="badge-mandatory">Mandatory</span>
+                    </label>
+                    <div class="unit-radio-group" id="unitRadioGroup">
+                        <label class="unit-radio-pill selected">
+                            <input type="radio" name="measurementUnit" value="KG" checked required onchange="handleUnitSelect(this.value)">
+                            <span>KG</span>
+                        </label>
+                        <label class="unit-radio-pill">
+                            <input type="radio" name="measurementUnit" value="Pcs" required onchange="handleUnitSelect(this.value)">
+                            <span>Pcs</span>
+                        </label>
+                        <label class="unit-radio-pill">
+                            <input type="radio" name="measurementUnit" value="Meter" required onchange="handleUnitSelect(this.value)">
+                            <span>Meter</span>
+                        </label>
+                        <label class="unit-radio-pill">
+                            <input type="radio" name="measurementUnit" value="Inch" required onchange="handleUnitSelect(this.value)">
+                            <span>Inch</span>
+                        </label>
+                        <label class="unit-radio-pill">
+                            <input type="radio" name="measurementUnit" value="CM" required onchange="handleUnitSelect(this.value)">
+                            <span>CM</span>
+                        </label>
+                        <label class="unit-radio-pill">
+                            <input type="radio" name="measurementUnit" value="Roll" required onchange="handleUnitSelect(this.value)">
+                            <span>Roll</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 4. Budget for unit (e.g., Per KG, Per Meter) (Placed AFTER Quantity) -->
         <div class="form-group">
-            <label><i class="fas fa-images"></i> Reference Images (Max 5)</label>
+            <label for="unitBudget" id="unitBudgetLabel">
+                <i class="fas fa-tag"></i> Target Budget per KG (BDT) *
+            </label>
+            <div class="input-prefix-box">
+                <span class="prefix-tag">BDT.</span>
+                <input
+                    type="number"
+                    id="unitBudget"
+                    placeholder="e.g. 150.00"
+                    min="0"
+                    step="0.01"
+                    required
+                    oninput="validatePositiveAmount(this); calculateTotalBudget();"
+                >
+            </div>
+            <span class="field-hint-text" id="unitBudgetHint">
+                Target manufacturing rate per KG. Minus / negative values are not allowed.
+            </span>
+        </div>
+        
+        <!-- 5. Total Budget (Next Row Calculated Automatically) -->
+        <div class="form-group">
+            <label><i class="fas fa-calculator"></i> Total Target Budget (Calculated)</label>
+            <div class="total-budget-card">
+                <div class="formula-info">
+                    <div class="formula-calc" id="formulaCalcText">
+                        <span id="displayQty">100</span> <span id="displayUnit">KG</span> × BDT. <span id="displayRate">0.00</span>
+                    </div>
+                    <div class="formula-note">
+                        Automatically calculated from your specified quantity and unit target rate.
+                    </div>
+                </div>
+                <div class="total-value-display">
+                    <span>BDT.</span>
+                    <strong id="displayTotalBudget">0.00</strong>
+                </div>
+            </div>
+            <!-- Hidden input to submit total budget value -->
+            <input type="hidden" id="orderBudget" name="budget" value="0">
+        </div>
+        
+        <!-- 6. Deadline -->
+        <div class="form-group">
+            <label for="orderDeadline"><i class="fas fa-calendar-alt"></i> Expected Delivery Deadline</label>
+            <input type="date" id="orderDeadline">
+            <span class="field-hint-text">Leave blank if flexible. Typical custom packaging requires 7–21 business days.</span>
+        </div>
+        
+        <!-- 7. Reference Images (Max 5) -->
+        <div class="form-group">
+            <label><i class="fas fa-images"></i> Reference Artwork or Die-Cut Images (Max 5)</label>
             <input type="file" id="orderImages" name="orderImages" accept="image/*" multiple>
-            <div class="help-text">You can upload up to 5 images. You can select multiple files at once, or add them one by one.</div>
+            <div class="help-text">Upload up to 5 reference mockups, photos, or technical drawings (JPEG, PNG, WebP).</div>
             <div class="image-preview-container" id="imagePreview"></div>
         </div>
         
-        <button type="submit" class="btn-submit">
+        <!-- 8. Terms and Conditions Checkbox -->
+        <div class="terms-box-card">
+            <label class="terms-checkbox-label" for="termsCheckbox">
+                <input type="checkbox" id="termsCheckbox" name="termsAccepted" required>
+                <span>
+                    I have read and agree to the 
+                    <button type="button" class="terms-link-btn" onclick="openTermsModal()">Terms and Conditions</button> 
+                    for Custom Packaging Manufacturing *
+                </span>
+            </label>
+        </div>
+        
+        <!-- 9. Submit Button -->
+        <button type="submit" class="btn-submit" id="submitOrderBtn">
             <i class="fas fa-paper-plane"></i> Submit Custom Order
         </button>
     </form>
 </div>
 
-<script>
-    // ============================================
+<!-- Terms and Conditions Modal Popup -->
+<div class="terms-modal-overlay" id="termsModalOverlay">
+    <div class="terms-modal-window">
+        <div class="terms-modal-header">
+            <h3><i class="fas fa-file-contract" style="color: #F39C12;"></i> <%= typeof termsTitle !== 'undefined' ? termsTitle : 'Custom Packaging Order Terms and Conditions' %></h3>
+            <button type="button" class="close-terms-btn" onclick="closeTermsModal()">&times;</button>
+        </div>
+        <div class="terms-modal-body" id="modalTermsContent">
+<%= typeof termsContent !== 'undefined' ? termsContent : '' %>
+        </div>
+        <div class="terms-modal-footer">
+            <button type="button" class="btn-agree-modal" onclick="acceptTermsFromModal()">
+                <i class="fas fa-check"></i> I Understand & Accept
+            </button>
+        </div>
+    </div>
+</div>
 
+<script>
+    let currentSelectedUnit = 'KG';
+
+    // Disallow negative figures
+    function validatePositiveAmount(input) {
+        if (parseFloat(input.value) < 0) {
+            input.value = 0;
+        }
+    }
+
+    function validatePositiveQuantity(input) {
+        if (parseFloat(input.value) < 1 && input.value !== '') {
+            input.value = 1;
+        }
+    }
+
+    // Handle measurement unit radio select
+    function handleUnitSelect(unitVal) {
+        currentSelectedUnit = unitVal;
+
+        // Update active class on radio pills
+        document.querySelectorAll('.unit-radio-pill').forEach(pill => {
+            const radio = pill.querySelector('input[type="radio"]');
+            if (radio && radio.value === unitVal) {
+                pill.classList.add('selected');
+            } else {
+                pill.classList.remove('selected');
+            }
+        });
+
+        // Update unit budget label & hint
+        document.getElementById('unitBudgetLabel').innerHTML =
+            '<i class="fas fa-tag"></i> Target Budget per ' + unitVal + ' (BDT) *';
+        document.getElementById('unitBudgetHint').textContent =
+            'Target manufacturing rate per ' + unitVal + '. Minus / negative values are not allowed.';
+
+        // Update calculation formula display
+        document.getElementById('displayUnit').textContent = unitVal;
+        calculateTotalBudget();
+    }
+
+    // Real-time calculation of total budget: Quantity * Unit Budget = Total Budget
+    function calculateTotalBudget() {
+        const qtyVal = parseFloat(document.getElementById('orderQuantity').value) || 0;
+        const rateVal = parseFloat(document.getElementById('unitBudget').value) || 0;
+
+        const safeQty = Math.max(1, qtyVal);
+        const safeRate = Math.max(0, rateVal);
+
+        const totalBudget = safeQty * safeRate;
+
+        document.getElementById('orderBudget').value = totalBudget.toFixed(2);
+        document.getElementById('displayTotalBudget').textContent = totalBudget.toLocaleString('en-BD', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('displayQty').textContent = safeQty;
+        document.getElementById('displayRate').textContent = safeRate.toFixed(2);
+    }
+
+    // Terms modal controls
+    function openTermsModal() {
+        document.getElementById('termsModalOverlay').style.display = 'flex';
+    }
+
+    function closeTermsModal() {
+        document.getElementById('termsModalOverlay').style.display = 'none';
+    }
+
+    function acceptTermsFromModal() {
+        document.getElementById('termsCheckbox').checked = true;
+        closeTermsModal();
+    }
+
+    // Close modal on background click
+    document.getElementById('termsModalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeTermsModal();
+        }
+    });
+
+    // ============================================
+    // Reference Images Multi-Upload with Previews
     // ============================================
     (function() {
         const fileInput = document.getElementById('orderImages');
         const previewContainer = document.getElementById('imagePreview');
         let selectedFiles = [];
 
-
         function renderPreview() {
             previewContainer.innerHTML = '';
-            if (selectedFiles.length === 0) {
-                return;
-            }
-
+            if (selectedFiles.length === 0) return;
 
             const countSpan = document.createElement('span');
             countSpan.className = 'preview-count';
-            countSpan.innerHTML = `<i class="fas fa-check-circle"></i> ${selectedFiles.length} image(s) selected`;
+            countSpan.innerHTML = '<i class="fas fa-check-circle"></i> ' + selectedFiles.length + ' image(s) selected';
             previewContainer.appendChild(countSpan);
-
 
             selectedFiles.forEach((file, index) => {
                 const reader = new FileReader();
@@ -250,13 +790,11 @@
                     img.title = file.name;
                     wrapper.appendChild(img);
 
-
                     const removeBtn = document.createElement('span');
                     removeBtn.className = 'preview-remove';
                     removeBtn.textContent = '×';
                     removeBtn.addEventListener('click', function() {
                         selectedFiles.splice(index, 1);
-
                         const dt = new DataTransfer();
                         selectedFiles.forEach(f => dt.items.add(f));
                         fileInput.files = dt.files;
@@ -269,12 +807,9 @@
             });
         }
 
-
-        fileInput.addEventListener('change', function(e) {
+        fileInput.addEventListener('change', function() {
             const newFiles = Array.from(this.files);
             if (newFiles.length === 0) return;
-
-
 
             newFiles.forEach(file => {
                 const isDuplicate = selectedFiles.some(f =>
@@ -285,60 +820,83 @@
                 }
             });
 
-
             if (selectedFiles.length > 5) {
                 selectedFiles = selectedFiles.slice(0, 5);
-                alert('⚠️ Maximum 5 images allowed. Extra ones ignored.');
+                alert('⚠️ Maximum 5 images allowed. Extra images were excluded.');
             }
-
 
             const dt = new DataTransfer();
             selectedFiles.forEach(f => dt.items.add(f));
             fileInput.files = dt.files;
-
-
             renderPreview();
         });
-
-
-        renderPreview();
     })();
 
-    // ============================================
+    // Initialize calculator
+    calculateTotalBudget();
 
+    // ============================================
+    // Form Submit Handler
     // ============================================
     document.getElementById('customOrderForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const title = document.getElementById('orderTitle').value.trim();
         const description = document.getElementById('orderDescription').value.trim();
-        const budget = document.getElementById('orderBudget').value;
-        const quantity = document.getElementById('orderQuantity').value;
+        const quantity = parseFloat(document.getElementById('orderQuantity').value);
+        const unitBudget = parseFloat(document.getElementById('unitBudget').value);
+        const totalBudget = parseFloat(document.getElementById('orderBudget').value);
         const deadline = document.getElementById('orderDeadline').value;
+        const termsCheckbox = document.getElementById('termsCheckbox');
         const fileInput = document.getElementById('orderImages');
-        
+
         if (!title || !description) {
-            alert('Please fill in title and description.');
+            alert('Please fill in both the order title and specifications.');
             return;
         }
-        
+
+        // Validate no minus / negative figure
+        if (isNaN(quantity) || quantity < 1) {
+            alert('Quantity must be a positive number greater than or equal to 1.');
+            return;
+        }
+
+        if (isNaN(unitBudget) || unitBudget < 0) {
+            alert('Target budget cannot be negative.');
+            return;
+        }
+
+        if (isNaN(totalBudget) || totalBudget < 0) {
+            alert('Total budget cannot be negative.');
+            return;
+        }
+
+        // Validate Terms and Conditions Checkbox
+        if (!termsCheckbox.checked) {
+            alert('Please read and agree to the Terms and Conditions before submitting your custom order.');
+            termsCheckbox.focus();
+            return;
+        }
+
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('budget', budget || '0');
-        formData.append('quantity', quantity || '1');
+        formData.append('quantity', quantity.toString());
+        formData.append('unit', currentSelectedUnit);
+        formData.append('unitPrice', unitBudget.toString());
+        formData.append('budget', totalBudget.toString());
         formData.append('deadline', deadline || '');
-        
+        formData.append('termsAccepted', 'true');
 
         const files = fileInput.files;
         for (let i = 0; i < Math.min(files.length, 5); i++) {
             formData.append('orderImages', files[i]);
         }
-        
-        const btn = this.querySelector('.btn-submit');
+
+        const btn = document.getElementById('submitOrderBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-        
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Custom Order...';
+
         try {
             const response = await fetch('/api/custom-order/create', {
                 method: 'POST',
@@ -346,16 +904,18 @@
             });
             const data = await response.json();
             if (data.success) {
-                alert('✅ Custom order submitted! Admin will review it shortly.');
+                alert('✅ Custom packaging order submitted successfully! Factory suppliers and admins can now review and bid.');
                 window.location.href = '/my-custom-orders';
             } else {
-                alert('❌ ' + data.message);
+                alert('❌ ' + (data.message || 'Submission failed'));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Custom Order';
             }
         } catch (err) {
-            alert('❌ Failed to submit order. Please try again.');
+            alert('❌ Network error while submitting custom order. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Custom Order';
         }
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Custom Order';
     });
 </script>
 

@@ -1,0 +1,473 @@
+<%- include('partials/header') %>
+
+<style>
+    .terms-dashboard {
+        max-width: 1100px;
+        margin: 30px auto 60px auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 3px solid #f39c12;
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .dashboard-header .header-info h2 {
+        margin: 0 0 6px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1a202c;
+        font-size: 1.6rem;
+        font-weight: 800;
+    }
+
+    .dashboard-header .header-info h2 i {
+        color: #f39c12;
+    }
+
+    .dashboard-header .header-info p {
+        margin: 0;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    .dashboard-header .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn-view-public {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        background: #EDF2F7;
+        color: #2D3748;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.88rem;
+        transition: all 0.2s;
+        border: 1px solid #CBD5E0;
+    }
+
+    .btn-view-public:hover {
+        background: #E2E8F0;
+        color: #1A202C;
+    }
+
+    /* Meta Info Card */
+    .terms-meta-strip {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 14px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .terms-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #4A5568;
+    }
+
+    .terms-meta-item i {
+        color: #F39C12;
+        font-size: 1rem;
+    }
+
+    .terms-meta-item strong {
+        color: #1A202C;
+    }
+
+    /* Main Editor Form Card */
+    .editor-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+    }
+
+    .editor-card .form-group {
+        margin-bottom: 22px;
+    }
+
+    .editor-card .form-group label {
+        display: block;
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #2D3748;
+        margin-bottom: 8px;
+    }
+
+    .editor-card .form-group input[type="text"] {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1A202C;
+        transition: all 0.2s;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .editor-card .form-group input[type="text"]:focus {
+        border-color: #F39C12;
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+    }
+
+    /* Textarea with Toolbar */
+    .textarea-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #F8FAFC;
+        border: 2px solid #E2E8F0;
+        border-bottom: none;
+        border-radius: 10px 10px 0 0;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        color: #718096;
+        font-weight: 600;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .textarea-toolbar .tool-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-tool {
+        background: #FFFFFF;
+        border: 1px solid #CBD5E0;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #4A5568;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-tool:hover {
+        background: #EDF2F7;
+        color: #1A202C;
+    }
+
+    .editor-card textarea {
+        width: 100%;
+        min-height: 400px;
+        padding: 16px;
+        border: 2px solid #E2E8F0;
+        border-radius: 0 0 10px 10px;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #2D3748;
+        box-sizing: border-box;
+        outline: none;
+        resize: vertical;
+        transition: border-color 0.2s;
+    }
+
+    .editor-card textarea:focus {
+        border-color: #F39C12;
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+    }
+
+    /* Save Action Button */
+    .form-actions-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 14px;
+        margin-top: 10px;
+        align-items: center;
+    }
+
+    .btn-save-terms {
+        background: linear-gradient(135deg, #F39C12 0%, #D97706 100%);
+        color: #FFFFFF;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(243, 156, 18, 0.35);
+        transition: all 0.2s;
+    }
+
+    .btn-save-terms:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(243, 156, 18, 0.45);
+    }
+
+    /* Live Preview Section */
+    .preview-section-card {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 24px;
+    }
+
+    .preview-section-card h3 {
+        margin: 0 0 14px 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1A202C;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .preview-section-card h3 i {
+        color: #3182CE;
+    }
+
+    .preview-content-box {
+        background: #FFFFFF;
+        border: 1px solid #CBD5E0;
+        border-radius: 10px;
+        padding: 20px;
+        max-height: 280px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #334155;
+        white-space: pre-line;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .terms-dashboard {
+            padding: 14px 10px 40px 10px;
+            margin: 16px auto;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dashboard-header .header-actions {
+            width: 100%;
+        }
+
+        .btn-view-public {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .terms-meta-strip {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 12px 14px;
+        }
+
+        .editor-card {
+            padding: 18px 14px;
+        }
+
+        .editor-card textarea {
+            min-height: 300px;
+            font-size: 16px;
+        }
+
+        .form-actions-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-save-terms {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="terms-dashboard">
+    <div class="dashboard-header">
+        <div class="header-info">
+            <h2>
+                <i class="fas fa-file-contract"></i> Terms & Conditions Management
+            </h2>
+            <p>Write, update, and manage the official legal terms displayed to buyers on the Custom Packaging Order page.</p>
+        </div>
+        <div class="header-actions">
+            <a href="/terms" target="_blank" class="btn-view-public">
+                <i class="fas fa-external-link-alt"></i> View Public Terms
+            </a>
+        </div>
+    </div>
+
+    <!-- Meta Information Strip -->
+    <div class="terms-meta-strip">
+        <div class="terms-meta-item">
+            <i class="fas fa-user-edit"></i>
+            <span>Last Updated By: <strong><%= terms.lastUpdatedBy || 'Admin' %></strong></span>
+        </div>
+        <div class="terms-meta-item">
+            <i class="fas fa-clock"></i>
+            <span>Last Modified: <strong><%= new Date(terms.updatedAt).toLocaleString('en-BD', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %></strong></span>
+        </div>
+        <div class="terms-meta-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>Status: <strong style="color: #10B981;">Active on Custom Orders</strong></span>
+        </div>
+    </div>
+
+    <!-- Editor Form -->
+    <div class="editor-card">
+        <form id="termsForm">
+            <div class="form-group">
+                <label for="termsTitle"><i class="fas fa-heading"></i> Document Title *</label>
+                <input
+                    type="text"
+                    id="termsTitle"
+                    name="title"
+                    value="<%= terms.title || 'Custom Packaging Order Terms and Conditions' %>"
+                    required
+                    placeholder="e.g. Custom Packaging Order Terms and Conditions"
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="termsContent"><i class="fas fa-paragraph"></i> Terms & Conditions Content *</label>
+                <div class="textarea-toolbar">
+                    <span id="charCounter">0 characters | 0 words</span>
+                    <div class="tool-actions">
+                        <button type="button" class="btn-tool" onclick="resetToTemplate()">
+                            <i class="fas fa-undo"></i> Reset to Recommended Template
+                        </button>
+                    </div>
+                </div>
+                <textarea
+                    id="termsContent"
+                    name="content"
+                    required
+                    placeholder="Write your custom order terms, production tolerance, lead time, proof approval, advance payment, and return policy..."
+                ><%= terms.content %></textarea>
+            </div>
+
+            <div class="form-actions-bar">
+                <button type="submit" class="btn-save-terms" id="saveTermsBtn">
+                    <i class="fas fa-save"></i> Save & Publish Terms
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Live Preview Card -->
+    <div class="preview-section-card">
+        <h3><i class="fas fa-eye"></i> Live Client Preview</h3>
+        <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #64748B;">This is how your terms appear inside the modal on the Make a Custom Order page:</p>
+        <div class="preview-content-box" id="previewBox">
+            <%= terms.content %>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultRecommendedTemplate = `1. Custom Specifications & Proof Approval:
+All customized packaging orders (dimensions, GSM, printing plates, cylinder engravings, color codes) require digital proof confirmation before mass manufacturing commences. Once digital proof or pre-production sample is approved by the client, production will proceed strictly according to approved specifications.
+
+2. Manufacturing Tolerance & Wastage:
+In industrial packaging production, standard manufacturing tolerances apply (dimensions +/- 3mm to 5mm; thickness/GSM +/- 5%; quantity variation +/- 5% to 10% depending on raw material roll runs). Final invoice and delivery will reflect verified delivered count.
+
+3. Pricing & Budget Estimates:
+Unit budgets (per KG, per Meter, per Pcs) submitted by buyers serve as initial benchmark targets for bidding suppliers. The final agreed price is finalized upon bid acceptance and binding contract confirmation.
+
+4. Payment, Escrow & Advance Deposit:
+Custom manufacturing requires committed raw materials. Work begins following standard platform advance deposit or verified escrow clearance. Remaining balance is due prior to factory dispatch or COD as contractually agreed.
+
+5. Lead Times & Dispatch:
+Estimated manufacturing lead times (typically 7 to 21 working days depending on quantity and printing complexity) commence only after proof approval and advance deposit verification. Factory dispatch delays caused by natural force majeure or client specification revisions will be notified in writing.
+
+6. Quality Inspection & Dispute Resolution:
+Merchants and buyers must inspect shipments upon arrival. Any defect reports or manufacturing discrepancies must be submitted within 48 hours of delivery accompanied by photographic proof for arbitration.`;
+
+    function updateStats() {
+        const text = document.getElementById('termsContent').value;
+        const chars = text.length;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        document.getElementById('charCounter').textContent = chars + ' characters | ' + words + ' words';
+        document.getElementById('previewBox').textContent = text;
+    }
+
+    document.getElementById('termsContent').addEventListener('input', updateStats);
+    updateStats();
+
+    function resetToTemplate() {
+        if (confirm('Are you sure you want to load the recommended packaging manufacturing terms template? Your current edits will be replaced.')) {
+            document.getElementById('termsContent').value = defaultRecommendedTemplate;
+            updateStats();
+        }
+    }
+
+    document.getElementById('termsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const title = document.getElementById('termsTitle').value.trim();
+        const content = document.getElementById('termsContent').value.trim();
+
+        if (!title || !content) {
+            alert('Please enter both title and terms content.');
+            return;
+        }
+
+        const btn = document.getElementById('saveTermsBtn');
+        const origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            const res = await fetch('/admin/terms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('✅ ' + data.message, 'success');
+                } else {
+                    alert('✅ ' + data.message);
+                }
+                setTimeout(() => location.reload(), 600);
+            } else {
+                alert('❌ ' + (data.message || 'Failed to update terms'));
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        } catch (err) {
+            alert('❌ Network error while saving terms. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = origText;
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>
